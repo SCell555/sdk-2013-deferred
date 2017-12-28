@@ -23,7 +23,7 @@
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
-DEFINE_FALLBACK_SHADER( DecalModulate, DEFERRED_DECALMODULATE )
+// DEFINE_FALLBACK_SHADER( DecalModulate, DEFERRED_DECALMODULATE )
 
 BEGIN_VS_SHADER( DEFERRED_DECALMODULATE, 
 			  "" )
