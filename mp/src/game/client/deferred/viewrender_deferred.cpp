@@ -29,9 +29,9 @@
 #include "vgui_int.h"
 #include "vgui/IPanel.h"
 #include "vgui_controls/Controls.h"
+#include "debugoverlay_shared.h"
 
 #include "tier0/memdbgon.h"
-#include "debugoverlay_shared.h"
 
 extern ConVar r_drawopaquerenderables;
 extern ConVar r_entityclips;

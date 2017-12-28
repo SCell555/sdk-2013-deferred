@@ -1,10 +1,7 @@
 #ifndef SHEDITMRENDER_H
 #define SHEDITMRENDER_H
 
-#include "cbase.h"
-#include "shadereditor/isedit_modelrender.h"
-
-class C_BaseFlex_OverrideLod;
+#include "ShaderEditor/ISEdit_ModelRender.h"
 
 class SEditModelRender : public ISEditModelRender, public CAutoGameSystemPerFrame
 {

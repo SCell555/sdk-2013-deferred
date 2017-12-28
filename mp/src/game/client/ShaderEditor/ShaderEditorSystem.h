@@ -26,20 +26,14 @@ public:
 
 	void SetMainViewMatrix( const VMatrix &view );
 
-#ifdef SOURCE_2006
-	void CustomViewRender( int *viewId, const VisibleFogVolumeInfo_t &fogVolumeInfo );
-#else
 	void CustomViewRender( int *viewId, const VisibleFogVolumeInfo_t &fogVolumeInfo, const WaterRenderInfo_t &waterRenderInfo );
-#endif
 	void CustomPostRender();
 	void UpdateSkymask( bool bCombineMode, int x, int y, int w, int h );
 
 	bool IsReady() const;
 	int &GetViewIdForModify();
 	const VisibleFogVolumeInfo_t &GetFogVolumeInfo();
-#ifndef SOURCE_2006
 	const WaterRenderInfo_t &GetWaterRenderInfo();
-#endif
 
 private:
 	bool m_bReady;
@@ -51,9 +45,7 @@ private:
 
 	int *m_piCurrentViewId;
 	VisibleFogVolumeInfo_t m_tFogVolumeInfo;
-#ifndef SOURCE_2006
 	WaterRenderInfo_t m_tWaterRenderInfo;
-#endif
 };
 
 extern ShaderEditorHandler *g_ShaderEditorSystem;

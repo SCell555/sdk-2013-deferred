@@ -3,7 +3,7 @@
 // Purpose:
 //		-	Handles model rendering requests from the
 //			shader editor library
-// 
+//
 // ******************************************************
 
 #include "cbase.h"
@@ -11,49 +11,20 @@
 #include "vgui/IInput.h"
 #include "vgui_controls/Controls.h"
 
-#include "shadereditor/sedit_modelrender.h"
+#include "ShaderEditor/SEdit_ModelRender.h"
 #include "model_types.h"
 
-#ifndef SOURCE_2006
 #include "viewpostprocess.h"
-#endif
 
 #include "view.h"
 #include "input.h"
 
 #include "beamdraw.h"
 
-#ifdef SOURCE_2006
-void ScreenToWorld( int mousex, int mousey, float fov,
-					const Vector& vecRenderOrigin,
-					const QAngle& vecRenderAngles,
-					Vector& vecPickingRay )
-{
-	float dx, dy;
-	float c_x, c_y;
-	float dist;
-	Vector vpn, vup, vright;
-
-	float scaled_fov = ScaleFOVByWidthRatio( fov, engine->GetScreenAspectRatio() * 0.75f );
-
-	c_x = ScreenWidth() / 2;
-	c_y = ScreenHeight() / 2;
-
-	dx = (float)mousex - c_x;
-	dy = c_y - (float)mousey;
-
-	float dist_denom = tan(M_PI * scaled_fov / 360.0f); 
-	dist = c_x / dist_denom;
-	AngleVectors( vecRenderAngles, &vpn, &vright, &vup );
-	vecPickingRay = vpn * dist + vright * ( dx ) + vup * ( dy );
-	VectorNormalize( vecPickingRay );
-}
-#else
 extern void ScreenToWorld( int mousex, int mousey, float fov,
 					const Vector& vecRenderOrigin,
 					const QAngle& vecRenderAngles,
 					Vector& vecPickingRay );
-#endif
 
 SEditModelRender __g_ShaderEditorMReder( "ShEditMRender" );
 SEditModelRender *sEditMRender = &__g_ShaderEditorMReder;
@@ -131,20 +102,14 @@ bool SEditModelRender::LoadModel( const char *localPath )
 	Q_strcpy( m_szModelPath, localPath );
 
 	C_BaseFlex *pEnt = new C_BaseFlex();
-	pEnt->InitializeAsClientEntity( NULL,
-#if SWARM_DLL
-		false
-#else
-		RENDER_GROUP_OPAQUE_ENTITY
-#endif
-		);
+	pEnt->InitializeAsClientEntity( NULL, RENDER_GROUP_OPAQUE_ENTITY );
 	MDLCACHE_CRITICAL_SECTION();
 	pEnt->SetModelPointer( mdl );
 	pEnt->Spawn();
 
 	pEnt->SetAbsAngles( vec3_angle );
 	pEnt->SetAbsOrigin( vec3_origin );
-	
+
 	pEnt->AddEffects( EF_NODRAW | EF_NOINTERP );
 	pEnt->m_EntClientFlags |= ENTCLIENTFLAG_DONTUSEIK;
 
@@ -272,39 +237,21 @@ void SEditModelRender::ExecRender()
 	for ( int i = 0; i < m_iNumPoseParams; i++ )
 		pModelInstance->SetPoseParameter( i, 0 );
 
-#if SWARM_DLL
-	RenderableInstance_t instance;
-	instance.m_nAlpha = 255;
-#endif
-	pModelInstance->DrawModel( STUDIO_RENDER
-#if SWARM_DLL
-		, instance
-#endif
-		);
+	pModelInstance->DrawModel( STUDIO_RENDER );
 }
 void SEditModelRender::DoPostProc( int x, int y, int w, int h )
 {
-#ifndef SOURCE_2006
 	if ( view && view->GetPlayerViewSetup()->m_bDoBloomAndToneMapping )
 		DoEnginePostProcessing( x, y, w, h, false, false );
-#endif
 }
 int SEditModelRender::MaterialPicker( char ***szMat )
 {
 	int mx, my;
-#ifdef SOURCE_2006
-	vgui::input()->GetCursorPos( mx, my );
-#else
 	vgui::input()->GetCursorPosition( mx, my );
-#endif
 
 	Vector ray;
 	const CViewSetup *pViewSetup = view->GetPlayerViewSetup();
-	float ratio =engine->GetScreenAspectRatio(
-#if SWARM_DLL
-		pViewSetup->width, pViewSetup->height
-#endif
-		);
+	float ratio =engine->GetScreenAspectRatio();
 
 	ratio = ( 1.0f / ratio ) * (4.0f/3.0f);
 	float flFov = ScaleFOVByWidthRatio( pViewSetup->fov, ratio );
@@ -375,7 +322,7 @@ int SEditModelRender::MaterialPicker( char ***szMat )
 				for ( int p = 0; p < numPaths; p++ )
 				{
 					char tmpPath[MAX_PATH];
-					Q_snprintf( tmpPath, MAX_PATH, "%s%s\0", pSHdr->pCdtexture( p ), matName );
+					Q_snprintf( tmpPath, MAX_PATH, "%s%s", pSHdr->pCdtexture( p ), matName );
 					Q_FixSlashes( tmpPath );
 					IMaterial *pTempMat = materials->FindMaterial( tmpPath, TEXTURE_GROUP_MODEL );
 					if ( !IsErrorMaterial( pTempMat ) )
