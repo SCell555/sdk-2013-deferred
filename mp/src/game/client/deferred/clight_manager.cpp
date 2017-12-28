@@ -1,11 +1,11 @@
 
 #include "cbase.h"
 #include "deferred/deferred_shared_common.h"
-#include "CollisionUtils.h"
+#include "collisionutils.h"
 
 #include "viewrender.h"
 #include "view_shared.h"
-#include "engine/IVDebugOverlay.h"
+#include "engine/ivdebugoverlay.h"
 #include "tier0/fasttimer.h"
 #include "tier1/callqueue.h"
 
@@ -533,7 +533,7 @@ void CLightingManager::SortLights()
 		{
 			if( s.lights[i]->IsSpot() )
 			{
-				if( _isnan( SubFloat( needsFullscreen, i ) ) )
+				if( IS_NAN( SubFloat( needsFullscreen, i ) ) )
 				{
 					if( !R_CullBox( camMins, camMaxs,s.lights[i]->spotFrustum ) )
 					{
@@ -551,7 +551,7 @@ void CLightingManager::SortLights()
 			}
 			else
 			{
-				if( _isnan( SubFloat( needsFullscreen, i ) ) )
+				if( IS_NAN( SubFloat( needsFullscreen, i ) ) )
 				{
 					m_hPreSortedLights[LSORT_POINT_FULLSCREEN].AddToTail( s.lights[i] );
 				}

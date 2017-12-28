@@ -45,6 +45,8 @@ server.so
 server.so.dbg
 game_shader_dx9.so
 game_shader_dx9.so.dbg
+client_srv.so
+client_srv.so.dbg
 server_srv.so
 server_srv.so.dbg
 game_shader_dx9_srv.so
