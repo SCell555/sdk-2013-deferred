@@ -20,8 +20,8 @@ CDeferredManagerClient *GetDeferredManager()
 
 static IViewRender *g_pCurrentViewRender = NULL;
 
-//static CDeferredMaterialSystem g_DeferredMaterialSystem;
-//static IMaterialSystem *g_pOldMatSystem;
+static CDeferredMaterialSystem g_DeferredMaterialSystem;
+static IMaterialSystem *g_pOldMatSystem;
 
 
 CDeferredManagerClient::CDeferredManagerClient() : BaseClass( "DeferredManagerClient" )
@@ -60,11 +60,11 @@ bool CDeferredManagerClient::Init()
 
 		if ( bGotDefShaderDll )
 		{
-			//g_pOldMatSystem = materials;
+			g_pOldMatSystem = materials;
 
-			//g_DeferredMaterialSystem.InitPassThru( materials );
-			//materials = &g_DeferredMaterialSystem;
-			//engine->Mat_Stub( &g_DeferredMaterialSystem );
+			g_DeferredMaterialSystem.InitPassThru( materials );
+			materials = &g_DeferredMaterialSystem;
+			engine->Mat_Stub( &g_DeferredMaterialSystem );
 
 			m_bDefRenderingEnabled = true;
 			GetDeferredExt()->EnableDeferredLighting();
@@ -128,8 +128,8 @@ void CDeferredManagerClient::Shutdown()
 	{
 		materials->RemoveModeChangeCallBack( &DefRTsOnModeChanged );
 
-		//materials = g_pOldMatSystem;
-		//engine->Mat_Stub( g_pOldMatSystem );
+		materials = g_pOldMatSystem;
+		engine->Mat_Stub( g_pOldMatSystem );
 	}
 
 	if ( m_bDefRenderingEnabled )
