@@ -1785,7 +1785,7 @@ private:
 #if PIX_ENABLE
 #	define PIXEVENT PIXEvent _pixEvent
 #else
-#	define PIXEVENT 
+#	define PIXEVENT(...)
 #endif
 
 //-----------------------------------------------------------------------------

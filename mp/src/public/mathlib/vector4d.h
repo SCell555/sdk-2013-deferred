@@ -40,10 +40,12 @@ public:
 	// Construction/destruction
 	Vector4D(void);
 	Vector4D(vec_t X, vec_t Y, vec_t Z, vec_t W);
+	Vector4D(const Vector &base, vec_t W = 0.f);
 	Vector4D(const float *pFloat);
 
 	// Initialization
 	void Init(vec_t ix=0.0f, vec_t iy=0.0f, vec_t iz=0.0f, vec_t iw=0.0f);
+	void Init(const Vector &base, vec_t iw=0.0f);
 
 	// Got any nasty NAN's?
 	bool IsValid() const;
@@ -215,6 +217,12 @@ inline Vector4D::Vector4D(vec_t X, vec_t Y, vec_t Z, vec_t W )
 	Assert( IsValid() );
 }
 
+inline Vector4D::Vector4D(const Vector &base, vec_t W )
+{ 
+	x = base.x; y = base.y; z = base.z; w = W;
+	Assert( IsValid() );
+}
+
 inline Vector4D::Vector4D(const float *pFloat)					
 {
 	Assert( pFloat );
@@ -240,6 +248,12 @@ inline Vector4D::Vector4D(const Vector4D &vOther)
 inline void Vector4D::Init( vec_t ix, vec_t iy, vec_t iz, vec_t iw )
 { 
 	x = ix; y = iy; z = iz;	w = iw;
+	Assert( IsValid() );
+}
+
+inline void Vector4D::Init( const Vector &base, vec_t iw )
+{ 
+	x = base.x; y = base.y; z = base.z;	w = iw;
 	Assert( IsValid() );
 }
 

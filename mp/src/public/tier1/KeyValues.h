@@ -178,6 +178,7 @@ public:
 	void *GetPtr( const char *keyName = NULL, void *defaultValue = (void*)0 );
 	bool GetBool( const char *keyName = NULL, bool defaultValue = false, bool* optGotDefault = NULL );
 	Color GetColor( const char *keyName = NULL /* default value is all black */);
+	Color GetColor( const char *keyName, Color defaultValue);
 	bool  IsEmpty(const char *keyName = NULL);
 
 	// Data access

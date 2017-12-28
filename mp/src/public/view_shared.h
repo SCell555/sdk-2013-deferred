@@ -41,10 +41,10 @@ enum StereoEye_t
 //-----------------------------------------------------------------------------
 // Purpose: Renderer setup data.  
 //-----------------------------------------------------------------------------
-class CViewSetup
+class CViewSetupEngine
 {
 public:
-	CViewSetup()
+	CViewSetupEngine()
 	{
 		m_flAspectRatio = 0.0f;
 		m_bRenderToSubrectOfLargerScreen = false;
@@ -131,6 +131,23 @@ public:
     VMatrix     m_ViewToProjection;
 };
 
+class CViewSetup : public CViewSetupEngine
+{
+public:
+	CViewSetup()
+	{
+		m_bDrawWorldNormal = false;
+	}
+
+	explicit CViewSetup(const CViewSetupEngine& other)
+	{
+		memcpy(static_cast<CViewSetupEngine*>(this), &other, sizeof(CViewSetupEngine));
+		
+		m_bDrawWorldNormal = false;
+	}
+
+	bool m_bDrawWorldNormal;
+};
 
 
 #endif // VIEW_SHARED_H

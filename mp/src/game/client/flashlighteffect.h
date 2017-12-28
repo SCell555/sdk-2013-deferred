@@ -30,19 +30,17 @@ public:
 	
 protected:
 
-	void LightOff();
-	void LightOffOld();
+	virtual void UpdateLightProjection( FlashlightState_t &state );
+
+	virtual void LightOff();
 	void LightOffNew();
 
 	void UpdateLightNew(const Vector &vecPos, const Vector &vecDir, const Vector &vecRight, const Vector &vecUp);
-	void UpdateLightOld(const Vector &vecPos, const Vector &vecDir, int nDistance);
 
 	bool m_bIsOn;
 	int m_nEntIndex;
 	ClientShadowHandle_t m_FlashlightHandle;
 
-	// Vehicle headlight dynamic light pointer
-	dlight_t *m_pPointLight;
 	float m_flDistMod;
 
 	// Texture for flashlight

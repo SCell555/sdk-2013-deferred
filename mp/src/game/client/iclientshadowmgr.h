@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
@@ -23,6 +23,7 @@
 // Forward decls
 //-----------------------------------------------------------------------------
 struct FlashlightState_t;
+class CViewSetup;
 
 
 //-----------------------------------------------------------------------------
@@ -51,7 +52,7 @@ public:
 	virtual ClientShadowHandle_t CreateFlashlight( const FlashlightState_t &lightState ) = 0;
 	virtual void UpdateFlashlightState( ClientShadowHandle_t shadowHandle, const FlashlightState_t &lightState ) = 0;
 	virtual void DestroyFlashlight( ClientShadowHandle_t handle ) = 0;
-	
+
 	// Indicate that the shadow should be recomputed due to a change in
 	// the client entity
 	virtual void UpdateProjectedTexture( ClientShadowHandle_t handle, bool force = false ) = 0;
@@ -64,7 +65,7 @@ public:
 	virtual void AddShadowToReceiver( ClientShadowHandle_t handle,
 		IClientRenderable* pRenderable, ShadowReceiver_t type ) = 0;
 
-	virtual void RemoveAllShadowsFromReceiver( 
+	virtual void RemoveAllShadowsFromReceiver(
 		IClientRenderable* pRenderable, ShadowReceiver_t type ) = 0;
 
 	// Re-renders all shadow textures for shadow casters that lie in the leaf list
@@ -72,14 +73,14 @@ public:
 
 	// Frees shadow depth textures for use in subsequent view/frame
 	virtual void UnlockAllShadowDepthTextures() = 0;
-	
+
 	// Renders the shadow texture to screen...
 	virtual void RenderShadowTexture( int w, int h ) = 0;
 
 	// Sets the shadow direction + color
 	virtual void SetShadowDirection( const Vector& dir ) = 0;
 	virtual const Vector &GetShadowDirection() const = 0;
-	
+
 	virtual void SetShadowColor( unsigned char r, unsigned char g, unsigned char b ) = 0;
 	virtual void SetShadowDistance( float flMaxDistance ) = 0;
 	virtual void SetShadowBlobbyCutoffArea( float flMinArea ) = 0;

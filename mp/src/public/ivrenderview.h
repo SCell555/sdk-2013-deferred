@@ -22,7 +22,7 @@
 //-----------------------------------------------------------------------------
 // Forward declarations
 //-----------------------------------------------------------------------------
-class CViewSetup;
+class CViewSetupEngine;
 class CEngineSprite;
 class IClientEntity;
 class IMaterial;
@@ -286,8 +286,8 @@ public:
 	virtual void			VGui_Paint( int mode ) = 0;
 
 	// Push, pop views (see PushViewFlags_t above for flags)
-	virtual void			Push3DView( const CViewSetup &view, int nFlags, ITexture* pRenderTarget, Frustum frustumPlanes ) = 0;
-	virtual void			Push2DView( const CViewSetup &view, int nFlags, ITexture* pRenderTarget, Frustum frustumPlanes ) = 0;
+	virtual void			Push3DView( const CViewSetupEngine &view, int nFlags, ITexture* pRenderTarget, Frustum frustumPlanes ) = 0;
+	virtual void			Push2DView( const CViewSetupEngine &view, int nFlags, ITexture* pRenderTarget, Frustum frustumPlanes ) = 0;
 	virtual void			PopView( Frustum frustumPlanes ) = 0;
 
 	// Sets the main view
@@ -310,8 +310,8 @@ public:
 	virtual void			EndUpdateLightmaps( void ) = 0;
 	virtual void			OLD_SetOffCenterProjectionMatrix( float fov, float zNear, float zFar, float flAspectRatio, float flBottom, float flTop, float flLeft, float flRight ) = 0;
 	virtual void			OLD_SetProjectionMatrixOrtho( float left, float top, float right, float bottom, float zNear, float zFar ) = 0;
-	virtual void			Push3DView( const CViewSetup &view, int nFlags, ITexture* pRenderTarget, Frustum frustumPlanes, ITexture* pDepthTexture ) = 0;
-	virtual void			GetMatricesForView( const CViewSetup &view, VMatrix *pWorldToView, VMatrix *pViewToProjection, VMatrix *pWorldToProjection, VMatrix *pWorldToPixels ) = 0;
+	virtual void			Push3DView( const CViewSetupEngine &view, int nFlags, ITexture* pRenderTarget, Frustum frustumPlanes, ITexture* pDepthTexture ) = 0;
+	virtual void			GetMatricesForView( const CViewSetupEngine &view, VMatrix *pWorldToView, VMatrix *pViewToProjection, VMatrix *pWorldToProjection, VMatrix *pWorldToPixels ) = 0;
 	virtual void			DrawBrushModelEx( IClientEntity *baseentity, model_t *model, const Vector& origin, const QAngle& angles, DrawBrushModelMode_t mode ) = 0;
 };
 

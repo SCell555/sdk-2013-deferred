@@ -254,10 +254,11 @@ public:
 										   int baseTextureFrame2Var,
 										   bool bSSBump
 		);
-	
+#endif
 	// Sets up hw morphing state for the vertex shader
 	void SetHWMorphVertexShaderState( int nDimConst, int nSubrectConst, VertexTextureSampler_t morphSampler );
-
+	
+#ifndef GAME_SHADER_DLL
 	// Computes the shader index for vertex lit materials
 	int ComputeVertexLitShaderIndex( bool bVertexLitGeneric, bool hasBump, bool hasEnvmap, bool hasVertexColor, bool bHasNormal ) const;
 

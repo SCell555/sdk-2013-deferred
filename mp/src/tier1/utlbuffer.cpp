@@ -211,7 +211,7 @@ CUtlBuffer::CUtlBuffer( int growSize, int initSize, int nFlags ) :
 	}
 	else
 	{
-		m_nMaxPut = 0;
+		m_nMaxPut = initSize;
 	}
 	SetOverflowFuncs( &CUtlBuffer::GetOverflow, &CUtlBuffer::PutOverflow );
 }

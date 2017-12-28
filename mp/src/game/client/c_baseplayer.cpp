@@ -54,6 +54,8 @@
 #include "econ_wearable.h"
 #endif
 
+#include "deferred/flashlighteffect_deferred.h"
+
 // NVNT haptics system interface
 #include "haptics/ihaptics.h"
 
@@ -1227,7 +1229,8 @@ void C_BasePlayer::UpdateFlashlight()
 		if (!m_pFlashlight)
 		{
 			// Turned on the headlight; create it.
-			m_pFlashlight = new CFlashlightEffect(index);
+			//m_pFlashlight = new CFlashlightEffect(index);
+			m_pFlashlight = new CFlashlightEffectDeferred(index);
 
 			if (!m_pFlashlight)
 				return;
@@ -1258,11 +1261,11 @@ void C_BasePlayer::Flashlight( void )
 	UpdateFlashlight();
 
 	// Check for muzzle flash and apply to view model
-	C_BaseAnimating *ve = this;
+	/*C_BaseAnimating *ve = this;
 	if ( GetObserverMode() == OBS_MODE_IN_EYE )
 	{
 		ve = dynamic_cast< C_BaseAnimating* >( GetObserverTarget() );
-	}
+	}*/
 }
 
 

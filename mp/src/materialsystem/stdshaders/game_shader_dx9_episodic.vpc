@@ -1,0 +1,43 @@
+//-----------------------------------------------------------------------------
+//	game_shader_dx9.vpc
+//
+//	Project Script for mods to use an an example of how to override shaders
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME "mod_episodic"
+$Include "$SRCDIR\materialsystem\stdshaders\game_shader_dx9_base.vpc"
+
+$Project "Shaders (Episodic)"
+{
+	$Folder	"Source Files"
+	{
+		$File	"blur.cpp"
+		$File	"debug_lightingctrl.cpp"
+		$File	"debug_radiosity_grid.cpp"
+		$File	"debug_shadow.cpp"
+		$File	"deferred_brush.cpp"
+		$File	"deferred_decalModulate.cpp"
+		$File	"deferred_model.cpp"
+		$File	"deferred_utility.cpp"
+		$File	"defpass_composite.cpp"
+		$File	"defpass_gbuffer.cpp"
+		$File	"defpass_shadow.cpp"
+		$File	"IDeferredExt.cpp"
+		$File	"lighting_global.cpp"
+		$File	"lighting_pass_basic.cpp"
+		$File	"lighting_pass_volum.cpp"
+		$File	"lighting_volume.cpp"
+		$File	"lighting_world.cpp"
+		$File	"radiosity_blend.cpp"
+		$File	"radiosity_global.cpp"
+		$File	"radiosity_propagate.cpp"
+		$File	"screenspace_combine.cpp"
+		$File	"screenspace_shading.cpp"
+		$File	"volume_blend.cpp"
+		$File	"volume_prepass.cpp"
+	}
+	
+	$Shaders	"deferred_shaders.txt"
+	$Shaders	"deferred_shaders_sm2.txt"
+}

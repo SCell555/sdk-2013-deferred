@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //
@@ -8,8 +8,8 @@
 
 //
 // This module implements the particle manager for the client DLL.
-// In a nutshell, to create your own effect, implement the ParticleEffect 
-// interface and call CParticleMgr::AddEffect to add your effect. Then you can 
+// In a nutshell, to create your own effect, implement the ParticleEffect
+// interface and call CParticleMgr::AddEffect to add your effect. Then you can
 // add particles and simulate and render them.
 
 /*
@@ -17,7 +17,7 @@
 Particle manager documentation
 -----------------------------------------------------------------------------
 
-All particle effects are managed by a class called CParticleMgr. It tracks 
+All particle effects are managed by a class called CParticleMgr. It tracks
 the list of particles, manages their materials, sorts the particles, and
 has callbacks to render them.
 
@@ -27,12 +27,12 @@ together, but you should be aware the CParticleMgr talks to you through its
 own interfaces and does not talk to entities. Thus, it is possible to have
 particle effects that are not entities.
 
-To make a particle effect, you need two things: 
+To make a particle effect, you need two things:
 
-1. An implementation of the IParticleEffect interface. This is how CParticleMgr 
+1. An implementation of the IParticleEffect interface. This is how CParticleMgr
    talks to you for things like rendering and updating your effect.
 
-2. A (member) variable of type CParticleEffectBinding. This allows CParticleMgr to 
+2. A (member) variable of type CParticleEffectBinding. This allows CParticleMgr to
    store its internal data associated with your effect.
 
 Once you have those two things, you call CParticleMgr::AddEffect and pass them
@@ -69,7 +69,7 @@ entities. Each one is useful under different conditions.
 
 1. CSimpleEmitter is a class that does some of the dirty work of using particles.
    If you want, you can just instantiate one of these with CSimpleEmitter::Create
-   and call its AddParticle functions to add particles. When you are done and 
+   and call its AddParticle functions to add particles. When you are done and
    want to 'free' it, call its Release function rather than deleting it, and it
    will wait until all of its particles have gone away before removing itself
    (so you don't have to write code to wait for all of the particles to go away).
@@ -79,7 +79,7 @@ entities. Each one is useful under different conditions.
    to make particles.
 
    CSimpleEmitter and derived classes handle adding themselves to the particle
-   manager, tracking how many particles in the effect are active, and 
+   manager, tracking how many particles in the effect are active, and
    rendering the particles.
 
    CSimpleEmitter has code to simulate and render particles in a generic fashion,
@@ -88,15 +88,15 @@ entities. Each one is useful under different conditions.
 
    Example code:
 		CSimpleEmitter *pEmitter = CSimpleEmitter::Create();
-		
+
 		CEffectMaterialHandle hMaterial = pEmitter->GetCEffectMaterial( "mymaterial" );
-		
+
 		for( int i=0; i < 100; i++ )
 			pEmitter->AddParticle( hMaterial, RandomVector(0,10), 4 );
 
 		pEmitter->Release();
 
-2. Some older effects derive from C_BaseParticleEffect and implement an entity 
+2. Some older effects derive from C_BaseParticleEffect and implement an entity
    and a particle system at the same time. This gets nasty and is not encouraged anymore.
 
 */
@@ -146,6 +146,7 @@ class CParticleSystemDefinition;
 class CParticleMgr;
 class CNewParticleEffect;
 class CParticleCollection;
+class CViewSetup;
 
 #define INVALID_MATERIAL_HANDLE	NULL
 
@@ -183,7 +184,7 @@ struct Particle
 // This indexes CParticleMgr::m_SubTextures.
 typedef CParticleSubTexture* PMaterialHandle;
 
-// Each effect stores a list of particles associated with each material. The list is 
+// Each effect stores a list of particles associated with each material. The list is
 // hashed on the IMaterial pointer.
 class CEffectMaterial
 {
@@ -194,7 +195,7 @@ public:
 	// This provides the material that gets bound for this material in this effect.
 	// There can be multiple subtextures all within the same CEffectMaterial.
 	CParticleSubTextureGroup *m_pGroup;
-	
+
 	Particle m_Particles;
 	CEffectMaterial *m_pHashedNext;
 };
@@ -206,8 +207,8 @@ public:
 				CParticleSubTextureGroup();
 				~CParticleSubTextureGroup();
 
-	// Even though each of the subtextures has its own material, they should all basically be 
-	// the same exact material and just use different texture coordinates, so this is the 
+	// Even though each of the subtextures has its own material, they should all basically be
+	// the same exact material and just use different texture coordinates, so this is the
 	// material of the first subtexture that is bound.
 	//
 	// This is gotten from GetMaterialPage().
@@ -232,7 +233,7 @@ public:
 #ifdef _DEBUG
 	char *m_szDebugName;
 #endif
-	
+
 	IMaterial *m_pMaterial;
 };
 
@@ -247,8 +248,8 @@ struct ParticleSimListEntry_t
 //-----------------------------------------------------------------------------
 // interface IParticleEffect:
 //
-// This is the interface that particles effects must implement. The effect is 
-// responsible for starting itself and calling CParticleMgr::AddEffect, then it 
+// This is the interface that particles effects must implement. The effect is
+// responsible for starting itself and calling CParticleMgr::AddEffect, then it
 // will get the callbacks it needs to simulate and render the particles.
 //-----------------------------------------------------------------------------
 
@@ -256,15 +257,15 @@ abstract_class IParticleEffect
 {
 // Overridables.
 public:
-	
+
 	virtual			~IParticleEffect() {}
-	
-	// Called at the beginning of a frame to precalculate data for rendering 
-	// the particles. If you manage your own list of particles and want to 
-	// simulate them all at once, you can do that here and just render them in 
+
+	// Called at the beginning of a frame to precalculate data for rendering
+	// the particles. If you manage your own list of particles and want to
+	// simulate them all at once, you can do that here and just render them in
 	// the SimulateAndRender call.
 	virtual void	Update( float fTimeDelta ) {}
-	
+
 	// Called once for the entire effect before the batch of SimulateAndRender() calls.
 	// For particle systems using FLAGS_CAMERASPACE (the default), effectMatrix transforms the particles from
 	// world space into camera space. You can change this matrix if you want your particles relative to something
@@ -302,7 +303,7 @@ public:
 // PARTICLE_LOCALSPACE FLAG, OR DO SETBBOX THEMSELVES.
 	virtual const Vector *GetParticlePosition( Particle *pParticle ) { return &pParticle->m_Pos; }
 
-	virtual const char *GetEffectName() { return "???"; } 
+	virtual const char *GetEffectName() { return "???"; }
 };
 
 #define REGISTER_EFFECT( effect )														\
@@ -346,7 +347,7 @@ class CParticleEffectBinding : public CDefaultClientRenderable
 public:
 	CParticleEffectBinding();
 	~CParticleEffectBinding();
-	
+
 
 // Helper functions to setup, add particles, etc..
 public:
@@ -354,13 +355,13 @@ public:
 	// Simulate all the particles.
 	void			SimulateParticles( float flTimeDelta );
 
-	// Use this to specify materials when adding particles. 
+	// Use this to specify materials when adding particles.
 	// Returns the index of the material it found or added.
 	// Returns INVALID_MATERIAL_HANDLE if it couldn't find or add a material.
 	PMaterialHandle	FindOrAddMaterial( const char *pMaterialName );
 
 	// Allocate particles. The Particle manager will automagically
-	// deallocate them when the IParticleEffect SimulateAndRender() method 
+	// deallocate them when the IParticleEffect SimulateAndRender() method
 	// returns false. The first argument is the size of the particle
 	// structure in bytes
 	Particle*		AddParticle( int sizeInBytes, PMaterialHandle pMaterial );
@@ -392,7 +393,7 @@ public:
 	// leaf system - they are specifically told to draw each frame at a certain point.
 	void			SetDrawThruLeafSystem( int bDraw );
 
-	// Some view model particle effects want to be drawn right before the view model (after everything else is 
+	// Some view model particle effects want to be drawn right before the view model (after everything else is
 	// drawn).
 	void			SetDrawBeforeViewModel( int bDraw );
 
@@ -419,9 +420,9 @@ public:
 	void			SetWasDrawnPrevFrame( int bWasDrawnPrevFrame )	{ SetFlag( FLAGS_DRAWN_PREVFRAME, bWasDrawnPrevFrame ); }
 
 	// When the effect is in camera space mode, then the transforms are setup such that
-	// the particle vertices are specified in camera space (in CParticleDraw) rather than world space. 
+	// the particle vertices are specified in camera space (in CParticleDraw) rather than world space.
 	//
-	// This makes it faster to specify the particles - you only have to transform the center 
+	// This makes it faster to specify the particles - you only have to transform the center
 	// by CParticleMgr::GetModelView then add to X and Y to build the quad.
 	//
 	// Effects that want to specify verts (in CParticleDraw) in world space should set this to false and
@@ -441,7 +442,7 @@ public:
 
 	// If this is true, then the bbox is calculated from particle positions. This works
 	// fine if you always simulate (SetAlwaysSimulateFlag) so the system can become visible
-	// if it moves into the PVS. If you don't use this, then you should call SetBBox at 
+	// if it moves into the PVS. If you don't use this, then you should call SetBBox at
 	// least once to tell the particle manager where your entity is.
 	int				GetAutoUpdateBBox()							{ return GetFlag( FLAGS_AUTOUPDATEBBOX ); }
 	void			SetAutoUpdateBBox( int bAutoUpdate )		{ SetFlag( FLAGS_AUTOUPDATEBBOX, bAutoUpdate ); }
@@ -477,9 +478,9 @@ private:
 						ParticleDraw &particleDraw,
 						bool bWireframe );
 
-	int				DrawMaterialParticles( 
+	int				DrawMaterialParticles(
 						bool bBucketSort,
-						CEffectMaterial *pMaterial, 
+						CEffectMaterial *pMaterial,
 						float flTimeDelta,
 						bool bWireframe
 						 );
@@ -491,10 +492,10 @@ private:
 
 	void			BBoxCalcStart( Vector &bbMin, Vector &bbMax );
 	void			BBoxCalcEnd( bool bboxSet, Vector &bbMin, Vector &bbMax );
-	
-	void			DoBucketSort( 
-						CEffectMaterial *pMaterial, 
-						float *zCoords, 
+
+	void			DoBucketSort(
+						CEffectMaterial *pMaterial,
+						float *zCoords,
 						int nZCoords,
 						float minZ,
 						float maxZ );
@@ -519,7 +520,7 @@ private:
 	CEffectMaterial* GetEffectMaterial( CParticleSubTexture *pSubTexture );
 
 // IClientRenderable overrides.
-public:		
+public:
 
 	virtual const Vector&			GetRenderOrigin( void );
 	virtual const QAngle&			GetRenderAngles( void );
@@ -558,7 +559,7 @@ private:
 
 	VMatrix m_LocalSpaceTransform;
 	bool m_bLocalSpaceTransformIdentity;	// If this is true, then m_LocalSpaceTransform is assumed to be identity.
-	
+
 	// Bounding box. Stored in WORLD space.
 	Vector							m_Min;
 	Vector							m_Max;
@@ -566,7 +567,7 @@ private:
 	// paramter copies to detect changes
 	Vector							m_LastMin;
 	Vector							m_LastMax;
-	
+
 	// The particle cull size
 	float							m_flParticleCullRadius;
 
@@ -581,14 +582,14 @@ private:
 
 	IParticleEffect					*m_pSim;
 	CParticleMgr					*m_pParticleMgr;
-	
+
 	// Combination of the CParticleEffectBinding::FLAGS_ flags.
 	int								m_Flags;
 
 	// Materials this effect is using.
 	enum { EFFECT_MATERIAL_HASH_SIZE = 8 };
 	CEffectMaterial *m_EffectMaterialHash[EFFECT_MATERIAL_HASH_SIZE];
-	
+
 	// For faster iteration.
 	CUtlLinkedList<CEffectMaterial*, unsigned short> m_Materials;
 
@@ -651,7 +652,7 @@ public:
 
 	// This should be called at the start of the frame.
 	void			IncrementFrameCode();
-	
+
 	// This updates all the particle effects and inserts them into the leaves.
 	void			Simulate( float fTimeDelta );
 
@@ -718,14 +719,14 @@ private:
 
 	CParticleSubTextureGroup* FindOrAddSubTextureGroup( IMaterial *pPageMaterial );
 
-	int ComputeParticleDefScreenArea( int nInfoCount, RetireInfo_t *pInfo, float *pTotalArea, CParticleSystemDefinition* pDef, 
+	int ComputeParticleDefScreenArea( int nInfoCount, RetireInfo_t *pInfo, float *pTotalArea, CParticleSystemDefinition* pDef,
 		const CViewSetup& view, const VMatrix &worldToPixels, float flFocalDist );
 
 	bool RetireParticleCollections( CParticleSystemDefinition* pDef, int nCount, RetireInfo_t *pInfo, float flScreenArea, float flMaxTotalArea );
 
 	void BuildParticleSimList( CUtlVector< ParticleSimListEntry_t > &list );
 	bool EarlyRetireParticleSystems( int nCount, ParticleSimListEntry_t *ppEffects );
-	static int RetireSort( const void *p1, const void *p2 ); 
+	static int RetireSort( const void *p1, const void *p2 );
 
 private:
 
@@ -748,14 +749,14 @@ private:
 	// all the active effects using the new particle interface
 	CUtlIntrusiveDList< CNewParticleEffect > m_NewEffects;
 
-	
+
 	CUtlVector< IClientParticleListener *> m_effectListeners;
 
 	IMaterialSystem					*m_pMaterialSystem;
 
 	// Store the concatenated modelview matrix
 	VMatrix							m_mModelView;
-	
+
 	CUtlVector<CParticleSubTextureGroup*>				m_SubTextureGroups;	// lookup by group name
 	CUtlDict<CParticleSubTexture*,unsigned short>		m_SubTextures;		// lookup by material name
 	CParticleSubTexture m_DefaultInvalidSubTexture; // Used when they specify an invalid material name.
@@ -833,7 +834,7 @@ struct StandardParticle_t : public Particle
 	void			SetAlpha(float a);
 
 	Vector			m_Velocity;
-	
+
 	// How this is used is up to the effect's discretion. Some use it for how long it has been alive
 	// and others use it to count down until the particle disappears.
 	float			m_Lifetime;
