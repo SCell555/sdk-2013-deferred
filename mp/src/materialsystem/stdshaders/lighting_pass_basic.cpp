@@ -4,7 +4,7 @@
 #include "defconstruct_vs30.inc"
 #include "lightingpass_point_ps30.inc"
 #include "lightingpass_spot_ps30.inc"
-#include "shaderapi\ishaderapi.h"
+#include "shaderapi/ishaderapi.h"
 
 #include "tier0/memdbgon.h"
 

@@ -16,9 +16,13 @@ CDeferredLightContainer *GetLightContainer( int index )
 
 CDeferredLightContainer *FindAvailableContainer()
 {
-	for ( CDeferredLightContainer* container : __g_pLightContainerDict )
+	const int dictSize = __g_pLightContainerDict.Count();
+	for ( int i = 0; i < dictSize; ++i )
+	{
+		CDeferredLightContainer* container = __g_pLightContainerDict[i];
 		if ( container->GetLightsAmount() < DEFLIGHTCONTAINER_MAXLIGHTS )
 			return container;
+	}
 
 	return NULL;
 }

@@ -237,8 +237,10 @@ void CDeferredManagerServer::LevelInitPreEntity()
 		if ( type1 != 1 && type1 != 2 )
 			continue;
 		bool bSkip = false;
-		for ( SpotLightPair_t& pair : spotLightPairs )
+		const int numPairs = spotLightPairs.Count();
+		for ( int i = 0; i < numPairs; ++i )
 		{
+			const SpotLightPair_t& pair = spotLightPairs[i];
 			if (pair.light == entity1 || pair.spotlight == entity1)
 			{
 				bSkip = true;
@@ -255,8 +257,10 @@ void CDeferredManagerServer::LevelInitPreEntity()
 		FOR_EACH_TRUE_SUBKEY( vmfFile, entity2 )
 		{
 			bool bSkip = false;
-			for ( SpotLightPair_t& pair : spotLightPairs )
+			const int numPairs = spotLightPairs.Count();
+			for ( int i = 0; i < numPairs; ++i )
 			{
+				const SpotLightPair_t& pair = spotLightPairs[i];
 				if (pair.light == entity2 || pair.spotlight == entity2)
 				{
 					bSkip = true;
@@ -286,8 +290,10 @@ void CDeferredManagerServer::LevelInitPreEntity()
 
 #define COPY_LIGHT_DATA( name ) pair.spotlight->SetString( name, pair.light->GetString( name ) )
 
-	for ( SpotLightPair_t& pair : spotLightPairs )
+	const int numPairs = spotLightPairs.Count();
+	for ( int i = 0; i < numPairs; ++i )
 	{
+		SpotLightPair_t& pair = spotLightPairs[i];
 		vmfFile->RemoveSubKey( pair.light );
 		COPY_LIGHT_DATA( "_light" );
 		COPY_LIGHT_DATA( "_exponent" );
@@ -381,9 +387,10 @@ void CDeferredManagerServer::LevelInitPreEntity()
 			}
 			else
 			{
-				for ( const dworldlight_t* unspawnedLight : unspawnedLights )
+				const int numUnspawnedLights = unspawnedLights.Count();
+				for ( int i = 0; i < numUnspawnedLights; ++i )
 				{
-					if (unspawnedLight == &light)
+					if (unspawnedLights[i] == &light)
 						goto out;
 				}
 				unspawnedLights.AddToTail( &light );
@@ -446,8 +453,10 @@ void CDeferredManagerServer::LevelInitPreEntity()
 		DispatchSpawn( lightEntity );
 	}
 
-	for ( const dworldlight_t* light : unspawnedLights )
+	const int numUnspawnedLights = unspawnedLights.Count();
+	for ( int i = 0; i < numUnspawnedLights; ++i )
 	{
+		const dworldlight_t* light = unspawnedLights[i];
 		const float radius = ComputeLightRadius( *light );
 
 		if ( radius == 0 )

@@ -1,8 +1,8 @@
 
 #include "cbase.h"
 #include "deferred/deferred_shared_common.h"
-#include "shadereditor/shadereditorsystem.h"
-#include "shadereditor/ivshadereditor.h"
+#include "ShaderEditor/ShaderEditorSystem.h"
+#include "ShaderEditor/IVShaderEditor.h"
 
 #include "view_shared.h"
 #include "view.h"

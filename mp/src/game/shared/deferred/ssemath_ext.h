@@ -1,7 +1,7 @@
 #ifndef SSEMATH_EXT_H
 #define SSEMATH_EXT_H
 
-#include "mathlib\ssemath.h"
+#include "mathlib/ssemath.h"
 
 FORCEINLINE float Dot4SIMD2( const fltx4 &a, const fltx4 &b )
 {
@@ -11,7 +11,11 @@ FORCEINLINE float Dot4SIMD2( const fltx4 &a, const fltx4 &b )
 	x = _mm_shuffle_ps( x, x, _MM_SHUFFLE( 0, 0, 0, 1 ) );
 	x = _mm_add_ss( y, x );
 
+#ifdef GNUC
+	return ((float*)&x)[0];
+#else
 	return x.m128_f32[0];
+#endif
 }
 
 FORCEINLINE void NormalizeInPlaceSIMD( fltx4 &v )

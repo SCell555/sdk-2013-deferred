@@ -1,7 +1,7 @@
 #ifndef DEFERRED_CONTEXT_H
 #define DEFERRED_CONTEXT_H
 
-#include "basevsshader.h"
+#include "BaseVSShader.h"
 
 class CDeferredPerMaterialContextData : public CBasePerMaterialContextData
 {

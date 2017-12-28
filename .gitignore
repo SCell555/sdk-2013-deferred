@@ -28,6 +28,9 @@ obj*/
 !devtools/*.mak
 !utils/smdlexp/smdlexp.mak
 
+# Linux files
+*.project
+
 # Specific Source build products
 client.pdb
 client.dll
@@ -40,8 +43,13 @@ client.so
 client.so.dbg
 server.so
 server.so.dbg
+game_shader_dx9.so
+game_shader_dx9.so.dbg
 server_srv.so
 server_srv.so.dbg
+game_shader_dx9_srv.so
+game_shader_dx9_srv.so.dbg
+
 
 client.dylib
 client.dylib.dSYM/
