@@ -1,0 +1,6 @@
+"DEFERRED_BRUSH"
+{
+	$basetexture "dev/graygrid"
+	$envmap env_cubemap
+	$envmapmask white
+}

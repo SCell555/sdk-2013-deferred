@@ -1,0 +1,17 @@
+bin\dx_proxy.dll
+d:\steam\steamapps\common\source sdk base 2013 multiplayer\bin\\tier0.dll
+d:\steam\steamapps\common\source sdk base 2013 multiplayer\bin\\vstdlib.dll
+common_fxc.h
+common_hlsl_cpp_consts.h
+common_pragmas.h
+common_ps_fxc.h
+common_vs_fxc.h
+common_vertexlitgeneric_dx9.h
+common_lightmappedgeneric_fxc.h
+common_flashlight_fxc.h
+common_parallax.h
+d:\steam\steamapps\common\source sdk base 2013 multiplayer\bin\\shadercompile.exe
+d:\steam\steamapps\common\source sdk base 2013 multiplayer\bin\\shadercompile_dll.dll
+000007_normals_to_screenspace_pos_preview_vs30.fxc
+000007_normals_to_screenspace_preview_vs30.fxc
+000007_normals_to_screenspace_preview_ps30.fxc

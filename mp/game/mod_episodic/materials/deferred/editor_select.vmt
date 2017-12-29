@@ -1,0 +1,7 @@
+"unlitgeneric"
+{
+	$basetexture	"deferred/editor_select"
+	$translucent 1
+	$vertexcolor 1
+	$ignorez 1
+}

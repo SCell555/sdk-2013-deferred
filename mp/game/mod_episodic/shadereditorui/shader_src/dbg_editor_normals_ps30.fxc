@@ -1,0 +1,47 @@
+// ********************************
+// ** auto generated pixelshader **
+// ********************************
+
+#define SHADER_EDITOR_2013_COMPILE
+
+
+// Includes
+#include "common_ps_fxc.h"
+#include "common_vertexlitgeneric_dx9.h"
+#include "common_lightmappedgeneric_fxc.h"
+#include "common_flashlight_fxc.h"
+#include "common_parallax.h"
+
+
+// Samplers
+sampler _Sampler_00		: register( s0 );
+sampler _Sampler_01		: register( s1 );
+
+// User code - function bodies
+void UserFunction_45( in float4 rgba, in float depth, out float4 final )
+{
+	final = lerp( float4( 0.5, 0.5, 0.5, 0.5 ), rgba, any( depth ) );
+}
+
+// Semantic structures
+struct PS_INPUT
+{
+	float2 vTexCoord_0			:	TEXCOORD0;
+};
+
+struct PS_OUTPUT
+{
+	float4 vColor_0				:	COLOR0;
+};
+
+// Entry point
+PS_OUTPUT main( const PS_INPUT In )
+{
+	PS_OUTPUT Out;
+	float4 _var0 = tex2D( _Sampler_00, In.vTexCoord_0 ).rgba;
+	float _var1 = tex2D( _Sampler_01, In.vTexCoord_0 ).r;
+	float4 _var2 = (float4)0;
+	UserFunction_45( _var0, _var1, _var2 );
+	Out.vColor_0 = _var2;
+	return Out;
+}

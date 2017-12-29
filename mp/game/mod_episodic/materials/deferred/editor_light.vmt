@@ -1,0 +1,6 @@
+"unlitgeneric"
+{
+	$basetexture	"editor/light"
+	$translucent 1
+	$vertexcolor 1
+}

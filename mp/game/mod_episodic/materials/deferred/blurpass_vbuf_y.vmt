@@ -1,0 +1,5 @@
+"GAUSSIAN_BLUR_6"
+{
+	"$basetexture"		"_rt_volumaccum_01"
+	"$ISVERTICAL"		"1"
+}

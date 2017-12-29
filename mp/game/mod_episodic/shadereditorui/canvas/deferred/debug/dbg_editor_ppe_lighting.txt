@@ -1,0 +1,87 @@
+"canvas"
+{
+	"cfmt_version"		"canvasver#003"
+	"flowgraph_type"		"4"
+	"config_ppe"
+	{
+		"updatefbcopy"		"0"
+	}
+	"Nodes"
+	{
+		"Node_000"
+		{
+			"iType"		"2001"
+			"pos_x"		"-320.000000"
+			"pos_y"		"15.000000"
+			"size_x"		"55.000000"
+			"size_y"		"-17.000000"
+			"iPreview"		"0"
+		}
+		"Node_001"
+		{
+			"iType"		"2002"
+			"pos_x"		"265.000000"
+			"pos_y"		"15.000000"
+			"size_x"		"55.000000"
+			"size_y"		"-17.000000"
+			"iPreview"		"0"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"2"
+					"iTarget_jack"		"0"
+				}
+			}
+		}
+		"Node_002"
+		{
+			"iType"		"2004"
+			"pos_x"		"-58.022194"
+			"pos_y"		"16.673006"
+			"size_x"		"160.000000"
+			"size_y"		"-80.000000"
+			"iPreview"		"1"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"0"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_01"
+				{
+					"iTarget_node"		"3"
+					"iTarget_jack"		"0"
+				}
+			}
+			"iSizingMode_Tg"		"0"
+			"iSizingMode_Src"		"0"
+			"iPushTg"		"1"
+			"iSHEETHINT_enable_tg"		"0"
+			"iSHEETHINT_enable_src"		"0"
+			"iDst_x"		"0"
+			"iDst_y"		"0"
+			"iDst_w"		"0"
+			"iDst_h"		"0"
+			"flSrcUV_x0"		"0.000000"
+			"flSrcUV_y0"		"0.000000"
+			"flSrcUV_x"		"0.000000"
+			"flSrcUV_y"		"0.000000"
+			"iSrc_w"		"0"
+			"iSrc_h"		"0"
+		}
+		"Node_003"
+		{
+			"iType"		"2010"
+			"pos_x"		"-271.289917"
+			"pos_y"		"-64.015358"
+			"size_x"		"80.000000"
+			"size_y"		"-17.000000"
+			"iPreview"		"0"
+			"iInline"		"1"
+			"szVMTString_num_strings"		"1"
+			"szVMTString_partial_00"		"\'EDITOR_SHADER\'\r\n{\r\n	\'$SHADERNAME\'	\'dbg_editor_lighting\'\r\n}"
+		}
+	}
+}

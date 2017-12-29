@@ -1,0 +1,6 @@
+"RADIOSITY_PROPAGATE"
+{
+	"$BLUR"		"1"
+	"$basetexture"		"_rt_radbuffer_00"
+	"$NORMALMAP"		"_rt_radnormal_00"
+}

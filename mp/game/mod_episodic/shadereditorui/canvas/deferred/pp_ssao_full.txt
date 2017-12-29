@@ -1,0 +1,370 @@
+"canvas"
+{
+	"cfmt_version"		"canvasver#003"
+	"flowgraph_type"		"1"
+	"config"
+	{
+		"shadermodel"		"1"
+		"cull_mode"		"0"
+		"alpha_blending"		"0"
+		"depth_test"		"0"
+		"depth_write"		"0"
+		"srgb_write"		"0"
+	}
+	"Nodes"
+	{
+		"Node_000"
+		{
+			"iType"		"1"
+			"pos_x"		"-320.000000"
+			"pos_y"		"190.000000"
+			"size_x"		"55.000000"
+			"size_y"		"-28.000000"
+			"iPreview"		"0"
+			"enable_flex"		"0"
+			"enable_normal"		"0"
+			"enable_normal_compression"		"0"
+			"enable_blendweights"		"0"
+			"enable_tangentspace"		"0"
+			"enable_tangentspace_skinning"		"0"
+			"numTexcoords"		"1"
+			"numColor"		"0"
+			"dTFlag_Texcoords_0"		"2"
+			"dTFlag_Texcoords_1"		"2"
+			"dTFlag_Texcoords_2"		"2"
+			"dTFlag_Color_0"		"8"
+			"dTFlag_Color_1"		"8"
+		}
+		"Node_001"
+		{
+			"iType"		"2"
+			"pos_x"		"265.000000"
+			"pos_y"		"190.000000"
+			"size_x"		"55.000000"
+			"size_y"		"-28.000000"
+			"iPreview"		"0"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"2"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_01"
+				{
+					"iTarget_node"		"0"
+					"iTarget_jack"		"1"
+				}
+			}
+			"numTexcoords"		"1"
+			"numColor"		"0"
+			"numTexcoord_Flag_0"		"2"
+			"numTexcoord_Flag_1"		"2"
+			"numTexcoord_Flag_2"		"2"
+			"numTexcoord_Flag_3"		"2"
+			"numTexcoord_Flag_4"		"2"
+			"numTexcoord_Flag_5"		"2"
+			"numTexcoord_Flag_6"		"2"
+			"numTexcoord_Flag_7"		"2"
+			"numColor_Flag_0"		"8"
+			"numColor_Flag_1"		"8"
+		}
+		"Node_002"
+		{
+			"iType"		"27"
+			"pos_x"		"-44.526688"
+			"pos_y"		"206.208878"
+			"size_x"		"80.000000"
+			"size_y"		"-17.000000"
+			"iPreview"		"1"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"0"
+					"iTarget_jack"		"0"
+				}
+			}
+			"swizzleString"		"x y z 1"
+		}
+		"Node_003"
+		{
+			"iType"		"3"
+			"pos_x"		"-327.922913"
+			"pos_y"		"-247.378967"
+			"size_x"		"55.000000"
+			"size_y"		"-17.000000"
+			"iPreview"		"0"
+			"numTexcoords"		"1"
+			"numColor"		"0"
+			"numTexcoord_Flag_0"		"2"
+			"numTexcoord_Flag_1"		"2"
+			"numTexcoord_Flag_2"		"2"
+			"numTexcoord_Flag_3"		"2"
+			"numTexcoord_Flag_4"		"2"
+			"numTexcoord_Flag_5"		"2"
+			"numTexcoord_Flag_6"		"2"
+			"numTexcoord_Flag_7"		"2"
+			"numColor_Flag_0"		"8"
+			"numColor_Flag_1"		"8"
+		}
+		"Node_004"
+		{
+			"iType"		"4"
+			"pos_x"		"502.938507"
+			"pos_y"		"-511.664856"
+			"size_x"		"55.000000"
+			"size_y"		"-17.000000"
+			"iPreview"		"0"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"9"
+					"iTarget_jack"		"0"
+				}
+			}
+			"numColors"		"1"
+			"enable_Depth"		"0"
+		}
+		"Node_005"
+		{
+			"iType"		"77"
+			"pos_x"		"-386.855255"
+			"pos_y"		"-767.992310"
+			"size_x"		"118.000000"
+			"size_y"		"-50.000000"
+			"iPreview"		"1"
+			"sz_callbackname"		"main_view_row_0"
+			"i_numc"		"3"
+		}
+		"Node_006"
+		{
+			"iType"		"77"
+			"pos_x"		"-374.740509"
+			"pos_y"		"-838.214111"
+			"size_x"		"118.000000"
+			"size_y"		"-50.000000"
+			"iPreview"		"1"
+			"sz_callbackname"		"main_view_row_1"
+			"i_numc"		"3"
+		}
+		"Node_007"
+		{
+			"iType"		"77"
+			"pos_x"		"-371.990997"
+			"pos_y"		"-919.532898"
+			"size_x"		"118.000000"
+			"size_y"		"-50.000000"
+			"iPreview"		"1"
+			"sz_callbackname"		"main_view_row_2"
+			"i_numc"		"3"
+		}
+		"Node_008"
+		{
+			"iType"		"73"
+			"pos_x"		"-184.736435"
+			"pos_y"		"-828.119995"
+			"size_x"		"91.000000"
+			"size_y"		"-80.000000"
+			"iPreview"		"1"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"5"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_01"
+				{
+					"iTarget_node"		"6"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_02"
+				{
+					"iTarget_node"		"7"
+					"iTarget_jack"		"0"
+				}
+			}
+			"i_mcomp_matrix"		"16"
+			"i_mcomp_c"		"0"
+		}
+		"Node_009"
+		{
+			"iType"		"27"
+			"pos_x"		"266.066376"
+			"pos_y"		"-526.049500"
+			"size_x"		"124.000000"
+			"size_y"		"-80.000000"
+			"iPreview"		"1"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"16"
+					"iTarget_jack"		"0"
+				}
+			}
+			"swizzleString"		"x x x 1"
+		}
+		"Node_010"
+		{
+			"iType"		"29"
+			"pos_x"		"46.248917"
+			"pos_y"		"-249.490509"
+			"size_x"		"122.000000"
+			"size_y"		"-80.000000"
+			"iPreview"		"1"
+			"iSRGB"		"0"
+			"iTextureType"		"5"
+			"IsCubemap"		"0"
+			"iLookupoverride"		"0"
+			"szDemoTexturePath"		"_rt_FullFrameFB"
+			"szFallbackTexturePath"		"white"
+			"iFallbackMode"		"0"
+		}
+		"Node_011"
+		{
+			"iType"		"94"
+			"szName"		"_rt_defProjDepth"
+			"pos_x"		"-331.008118"
+			"pos_y"		"-389.814331"
+			"size_x"		"84.000000"
+			"size_y"		"-50.000000"
+			"iPreview"		"1"
+			"szParamname"		"_rt_defProjDepth"
+			"iTextureType"		"0"
+			"IsCubemap"		"0"
+			"szDemoTexturePath"		"_rt_defProjDepth"
+			"szFallbackTexturePath"		"_rt_defProjDepth"
+			"iFallbackMode"		"4"
+		}
+		"Node_012"
+		{
+			"iType"		"94"
+			"szName"		"randomSampler"
+			"pos_x"		"-330.803589"
+			"pos_y"		"-480.161499"
+			"size_x"		"84.000000"
+			"size_y"		"-50.000000"
+			"iPreview"		"1"
+			"szParamname"		"randomSampler"
+			"iTextureType"		"0"
+			"IsCubemap"		"0"
+			"szDemoTexturePath"		"texture_samples\drew\noise_random"
+			"szFallbackTexturePath"		"texture_samples\drew\noise_random"
+			"iFallbackMode"		"4"
+		}
+		"Node_013"
+		{
+			"iType"		"94"
+			"szName"		"_rt_defNormals"
+			"pos_x"		"-331.292694"
+			"pos_y"		"-571.337585"
+			"size_x"		"84.000000"
+			"size_y"		"-50.000000"
+			"iPreview"		"1"
+			"szParamname"		"_rt_defNormals"
+			"iTextureType"		"0"
+			"IsCubemap"		"0"
+			"szDemoTexturePath"		"_rt_defNormals"
+			"szFallbackTexturePath"		"_rt_defNormals"
+			"iFallbackMode"		"4"
+		}
+		"Node_014"
+		{
+			"iType"		"19"
+			"pos_x"		"305.217255"
+			"pos_y"		"-282.037048"
+			"size_x"		"91.000000"
+			"size_y"		"-80.000000"
+			"iPreview"		"1"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"10"
+					"iTarget_jack"		"0"
+				}
+			}
+			"i_mat_rotation"		"0"
+		}
+		"Node_015"
+		{
+			"iType"		"65"
+			"pos_x"		"-332.486664"
+			"pos_y"		"-652.062805"
+			"size_x"		"70.000000"
+			"size_y"		"-50.000000"
+			"iPreview"		"1"
+			"flSmartVal0"		"0.000000"
+		}
+		"Node_016"
+		{
+			"iType"		"99"
+			"pos_x"		"-11.959938"
+			"pos_y"		"-447.146393"
+			"size_x"		"169.000000"
+			"size_y"		"-80.000000"
+			"iPreview"		"1"
+			"bridges"
+			{
+				"jackIn_00"
+				{
+					"iTarget_node"		"3"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_01"
+				{
+					"iTarget_node"		"11"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_02"
+				{
+					"iTarget_node"		"12"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_03"
+				{
+					"iTarget_node"		"13"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_04"
+				{
+					"iTarget_node"		"15"
+					"iTarget_jack"		"0"
+				}
+				"jackIn_05"
+				{
+					"iTarget_node"		"8"
+					"iTarget_jack"		"0"
+				}
+			}
+			"varName_In_0"		"texCoords"
+			"varType_In_0"		"2"
+			"varName_In_1"		"depthSampler"
+			"varType_In_1"		"128"
+			"varName_In_2"		"randomSampler"
+			"varType_In_2"		"128"
+			"varName_In_3"		"normalSampler"
+			"varType_In_3"		"128"
+			"varName_In_4"		"fbTexelSize"
+			"varType_In_4"		"2"
+			"varName_In_5"		"viewMatrix"
+			"varType_In_5"		"16"
+			"varName_Out_0"		"ao_out"
+			"varType_Out_0"		"1"
+			"szFunctionName"		"SSAO_PS"
+			"iInline"		"1"
+			"szcode_global_num_strings"		"4"
+			"szcode_global_partial_00"		"//-----------------------------------------------------------------------------\r\n// Global variables\r\n//-----------------------------------------------------------------------------\r\n\r\n#define USE_STATIC_DIRECTIONS 1\r\n\r\n#if USE_STATIC_DIRECTIONS\r\nstatic float g_fSampleRad = 4;\r\nstatic float g_fJitter = 10;\r\n#else\r\nstatic float g_fSampleRad = 8;\r\nstatic float g_fJitter = 0.5;\r\n#endif\r\nstatic float g_fIntensity = 0.5;\r\nstatic float g_fScale = 48.0;\r\nstatic float g_fFarClip = 8000.0;\r\nstatic float2 vRenderTargetDimension = 1.0f / _g_TexelSize;\r\n\r\n//hlsl_calc_angles 9 36 0\r\n//hlsl_calc_angles 9 60 0 -0.5 5\r\n\r\nstatic const float2 directions_9[9] =\r\n{\r\n	float2( 1.000000, 0.000000 ),\r\n	float2( 0.500000, 0.866025 ),\r\n	float2( -0.500000, 0.866025 ),\r\n	float2( -1.000000, -0.000000 ),\r\n	float2( -0.500000, -0.866025 ),\r\n	float2( 0.500000, -0.866025 ),\r\n	float2( 0.500000, 0.000000 ),\r\n	float2( 0.250000, 0.433013 ),\r\n	float2( -0.250000, 0.433013 ),\r\n};\r\n\r\"
+			"szcode_global_partial_01"		"nstatic const float2 directions_18[18] =\r\n{\r\n	float2( 1.000000, 0.000000 ),\r\n	float2( -1.083289, 0.191013 ),\r\n	float2( 1.127631, -0.410424 ),\r\n	float2( -1.125833, 0.650000 ),\r\n	float2( 1.072462, -0.899903 ),\r\n	float2( -0.964181, 1.149067 ),\r\n	float2( 0.800000, -1.385641 ),\r\n	float2( -0.581435, 1.597477 ),\r\n	float2( 0.312565, -1.772654 ),\r\n	float2( 0.000001, 1.900000 ),\r\n	float2( -0.347297, -1.969616 ),\r\n	float2( 0.718242, 1.973355 ),\r\n	float2( -1.099999, -1.905257 ),\r\n	float2( 1.478410, 1.761904 ),\r\n	float2( -1.838505, -1.542692 ),\r\n	float2( 2.165066, 1.249995 ),\r\n	float2( -2.443202, -0.889248 ),\r\n	float2( 2.658981, 0.468846 ),\r\n};\r\n\r\n\r\n\r\n//-----------------------------------------------------------------------------\r\n// Functions\r\n//----------------------------------------------------------------------\r\n\r\nfloat getDepth(float2 uv)\r\n{\r\n	// _Sampler_00 is our depth buffer, make sure it's the FIRST sampler input on our custom code node! \r\n	return te"
+			"szcode_global_partial_02"		"x2D(_Sampler_00, uv).r / g_fFarClip;\r\n}\r\n\r\nfloat2 coordsToDeviceSpace( float2 texCoords )\r\n{\r\n	return texCoords * 2.0f - 1.0f;\r\n}\r\n\r\nfloat3 getPosition(float2 uv)\r\n{\r\n	// Get depth data from the depth buffer.\r\n	// We will use this information to re-construct\r\n	// pixel position in view-space\r\n	float depth = getDepth(uv);\r\n	float3 pos = float3(coordsToDeviceSpace( uv ), 1.0);\r\n	return pos * depth;\r\n}\r\n\r\nfloat3 getNormal(float2 uv, in float3x3 viewMatrix, in sampler normalSampler)\r\n{\r\n	//find 2 more points, enough to specify a plane\r\n	float3 worldNormal = tex2D( normalSampler, uv );\r\n	worldNormal = worldNormal * 2.0f - 1.0f;\r\n	return normalize( mul( worldNormal, viewMatrix ) ) * float3( 1, -1, -1 );\r\n}\r\n\r\nfloat2 getRandom(sampler randomSampler, float2 uv)\r\n{\r\n	return tex2D(randomSampler, vRenderTargetDimension * uv / 128.0f * 3.0f).rg * 2.0f - 1.0f;\r\n}\r\n\r\nfloat calAmbientOcclusion(in float2 tcoord, in float2 uv, in float3 p, in float3 cnorm, in floa"
+			"szcode_global_partial_03"		"t3x3 viewMatrix, in sampler normalSampler)\r\n{\r\n  float3 diff = getPosition(tcoord + uv) - p;\r\n  float3 n = getNormal(tcoord + uv, viewMatrix, normalSampler);\r\n  float3 v = normalize(diff);\r\n  float  d = length(diff)*0.1;\r\n\r\n  return\r\n    (1.0-saturate(dot(n, -v)-0.2)) *saturate(dot(cnorm, v)-0.2) * (1.0f - 1.0f / sqrt(0.2f / (d * d * pow(g_fScale, 4)) + 1.0f));\r\n}\n"
+			"szcode_body_num_strings"		"2"
+			"szcode_body_partial_00"		"	float d = tex2D(depthSampler, texCoords).r;\r\n	clip( 3000.0f - d );\r\n\r\n	float flIntensity = g_fIntensity * ( 1 + d / 500.0f );\r\n	float3 p = float3( coordsToDeviceSpace( texCoords ), 1.0f ) * d / g_fFarClip;\r\n\r\n#if USE_STATIC_DIRECTIONS\r\n	//d = saturate( 1 - d * 0.00015f );\r\n	//d = 3 - d * 0.005f;\r\n	float flJitterAmt = g_fJitter * smoothstep( 1500, 0, d );\r\n	d = 3 - d * 0.001f;\r\n	d = max( 1.0f, d );\r\n#else\r\n	d = 6.5 + d * 0.002f;\r\n#endif\r\n\r\n	float3 n = getNormal(texCoords, viewMatrix, normalSampler);\r\n	float2 r = getRandom(randomSampler, texCoords);\r\n\r\n	float ao = 0.0f;\r\n\r\n#if USE_STATIC_DIRECTIONS == 0\r\n	float incx = g_fSampleRad * fbTexelSize.x;\r\n	float incy = g_fSampleRad * fbTexelSize.y;\r\n	float dx0 = incx;\r\n	float dy0 = incy;\r\n	float ang = 0.0f;\r\n	float iterations = 9.0;\r\n\r\n	for( int j = 0; j < iterations; j++ )\r\n	{\r\n		float dzx = (dx0 + r.x * g_fJitter) / d;\r\n		float dzy = (dy0 + r.y * g_fJitter) / d;\r\n		float a = radians(ang);\r\n		float"
+			"szcode_body_partial_01"		" dx = cos(a)*dzx - sin(a)*dzy;\r\n		float dy = sin(a)*dzx + cos(a)*dzy;\r\n\r\n		ao += calAmbientOcclusion(texCoords, float2(dx, dy), p, n, viewMatrix, normalSampler);\r\n\r\n		dx0 += incx;\r\n		dy0 += incy;\r\n		ang += 360.0 / 7;\r\n	}\r\n#else\r\n	r *= flJitterAmt * fbTexelSize;\r\n\r\n	for( int i = 0; i < 9; i++ )\r\n	{\r\n		float2 offset = directions_9[ i ] * fbTexelSize * g_fSampleRad * d + r;\r\n\r\n		ao += calAmbientOcclusion(texCoords, offset, p, n, viewMatrix, normalSampler);\r\n	}\r\n#endif\r\n\r\n	ao_out = saturate(1.0 - ao * flIntensity);"
+			"iEnvFlags"		"0"
+		}
+	}
+}
