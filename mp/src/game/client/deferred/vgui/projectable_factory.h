@@ -14,18 +14,17 @@ namespace CProjectableFactory
 
 	class CProjectableManager : public CAutoGameSystemPerFrame
 	{
-		friend class CVGUIProjectable;
 	public:
 		CProjectableManager();
 
 		bool Init();
 		void Update( float frametime );
 
-	private:
-		void RegisterHelpers();
-
 		void AddThinkTarget( CVGUIProjectable *panel );
 		void RemoveThinkTarget( CVGUIProjectable *panel );
+
+	private:
+		void RegisterHelpers();
 		CUtlVector< CVGUIProjectable* > m_hInstantiatedPanels;
 	};
 	extern CProjectableManager *GetProjectableManager();

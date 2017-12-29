@@ -3,9 +3,9 @@
 #include "deferred/deferred_shared_common.h"
 
 #include "view_shared.h"
-#include "BSPTreeData.h"
-#include "CollisionUtils.h"
-#include "RayTrace.h"
+#include "bsptreedata.h"
+#include "collisionutils.h"
+#include "raytrace.h"
 
 class CLightLeafEnum : public ISpatialLeafEnumerator
 {
