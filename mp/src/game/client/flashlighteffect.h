@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -9,8 +9,6 @@
 #ifdef _WIN32
 #pragma once
 #endif
-
-struct dlight_t;
 
 
 class CFlashlightEffect
@@ -27,7 +25,7 @@ public:
 
 	ClientShadowHandle_t GetFlashlightHandle( void ) { return m_FlashlightHandle; }
 	void SetFlashlightHandle( ClientShadowHandle_t Handle ) { m_FlashlightHandle = Handle;	}
-	
+
 protected:
 
 	virtual void UpdateLightProjection( FlashlightState_t &state );
@@ -47,16 +45,16 @@ protected:
 	CTextureReference m_FlashlightTexture;
 };
 
-class CHeadlightEffect : public CFlashlightEffect
+#include "deferred/flashlighteffect_deferred.h"
+
+class CHeadlightEffect : public CFlashlightEffectDeferred
 {
 public:
-	
+
 	CHeadlightEffect();
 	~CHeadlightEffect();
 
 	virtual void UpdateLight(const Vector &vecPos, const Vector &vecDir, const Vector &vecRight, const Vector &vecUp, int nDistance);
 };
-
-
 
 #endif // FLASHLIGHTEFFECT_H

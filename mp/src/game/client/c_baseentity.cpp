@@ -3526,7 +3526,7 @@ void C_BaseEntity::ComputeFxBlend( void )
 //-----------------------------------------------------------------------------
 int C_BaseEntity::GetFxBlend( void )
 {
-	Assert( m_nFXComputeFrame == gpGlobals->framecount );
+	//Assert( m_nFXComputeFrame == gpGlobals->framecount );
 	return m_nRenderFXBlend;
 }
 

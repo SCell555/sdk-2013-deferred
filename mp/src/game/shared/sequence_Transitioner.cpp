@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 //=============================================================================//
 
@@ -14,9 +14,9 @@
 // CSequenceTransitioner implementation.
 // -----------------------------------------------------------------------------
 
-void CSequenceTransitioner::CheckForSequenceChange( 
+void CSequenceTransitioner::CheckForSequenceChange(
 	CStudioHdr *hdr,
-	int nCurSequence, 
+	int nCurSequence,
 	bool bForceNewSequence,
 	bool bInterpolate )
 {
@@ -25,7 +25,7 @@ void CSequenceTransitioner::CheckForSequenceChange(
 		return;
 
 	// FIXME?: this should detect that what's been asked to be drawn isn't what was expected
-	// due to not only sequence change, by frame index, rate, or whatever.  When that happens, 
+	// due to not only sequence change, by frame index, rate, or whatever.  When that happens,
 	// it should insert the previous rules.
 
 	if (m_animationQueue.Count() == 0)
@@ -35,7 +35,7 @@ void CSequenceTransitioner::CheckForSequenceChange(
 
 	CAnimationLayer *currentblend = &m_animationQueue[m_animationQueue.Count()-1];
 
-	if (currentblend->m_flLayerAnimtime && 
+	if (currentblend->m_flLayerAnimtime &&
 		(currentblend->m_nSequence != nCurSequence || bForceNewSequence ))
 	{
 		mstudioseqdesc_t &seqdesc = hdr->pSeqdesc( nCurSequence );
@@ -72,9 +72,9 @@ void CSequenceTransitioner::CheckForSequenceChange(
 }
 
 
-void CSequenceTransitioner::UpdateCurrent( 
+void CSequenceTransitioner::UpdateCurrent(
 	CStudioHdr *hdr,
-	int nCurSequence, 
+	int nCurSequence,
 	float flCurCycle,
 	float flCurPlaybackRate,
 	float flCurTime )

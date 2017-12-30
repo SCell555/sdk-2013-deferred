@@ -79,6 +79,7 @@ $Project
 	
 	$Folder	"Source Files"
 	{
+		$File	"$SRCDIR\game\shared\content_mounter.cpp"
 		$File	"$SRCDIR\game\shared\achievement_saverestore.cpp"
 		$File	"$SRCDIR\game\shared\achievement_saverestore.h"
 		$File	"$SRCDIR\game\shared\achievementmgr.cpp"

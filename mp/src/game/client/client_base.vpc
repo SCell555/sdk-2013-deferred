@@ -172,6 +172,7 @@ $Project
 		
 	$Folder	"Source Files"
 	{
+		$File	"$SRCDIR\game\shared\content_mounter.cpp"
 		$File	"hl2\C_Func_Monitor.cpp"
 		$File	"geiger.cpp"
 		$File	"history_resource.cpp"
