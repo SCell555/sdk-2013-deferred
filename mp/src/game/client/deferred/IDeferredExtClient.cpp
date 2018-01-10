@@ -1,6 +1,8 @@
 #include "cbase.h"
 #include "deferred/deferred_shared_common.h"
 
+#include "tier0/memdbgon.h"
+
 
 CSysModule *__g_pDeferredShaderModule = NULL;
 static IDeferredExtension *__g_defExt = NULL;

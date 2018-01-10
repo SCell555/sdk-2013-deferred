@@ -3,20 +3,30 @@
 #include "deferred/deferred_shared_common.h"
 #include "deferred/vgui/vgui_deferred.h"
 
+#include "clientmode.h"
 #include "ienginevgui.h"
 #include "collisionutils.h"
 #include <vgui/IVGui.h>
+#undef GetCursorPos
 #include <vgui/IInput.h>
 #include <vgui/ISurface.h>
 
-#include <vgui_controls/RadioButton.h>
+#include "vgui_controls/RadioButton.h"
+
+#define DEFCG_LIGHTEDITOR_ALTERNATESETUP 0
+
+#if DEFCG_LIGHTEDITOR_ALTERNATESETUP
+#include "vgui_controls/Menu.h"
+#include "vgui_controls/MenuBar.h"
+#endif
+
+#include "tier0/memdbgon.h"
 
 using namespace vgui;
 
 class CVGUILightEditor : public Panel
 {
 	DECLARE_CLASS_SIMPLE( CVGUILightEditor, Panel );
-	DECLARE_REFERENCED_CLASS( CVGUILightEditor );
 
 public:
 
@@ -60,7 +70,6 @@ private:
 	void StopDrag();
 	void GetDragBounds( int *pi2_min, int *pi2_max );
 
-	static CUtlReference< CVGUILightEditor > m_refInstance;
 	CVGUILightEditor( VPANEL pParent );
 
 	CLightingEditor *m_pEditorSystem;
@@ -99,56 +108,52 @@ private:
 	void UpdateCurrentMapName();
 };
 
-CUtlReference< CVGUILightEditor > CVGUILightEditor::m_refInstance;
+CVGUILightEditor* g_EditorInstance = NULL;
 
 void CVGUILightEditor::DestroyEditor()
 {
-	CVGUILightEditor *pPanel = CVGUILightEditor::m_refInstance;
-
-	if ( pPanel )
-		pPanel->DeletePanel();
+	if ( g_EditorInstance )
+		g_EditorInstance->MarkForDeletion();
+	g_EditorInstance = NULL;
 }
 
 void CVGUILightEditor::ToggleEditor()
 {
-	CVGUILightEditor *pPanel = CVGUILightEditor::m_refInstance;
-
-	if ( pPanel == NULL )
+	if ( g_EditorInstance == NULL )
 	{
 		VPANEL editorParent = enginevgui->GetPanel( PANEL_INGAMESCREENS );
 
-		pPanel = new CVGUILightEditor( editorParent );
-		pPanel->MakeReadyForUse();
-		pPanel->SetVisible( true );
+		g_EditorInstance = new CVGUILightEditor( editorParent );
+		g_EditorInstance->MakeReadyForUse();
+		g_EditorInstance->SetVisible( true );
 
-		CVGUILightEditor::m_refInstance.Set( pPanel );
 		GetLightingEditor()->SetEditorActive( true );
 	}
 	else
-		pPanel->SetVisible( !pPanel->IsVisible() );
+		g_EditorInstance->SetVisible( !g_EditorInstance->IsVisible() );
 
-	Assert( pPanel != NULL );
+	Assert( g_EditorInstance != NULL );
 
 	GetLightingEditor()->AbortEditorMovement( true );
 
-	GetLightingEditor()->SetEditorActive( pPanel->IsVisible(), true, false );
+	GetLightingEditor()->SetEditorActive( g_EditorInstance->IsVisible(), true, false );
 
-	pPanel->UpdateCurrentMapName();
+	g_EditorInstance->UpdateCurrentMapName();
 }
 
 bool CVGUILightEditor::IsEditorVisible()
 {
-	CVGUILightEditor *pPanel = CVGUILightEditor::m_refInstance;
+	CVGUILightEditor *pPanel = g_EditorInstance;
 
 	return pPanel && pPanel->IsVisible();
 }
 
 VPANEL CVGUILightEditor::GetEditorPanel()
 {
-	if ( m_refInstance.m_pObject == NULL )
+	if ( g_EditorInstance == NULL )
 		return (VPANEL)0;
 
-	return m_refInstance->GetVPanel();
+	return g_EditorInstance->GetVPanel();
 }
 
 CVGUILightEditor::CVGUILightEditor( VPANEL pParent )
@@ -174,7 +179,7 @@ CVGUILightEditor::CVGUILightEditor( VPANEL pParent )
 
 #if DEFCG_LIGHTEDITOR_ALTERNATESETUP
 	m_pMenuBar = new MenuBar( this, "MenuBar" );
-	
+
 	Menu* pMenu = new Menu( m_pMenuBar, "FileMenu" );
 	pMenu->AddMenuItem( "OpenVMF", "Open VMF", "loadvmf", this );
 	pMenu->AddMenuItem( "SaveVMF", "Save VMF", "savevmf", this );
@@ -192,6 +197,8 @@ CVGUILightEditor::CVGUILightEditor( VPANEL pParent )
 	m_pMainControls = new CVGUILightEditor_Controls( this );
 	m_pMainControls->Activate();
 	m_pMainControls->AddActionSignalTarget( this );
+	GetLightingEditor()->SetEditorInteractionMode( CLightingEditor::EDITORINTERACTION_SELECT );
+	GetLightingEditor()->SetEditorActive( true, false );
 #endif
 
 	m_pEditorProps = new CVGUILightEditor_Properties( this );
@@ -491,11 +498,11 @@ void CVGUILightEditor::GetDragBounds( int *pi2_min, int *pi2_max )
 	int iCurPos[2];
 	input()->GetCursorPos( iCurPos[0], iCurPos[1] );
 
-	pi2_min[ 0 ] = MIN( iCurPos[0], m_iDragStartPos[0] );
-	pi2_min[ 1 ] = MIN( iCurPos[1], m_iDragStartPos[1] );
+	pi2_min[ 0 ] = Min( iCurPos[0], m_iDragStartPos[0] );
+	pi2_min[ 1 ] = Min( iCurPos[1], m_iDragStartPos[1] );
 
-	pi2_max[ 0 ] = MAX( iCurPos[0], m_iDragStartPos[0] );
-	pi2_max[ 1 ] = MAX( iCurPos[1], m_iDragStartPos[1] );
+	pi2_max[ 0 ] = Max( iCurPos[0], m_iDragStartPos[0] );
+	pi2_max[ 1 ] = Max( iCurPos[1], m_iDragStartPos[1] );
 }
 
 void CVGUILightEditor::StartDrag( int mode )
@@ -981,9 +988,9 @@ static class CLightEditorHelper : public CAutoGameSystemPerFrame
 
 	void Update( float ft )
 	{
-		if ( !engine->IsInGame() )
+		if ( !engine->IsInGame() || engine->Con_IsVisible() )
 		{
-			if ( CVGUILightEditor::IsEditorVisible() )
+			if ( g_EditorInstance && CVGUILightEditor::IsEditorVisible() )
 				CVGUILightEditor::ToggleEditor();
 
 			return;

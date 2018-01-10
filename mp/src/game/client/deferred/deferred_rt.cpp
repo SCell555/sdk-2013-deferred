@@ -4,6 +4,8 @@
 
 #include "materialsystem/itexture.h"
 
+#include "tier0/memdbgon.h"
+
 static CTextureReference g_tex_Normals;
 static CTextureReference g_tex_Depth;
 #if ( DEFCFG_LIGHTCTRL_PACKING == 0 )
@@ -83,7 +85,7 @@ const ImageFormat fmt_gbuffer0 =
 	const ImageFormat fmt_volumAccum = IMAGE_FORMAT_RGB888;
 	const ImageFormat fmt_projVGUI = IMAGE_FORMAT_RGB888;
 
-	const bool bShadowUseColor = 
+	const bool bShadowUseColor =
 #ifdef SHADOWMAPPING_USE_COLOR
 		true;
 #else
@@ -104,15 +106,15 @@ const ImageFormat fmt_gbuffer0 =
 
 	AssertMsg( fmt_depth == IMAGE_FORMAT_NV_DST16 || fmt_depth == IMAGE_FORMAT_NV_DST24, "Unexpected depth format" );
 
-	unsigned int gbufferFlags =			TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
-	unsigned int lightAccumFlags =		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
-	unsigned int volumAccumFlags =		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
-	unsigned int depthFlags =			TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
-	unsigned int shadowColorFlags =		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
-	unsigned int projVGUIFlags =		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
-	unsigned int radAlbedoNormalFlags =	TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
-	unsigned int radBufferFlags =		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
-	unsigned int radNormalFlags =		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
+	const unsigned int gbufferFlags		=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
+	const unsigned int lightAccumFlags	=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
+	const unsigned int volumAccumFlags	=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
+	const unsigned int depthFlags		=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
+	const unsigned int shadowColorFlags =		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
+	const unsigned int projVGUIFlags	=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
+	const unsigned int radAlbedoNormalFlags =	TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
+	const unsigned int radBufferFlags	=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET;
+	const unsigned int radNormalFlags	=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
 
 	materials->BeginRenderTargetAllocation();
 
@@ -363,7 +365,7 @@ const ImageFormat fmt_gbuffer0 =
 		Assert( res == g_tex_ShadowColor_Proj_LOD2[i]->GetActualHeight() );
 		Assert( res == g_tex_ShadowDepth_Proj_LOD2[i]->GetActualWidth() );
 		Assert( res == g_tex_ShadowColor_Proj_LOD2[i]->GetActualWidth() );
-#endif	
+#endif
 	}
 
 	for ( int i = 0; i < MAX_SHADOW_DP; i++ )
@@ -404,7 +406,7 @@ const ImageFormat fmt_gbuffer0 =
 		Assert( res_x == g_tex_ShadowColor_DP[i]->GetActualWidth() );
 	}
 
-	
+
 
 	materials->EndRenderTargetAllocation();
 

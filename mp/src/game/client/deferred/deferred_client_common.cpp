@@ -2,6 +2,8 @@
 #include "cbase.h"
 #include "deferred/deferred_shared_common.h"
 
+#include "tier0/memdbgon.h"
+
 ConVar deferred_rt_shadowspot_res( "deferred_rt_shadowspot_res", "1024", FCVAR_HIDDEN | FCVAR_RELOAD_TEXTURES | FCVAR_RELOAD_MATERIALS );
 #if DEFCFG_ADAPTIVE_SHADOWMAP_LOD
 ConVar deferred_rt_shadowspot_lod1_res( "deferred_rt_shadowspot_lod1_res", "512", FCVAR_HIDDEN | FCVAR_RELOAD_TEXTURES | FCVAR_RELOAD_MATERIALS );
@@ -62,8 +64,8 @@ void CalcBoundaries( Vector *list, const int &num, Vector &min, Vector &max )
 	{
 		for ( int x = 0; x < 3; x++ )
 		{
-			min[ x ] = MIN( min[ x ], list[ i ][ x ] );
-			max[ x ] = MAX( max[ x ], list[ i ][ x ] );
+			min[ x ] = Min( min[ x ], list[ i ][ x ] );
+			max[ x ] = Max( max[ x ], list[ i ][ x ] );
 		}
 	}
 #endif

@@ -70,7 +70,7 @@ inline Vector stringColToVec( const char *str )
 
 inline void vecToStringCol( Vector col, char *out, int maxLen )
 {
-	float flMax = MAX( col.x, MAX( col.y, col.z ) );
+	float flMax = Max( col.x, Max( col.y, col.z ) );
 	if ( flMax > 0 )
 		col /= flMax;
 

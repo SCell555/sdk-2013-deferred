@@ -12,6 +12,8 @@
 
 #include "filesystem.h"
 
+#include "tier0/memdbgon.h"
+
 extern void ScreenToWorld( int mousex, int mousey, float fov,
 					const Vector& vecRenderOrigin,
 					const QAngle& vecRenderAngles,
@@ -216,8 +218,8 @@ void CLightingEditor::RenderSprites()
 		Vector origin = pLight->pos;
 
 		float flC3[3] = { 0 };
-		float flMax = MAX( 1, MAX( pLight->col_diffuse[0],
-			MAX( pLight->col_diffuse[1], pLight->col_diffuse[2] ) ) );
+		float flMax = Max( 1.f, Max( pLight->col_diffuse[0],
+			Max( pLight->col_diffuse[1], pLight->col_diffuse[2] ) ) );
 
 		for ( int i = 0; i < 3; i++ )
 			flC3[i] = clamp( pLight->col_diffuse[i] / flMax, 0, 1 );
@@ -768,7 +770,7 @@ void CLightingEditor::UpdateCurrentSelectedAxis( int x, int y )
 					float flStepLengthSqr = ringRay.m_Delta.LengthSqr();
 
 					if ( flDist < flBestDist &&
-						flDist < flMaxDist && 
+						flDist < flMaxDist &&
 						s * s < flStepLengthSqr &&
 						t > 0 && t < (flBestViewDist-7) )
 					{
@@ -989,7 +991,7 @@ void CLightingEditor::ApplyLightsToCurrentVmfFile()
 		if ( iTargetID < 0 )
 			continue;
 
-		nextId = MAX( nextId, iTargetID );
+		nextId = Max( nextId, iTargetID );
 
 		KeyValues *pSrcKey = NULL;
 
@@ -1412,7 +1414,7 @@ void CLightingEditor::RotateSelectedLights( VMatrix matRotate )
 		VMatrix matCurrent, matDst;
 		matCurrent.SetupMatrixOrgAngles( delta, vec3_angle );
 		MatrixMultiply( matRotate, matCurrent, matDst );
-		
+
 		Vector rotatedDelta = matDst.GetTranslation();
 
 		Vector move = rotatedDelta - delta;
@@ -1467,9 +1469,6 @@ void CLightingEditor::ApplyKVToGlobalLight( KeyValues *pKVChanges )
 			m_pKVGlobalLight->SetString( pszName, pszValue );
 		}
 	}
-
-	CDeferredViewRender *pDefView = assert_cast< CDeferredViewRender* >( view );
-	pDefView->ResetCascadeDelay();
 
 	m_EditorGlobalState.bEnabled = ( m_pKVGlobalLight->GetInt( GetLightParamName( LPARAM_SPAWNFLAGS ), 1 ) & DEFLIGHTGLOBAL_ENABLED ) != 0;
 	m_EditorGlobalState.bShadow = ( m_pKVGlobalLight->GetInt( GetLightParamName( LPARAM_SPAWNFLAGS ), 1 ) & DEFLIGHTGLOBAL_SHADOW_ENABLED ) != 0;

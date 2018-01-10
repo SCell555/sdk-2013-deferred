@@ -49,7 +49,7 @@ BEGIN_VS_SHADER( LIGHTING_GLOBAL, "" )
 		{
 			pShaderAPI->SetDefaultState();
 
-			lightData_Global_t data = GetDeferredExt()->GetLightData_Global();
+			const lightData_Global_t& data = GetDeferredExt()->GetLightData_Global();
 
 			AssertMsg( data.bEnabled, "I shouldn't be drawn at all." );
 

@@ -6,6 +6,8 @@
 #include "vgui/IPanel.h"
 #include "filesystem.h"
 
+#include "tier0/memdbgon.h"
+
 using namespace CProjectableFactory;
 
 struct ProjMapping

@@ -1,6 +1,6 @@
 //====== Copyright © Sandern Corporation, All rights reserved. ===========//
 //
-// Purpose: Implementation of IMaterialSystem interface which "passes tru" all 
+// Purpose: Implementation of IMaterialSystem interface which "passes tru" all
 //			function calls to the real interface. Can be used to override
 //			IMaterialSystem function calls (combined with engine->Mat_Stub).
 //
@@ -30,15 +30,18 @@ public:
 
 public:
 	virtual bool Connect( CreateInterfaceFn factory ) { return m_pBaseMaterialsPassThru->Connect( factory ); }
-	virtual void Disconnect() { return m_pBaseMaterialsPassThru->Disconnect( ); }
+	virtual void Disconnect() { return m_pBaseMaterialsPassThru->Disconnect(); }
 	virtual void *QueryInterface( const char *pInterfaceName ) { return m_pBaseMaterialsPassThru->QueryInterface( pInterfaceName ); }
-	virtual InitReturnVal_t Init() { return m_pBaseMaterialsPassThru->Init( ); }
-	virtual void Shutdown() { m_pBaseMaterialsPassThru->Shutdown( ); }
+	virtual InitReturnVal_t Init() { return m_pBaseMaterialsPassThru->Init(); }
+	virtual void Shutdown() { m_pBaseMaterialsPassThru->Shutdown(); }
 
-	virtual CreateInterfaceFn	Init( char const* pShaderAPIDLL, 
-		IMaterialProxyFactory *pMaterialProxyFactory,
-		CreateInterfaceFn fileSystemFactory,
-		CreateInterfaceFn cvarFactory=NULL ) { return m_pBaseMaterialsPassThru->Init( pShaderAPIDLL, pMaterialProxyFactory, fileSystemFactory, cvarFactory ); }
+	virtual CreateInterfaceFn	Init( char const* pShaderAPIDLL,
+									  IMaterialProxyFactory *pMaterialProxyFactory,
+									  CreateInterfaceFn fileSystemFactory,
+									  CreateInterfaceFn cvarFactory = NULL )
+	{
+		return m_pBaseMaterialsPassThru->Init( pShaderAPIDLL, pMaterialProxyFactory, fileSystemFactory, cvarFactory );
+	}
 
 	virtual void				SetShaderAPI( char const *pShaderAPIDLL ) { m_pBaseMaterialsPassThru->SetShaderAPI( pShaderAPIDLL ); }
 
@@ -79,12 +82,12 @@ public:
 
 	virtual bool				SupportsMSAAMode( int nMSAAMode ) { return m_pBaseMaterialsPassThru->SupportsMSAAMode( nMSAAMode ); }
 
-	virtual const MaterialSystemHardwareIdentifier_t &GetVideoCardIdentifier( void ) const { return m_pBaseMaterialsPassThru->GetVideoCardIdentifier( ); }
+	virtual const MaterialSystemHardwareIdentifier_t &GetVideoCardIdentifier( void ) const { return m_pBaseMaterialsPassThru->GetVideoCardIdentifier(); }
 
-	virtual void				SpewDriverInfo() const { m_pBaseMaterialsPassThru->SpewDriverInfo( ); }
+	virtual void				SpewDriverInfo() const { m_pBaseMaterialsPassThru->SpewDriverInfo(); }
 
-	virtual void				GetBackBufferDimensions( int &width, int &height) const { m_pBaseMaterialsPassThru->GetBackBufferDimensions( width, height ); }
-	virtual ImageFormat			GetBackBufferFormat() const { return m_pBaseMaterialsPassThru->GetBackBufferFormat( ); }
+	virtual void				GetBackBufferDimensions( int &width, int &height ) const { m_pBaseMaterialsPassThru->GetBackBufferDimensions( width, height ); }
+	virtual ImageFormat			GetBackBufferFormat() const { return m_pBaseMaterialsPassThru->GetBackBufferFormat(); }
 
 	virtual bool				SupportsHDRMode( HDRType_t nHDRModede ) { return m_pBaseMaterialsPassThru->SupportsHDRMode( nHDRModede ); }
 
@@ -94,27 +97,27 @@ public:
 	virtual void				SetView( void* hwnd ) { m_pBaseMaterialsPassThru->SetView( hwnd ); }
 
 	virtual void				BeginFrame( float frameTime ) { m_pBaseMaterialsPassThru->BeginFrame( frameTime ); }
-	virtual void				EndFrame( ) { m_pBaseMaterialsPassThru->EndFrame( ); }
+	virtual void				EndFrame() { m_pBaseMaterialsPassThru->EndFrame(); }
 	virtual void				Flush( bool flushHardware = false ) { m_pBaseMaterialsPassThru->Flush( flushHardware ); }
 
-	virtual void				SwapBuffers( ) { m_pBaseMaterialsPassThru->SwapBuffers( ); }
+	virtual void				SwapBuffers() { m_pBaseMaterialsPassThru->SwapBuffers(); }
 
-	virtual void				EvictManagedResources() { m_pBaseMaterialsPassThru->EvictManagedResources( ); }
+	virtual void				EvictManagedResources() { m_pBaseMaterialsPassThru->EvictManagedResources(); }
 
-	virtual void				ReleaseResources(void) { m_pBaseMaterialsPassThru->ReleaseResources( ); }
-	virtual void				ReacquireResources(void ) { m_pBaseMaterialsPassThru->ReacquireResources( ); }
+	virtual void				ReleaseResources( void ) { m_pBaseMaterialsPassThru->ReleaseResources(); }
+	virtual void				ReacquireResources( void ) { m_pBaseMaterialsPassThru->ReacquireResources(); }
 
 	virtual void				AddReleaseFunc( MaterialBufferReleaseFunc_t func ) { m_pBaseMaterialsPassThru->AddReleaseFunc( func ); }
 	virtual void				RemoveReleaseFunc( MaterialBufferReleaseFunc_t func ) { m_pBaseMaterialsPassThru->RemoveReleaseFunc( func ); }
 
 	virtual void				AddRestoreFunc( MaterialBufferRestoreFunc_t func ) { m_pBaseMaterialsPassThru->AddRestoreFunc( func ); }
 	virtual void				RemoveRestoreFunc( MaterialBufferRestoreFunc_t func ) { m_pBaseMaterialsPassThru->RemoveRestoreFunc( func ); }
-	
+
 	virtual void				ResetTempHWMemory( bool bExitingLevel = false ) { m_pBaseMaterialsPassThru->ResetTempHWMemory( bExitingLevel ); }
 
-	virtual void				HandleDeviceLost() { m_pBaseMaterialsPassThru->HandleDeviceLost( ); }
+	virtual void				HandleDeviceLost() { m_pBaseMaterialsPassThru->HandleDeviceLost(); }
 
-	virtual int					ShaderCount() const { return m_pBaseMaterialsPassThru->ShaderCount( ); }
+	virtual int					ShaderCount() const { return m_pBaseMaterialsPassThru->ShaderCount(); }
 	virtual int					GetShaders( int nFirstShader, int nMaxCount, IShader **ppShaderList ) const { return m_pBaseMaterialsPassThru->GetShaders( nFirstShader, nMaxCount, ppShaderList ); }
 
 	virtual int					ShaderFlagCount() const { return m_pBaseMaterialsPassThru->ShaderFlagCount(); }
@@ -122,111 +125,134 @@ public:
 
 	virtual void				GetShaderFallback( const char *pShaderName, char *pFallbackShader, int nFallbackLength ) { m_pBaseMaterialsPassThru->GetShaderFallback( pShaderName, pFallbackShader, nFallbackLength ); }
 
-	virtual IMaterialProxyFactory *GetMaterialProxyFactory() { return m_pBaseMaterialsPassThru->GetMaterialProxyFactory( ); }
+	virtual IMaterialProxyFactory *GetMaterialProxyFactory() { return m_pBaseMaterialsPassThru->GetMaterialProxyFactory(); }
 
 	virtual void				SetMaterialProxyFactory( IMaterialProxyFactory* pFactory ) { m_pBaseMaterialsPassThru->SetMaterialProxyFactory( pFactory ); }
 
-	virtual void				EnableEditorMaterials() { m_pBaseMaterialsPassThru->EnableEditorMaterials( ); }
+	virtual void				EnableEditorMaterials() { m_pBaseMaterialsPassThru->EnableEditorMaterials(); }
 
 	virtual void				SetInStubMode( bool bInStubMode ) { m_pBaseMaterialsPassThru->SetInStubMode( bInStubMode ); }
 
 	virtual void				DebugPrintUsedMaterials( const char *pSearchSubString, bool bVerbose ) { m_pBaseMaterialsPassThru->DebugPrintUsedMaterials( pSearchSubString, bVerbose ); }
-	virtual void				DebugPrintUsedTextures( void ) { m_pBaseMaterialsPassThru->DebugPrintUsedTextures( ); }
+	virtual void				DebugPrintUsedTextures( void ) { m_pBaseMaterialsPassThru->DebugPrintUsedTextures(); }
 
 	virtual void				ToggleSuppressMaterial( char const* pMaterialName ) { m_pBaseMaterialsPassThru->ToggleSuppressMaterial( pMaterialName ); }
-	virtual void				ToggleDebugMaterial( char const* pMaterialName )  { m_pBaseMaterialsPassThru->ToggleDebugMaterial( pMaterialName ); }
+	virtual void				ToggleDebugMaterial( char const* pMaterialName ) { m_pBaseMaterialsPassThru->ToggleDebugMaterial( pMaterialName ); }
 
-	virtual bool				UsingFastClipping( void ) { return m_pBaseMaterialsPassThru->UsingFastClipping( ); }
+	virtual bool				UsingFastClipping( void ) { return m_pBaseMaterialsPassThru->UsingFastClipping(); }
 
-	virtual int					StencilBufferBits( void ) { return m_pBaseMaterialsPassThru->StencilBufferBits( ); }
+	virtual int					StencilBufferBits( void ) { return m_pBaseMaterialsPassThru->StencilBufferBits(); }
 
-	virtual void				UncacheAllMaterials( ) { m_pBaseMaterialsPassThru->UncacheAllMaterials( ); }
+	virtual void				UncacheAllMaterials() { m_pBaseMaterialsPassThru->UncacheAllMaterials(); }
 
 	virtual void				UncacheUnusedMaterials( bool bRecomputeStateSnapshots = false ) { m_pBaseMaterialsPassThru->UncacheUnusedMaterials( bRecomputeStateSnapshots ); }
 
 
-	virtual void				CacheUsedMaterials( ) { m_pBaseMaterialsPassThru->CacheUsedMaterials( ); }
+	virtual void				CacheUsedMaterials() { m_pBaseMaterialsPassThru->CacheUsedMaterials(); }
 
-	virtual void				ReloadTextures( ) { m_pBaseMaterialsPassThru->ReloadTextures( ); }
+	virtual void				ReloadTextures() { m_pBaseMaterialsPassThru->ReloadTextures(); }
 
 	virtual void				ReloadMaterials( const char *pSubString = NULL ) { m_pBaseMaterialsPassThru->ReloadMaterials( pSubString ); }
 
 	virtual IMaterial *			CreateMaterial( const char *pMaterialName, KeyValues *pVMTKeyValues ) { return m_pBaseMaterialsPassThru->CreateMaterial( pMaterialName, pVMTKeyValues ); }
 
-	virtual IMaterial *			FindMaterial( char const* pMaterialName, const char *pTextureGroupName, bool complain = true, const char *pComplainPrefix = NULL ) 
-				{ return m_pBaseMaterialsPassThru->FindMaterial( pMaterialName, pTextureGroupName, complain, pComplainPrefix ); }
+	virtual IMaterial *			FindMaterial( char const* pMaterialName, const char *pTextureGroupName, bool complain = true, const char *pComplainPrefix = NULL )
+	{
+		return m_pBaseMaterialsPassThru->FindMaterial( pMaterialName, pTextureGroupName, complain, pComplainPrefix );
+	}
 
-	virtual MaterialHandle_t	FirstMaterial() const { return m_pBaseMaterialsPassThru->FirstMaterial( ); }
+	virtual MaterialHandle_t	FirstMaterial() const { return m_pBaseMaterialsPassThru->FirstMaterial(); }
 
 	virtual MaterialHandle_t	NextMaterial( MaterialHandle_t h ) const { return m_pBaseMaterialsPassThru->NextMaterial( h ); }
 
-	virtual MaterialHandle_t	InvalidMaterial() const { return m_pBaseMaterialsPassThru->InvalidMaterial( ); }
+	virtual MaterialHandle_t	InvalidMaterial() const { return m_pBaseMaterialsPassThru->InvalidMaterial(); }
 
 	virtual IMaterial*			GetMaterial( MaterialHandle_t h ) const { return m_pBaseMaterialsPassThru->GetMaterial( h ); }
 
-	virtual int					GetNumMaterials( ) const { return m_pBaseMaterialsPassThru->GetNumMaterials( ); }
+	virtual int					GetNumMaterials() const { return m_pBaseMaterialsPassThru->GetNumMaterials(); }
 
 	virtual ITexture *			FindTexture( char const* pTextureName, const char *pTextureGroupName, bool complain = true ) { return m_pBaseMaterialsPassThru->FindTexture( pTextureName, pTextureGroupName, complain ); }
 
 	virtual bool				IsTextureLoaded( char const* pTextureName ) const { return m_pBaseMaterialsPassThru->IsTextureLoaded( pTextureName ); }
 
-	virtual ITexture *			CreateProceduralTexture( const char	*pTextureName, 
-		const char *pTextureGroupName, 
-		int w, 
-		int h, 
-		ImageFormat fmt, 
-		int nFlags ) { return m_pBaseMaterialsPassThru->CreateProceduralTexture( pTextureName, pTextureGroupName, w, h, fmt, nFlags ); }
+	virtual ITexture *			CreateProceduralTexture( const char	*pTextureName,
+														 const char *pTextureGroupName,
+														 int w,
+														 int h,
+														 ImageFormat fmt,
+														 int nFlags )
+	{
+		return m_pBaseMaterialsPassThru->CreateProceduralTexture( pTextureName, pTextureGroupName, w, h, fmt, nFlags );
+	}
 
 	virtual void				BeginRenderTargetAllocation() { return m_pBaseMaterialsPassThru->BeginRenderTargetAllocation(); }
 	virtual void				EndRenderTargetAllocation() { return m_pBaseMaterialsPassThru->EndRenderTargetAllocation(); }
 
-	virtual ITexture *			CreateRenderTargetTexture( int w, 
-		int h, 
-		RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
-		ImageFormat	format, 
-		MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED ) { return m_pBaseMaterialsPassThru->CreateRenderTargetTexture(w, h, sizeMode, format, depth ); }
+	virtual ITexture *			CreateRenderTargetTexture( int w,
+														   int h,
+														   RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
+														   ImageFormat	format,
+														   MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED )
+	{
+		return m_pBaseMaterialsPassThru->CreateRenderTargetTexture( w, h, sizeMode, format, depth );
+	}
 
-	virtual ITexture *			CreateNamedRenderTargetTextureEx(  const char *pRTName,				// Pass in NULL here for an unnamed render target.
-		int w, 
-		int h, 
-		RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
-		ImageFormat format, 
-		MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED, 
-		unsigned int textureFlags = TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
-		unsigned int renderTargetFlags = 0 ) { return m_pBaseMaterialsPassThru->CreateNamedRenderTargetTextureEx(pRTName, w, h, sizeMode, format, depth, textureFlags, renderTargetFlags ); }
+	virtual ITexture *			CreateNamedRenderTargetTextureEx( const char *pRTName,				// Pass in NULL here for an unnamed render target.
+																  int w,
+																  int h,
+																  RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
+																  ImageFormat format,
+																  MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED,
+																  unsigned int textureFlags = TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
+																  unsigned int renderTargetFlags = 0 )
+	{
+		return m_pBaseMaterialsPassThru->CreateNamedRenderTargetTextureEx( pRTName, w, h, sizeMode, format, depth, textureFlags, renderTargetFlags );
+	}
 
-	virtual ITexture *			CreateNamedRenderTargetTexture( const char *pRTName, 
-		int w, 
-		int h, 
-		RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
-		ImageFormat format, 
-		MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED, 
-		bool bClampTexCoords = true, 
-		bool bAutoMipMap = false ) { return m_pBaseMaterialsPassThru->CreateNamedRenderTargetTexture(pRTName, w, h, sizeMode, format, depth, bClampTexCoords, bAutoMipMap ); }
+	virtual ITexture *			CreateNamedRenderTargetTexture( const char *pRTName,
+																int w,
+																int h,
+																RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
+																ImageFormat format,
+																MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED,
+																bool bClampTexCoords = true,
+																bool bAutoMipMap = false )
+	{
+		return m_pBaseMaterialsPassThru->CreateNamedRenderTargetTexture( pRTName, w, h, sizeMode, format, depth, bClampTexCoords, bAutoMipMap );
+	}
 
 	virtual ITexture *			CreateNamedRenderTargetTextureEx2( const char *pRTName,				// Pass in NULL here for an unnamed render target.
-		int w, 
-		int h, 
-		RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
-		ImageFormat format, 
-		MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED, 
-		unsigned int textureFlags = TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
-		unsigned int renderTargetFlags = 0 ) { return m_pBaseMaterialsPassThru->CreateNamedRenderTargetTextureEx2(pRTName, w, h, sizeMode, format, depth, textureFlags, renderTargetFlags ); }
+																   int w,
+																   int h,
+																   RenderTargetSizeMode_t sizeMode,	// Controls how size is generated (and regenerated on video mode change).
+																   ImageFormat format,
+																   MaterialRenderTargetDepth_t depth = MATERIAL_RT_DEPTH_SHARED,
+																   unsigned int textureFlags = TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT,
+																   unsigned int renderTargetFlags = 0 )
+	{
+		return m_pBaseMaterialsPassThru->CreateNamedRenderTargetTextureEx2( pRTName, w, h, sizeMode, format, depth, textureFlags, renderTargetFlags );
+	}
 
-	virtual void				BeginLightmapAllocation( ) { m_pBaseMaterialsPassThru->BeginLightmapAllocation(); }
-	virtual void				EndLightmapAllocation( ) { m_pBaseMaterialsPassThru->EndLightmapAllocation(); }
+	virtual void				BeginLightmapAllocation() { m_pBaseMaterialsPassThru->BeginLightmapAllocation(); }
+	virtual void				EndLightmapAllocation() { m_pBaseMaterialsPassThru->EndLightmapAllocation(); }
 
-	virtual int 				AllocateLightmap( int width, int height, 
-		int offsetIntoLightmapPage[2],
-		IMaterial *pMaterial ) { return m_pBaseMaterialsPassThru->AllocateLightmap( width, height, offsetIntoLightmapPage, pMaterial ); }
+	virtual int 				AllocateLightmap( int width, int height,
+												  int offsetIntoLightmapPage[2],
+												  IMaterial *pMaterial )
+	{
+		return m_pBaseMaterialsPassThru->AllocateLightmap( width, height, offsetIntoLightmapPage, pMaterial );
+	}
 	virtual int					AllocateWhiteLightmap( IMaterial *pMaterial ) { return m_pBaseMaterialsPassThru->AllocateWhiteLightmap( pMaterial ); }
 
 	virtual void				UpdateLightmap( int lightmapPageID, int lightmapSize[2],
-		int offsetIntoLightmapPage[2], 
-		float *pFloatImage, float *pFloatImageBump1,
-		float *pFloatImageBump2, float *pFloatImageBump3 ) { m_pBaseMaterialsPassThru->UpdateLightmap( lightmapPageID, lightmapSize, offsetIntoLightmapPage, pFloatImage, pFloatImageBump1, pFloatImageBump2, pFloatImageBump3 ); }
+												int offsetIntoLightmapPage[2],
+												float *pFloatImage, float *pFloatImageBump1,
+												float *pFloatImageBump2, float *pFloatImageBump3 )
+	{
+		m_pBaseMaterialsPassThru->UpdateLightmap( lightmapPageID, lightmapSize, offsetIntoLightmapPage, pFloatImage, pFloatImageBump1, pFloatImageBump2, pFloatImageBump3 );
+	}
 
-	virtual int					GetNumSortIDs( ) { return m_pBaseMaterialsPassThru->GetNumSortIDs( ); }
+	virtual int					GetNumSortIDs() { return m_pBaseMaterialsPassThru->GetNumSortIDs(); }
 	virtual void				GetSortInfo( MaterialSystem_SortInfo_t *sortInfoArray ) { m_pBaseMaterialsPassThru->GetSortInfo( sortInfoArray ); }
 
 	virtual void				GetLightmapPageSize( int lightmap, int *width, int *height ) const { m_pBaseMaterialsPassThru->GetLightmapPageSize( lightmap, width, height ); }
@@ -247,34 +273,38 @@ public:
 
 	virtual IMatRenderContext *CreateRenderContext( MaterialContextType_t type ) { return m_pBaseMaterialsPassThru->CreateRenderContext( type ); }
 
-	virtual IMatRenderContext *SetRenderContext( IMatRenderContext *c )  { return m_pBaseMaterialsPassThru->SetRenderContext( c ); }
+	virtual IMatRenderContext *SetRenderContext( IMatRenderContext *c ) { return m_pBaseMaterialsPassThru->SetRenderContext( c ); }
 
 	virtual bool				SupportsCSAAMode( int nNumSamples, int nQualityLevel ) { return m_pBaseMaterialsPassThru->SupportsCSAAMode( nNumSamples, nQualityLevel ); }
 
 	virtual void				RemoveModeChangeCallBack( ModeChangeCallbackFunc_t func ) { m_pBaseMaterialsPassThru->RemoveModeChangeCallBack( func ); }
 
-	virtual IMaterial *			FindProceduralMaterial( const char *pMaterialName, const char *pTextureGroupName, KeyValues *pVMTKeyValues ) 
-		{ return m_pBaseMaterialsPassThru->FindProceduralMaterial( pMaterialName, pTextureGroupName, pVMTKeyValues ); }
+	virtual IMaterial *			FindProceduralMaterial( const char *pMaterialName, const char *pTextureGroupName, KeyValues *pVMTKeyValues )
+	{
+		return m_pBaseMaterialsPassThru->FindProceduralMaterial( pMaterialName, pTextureGroupName, pVMTKeyValues );
+	}
 
 	virtual void				AddTextureAlias( const char *pAlias, const char *pRealName ) { m_pBaseMaterialsPassThru->AddTextureAlias( pAlias, pRealName ); }
 	virtual void				RemoveTextureAlias( const char *pAlias ) { m_pBaseMaterialsPassThru->RemoveTextureAlias( pAlias ); }
 
-	virtual int					AllocateDynamicLightmap( int lightmapSize[2], int *pOutOffsetIntoPage, int frameID ) 
-		{ return m_pBaseMaterialsPassThru->AllocateDynamicLightmap( lightmapSize, pOutOffsetIntoPage, frameID ); }
+	virtual int					AllocateDynamicLightmap( int lightmapSize[2], int *pOutOffsetIntoPage, int frameID )
+	{
+		return m_pBaseMaterialsPassThru->AllocateDynamicLightmap( lightmapSize, pOutOffsetIntoPage, frameID );
+	}
 
 	virtual void				SetExcludedTextures( const char *pScriptName ) { m_pBaseMaterialsPassThru->SetExcludedTextures( pScriptName ); }
-	virtual void				UpdateExcludedTextures( void ) { m_pBaseMaterialsPassThru->UpdateExcludedTextures( ); }
+	virtual void				UpdateExcludedTextures( void ) { m_pBaseMaterialsPassThru->UpdateExcludedTextures(); }
 
-	virtual bool				IsInFrame( ) const { return m_pBaseMaterialsPassThru->IsInFrame(); }
+	virtual bool				IsInFrame() const { return m_pBaseMaterialsPassThru->IsInFrame(); }
 
 	virtual void				CompactMemory() { m_pBaseMaterialsPassThru->CompactMemory(); }
 
 	virtual void				ReloadFilesInList( IFileList *pFilesToReload ) { m_pBaseMaterialsPassThru->ReloadFilesInList( pFilesToReload ); }
 
 	virtual	bool				AllowThreading( bool bAllow, int nServiceThread ) { return m_pBaseMaterialsPassThru->AllowThreading( bAllow, nServiceThread ); }
-	
+
 	virtual bool				IsRenderThreadSafe() { return m_pBaseMaterialsPassThru->IsRenderThreadSafe(); }
-	
+
 	virtual void				GetDXLevelDefaults( uint &max_dxlevel, uint &recomended ) { m_pBaseMaterialsPassThru->GetDXLevelDefaults( max_dxlevel, recomended ); }
 
 	virtual bool				IsMaterialLoaded( const char* name ) { return m_pBaseMaterialsPassThru->IsMaterialLoaded( name ); }
@@ -298,7 +328,7 @@ public:
 
 #ifdef DX_TO_GL_ABSTRACTION
 	virtual void				DoStartupShaderPreloading() { m_pBaseMaterialsPassThru->DoStartupShaderPreloading(); }
-#endif	
+#endif
 
 	virtual void				SetRenderTargetFrameBufferSizeOverrides( int nWidth, int nHeight ) { m_pBaseMaterialsPassThru->SetRenderTargetFrameBufferSizeOverrides( nWidth, nHeight ); }
 
@@ -329,13 +359,13 @@ public:
 	}
 
 protected:
-	IMaterialSystem *m_pBaseMaterialsPassThru;
+	IMaterialSystem * m_pBaseMaterialsPassThru;
 };
 
 class CDeferredMaterialSystem : public CPassThruMaterialSystem
 {
 public:
-	IMaterial* FindMaterialEx( char const* pMaterialName, const char *pTextureGroupName, int nContext, bool complain = true, const char *pComplainPrefix = NULL ) OVERRIDE
+	IMaterial * FindMaterialEx( char const* pMaterialName, const char *pTextureGroupName, int nContext, bool complain = true, const char *pComplainPrefix = NULL ) OVERRIDE
 	{
 		return ReplaceMaterialInternal( BaseClass::FindMaterialEx( pMaterialName, pTextureGroupName, nContext, complain, pComplainPrefix ) );
 	}
@@ -345,12 +375,11 @@ public:
 		return ReplaceMaterialInternal( BaseClass::FindMaterial( pMaterialName, pTextureGroupName, complain, pComplainPrefix ) );
 	}
 
-	IMaterial* FindProceduralMaterial( const char* pMaterialName, const char* pTextureGroupName, KeyValues* pVMTKeyValues )
-	OVERRIDE;
+	IMaterial* FindProceduralMaterial( const char* pMaterialName, const char* pTextureGroupName, KeyValues* pVMTKeyValues ) OVERRIDE;
 
 	IMaterial* CreateMaterial( const char* pMaterialName, KeyValues* pVMTKeyValues ) OVERRIDE;
 private:
-	IMaterial* ReplaceMaterialInternal( IMaterial* pMat ) const;
+	IMaterial * ReplaceMaterialInternal( IMaterial* pMat ) const;
 };
 
 #endif // WARS_MATERIALSYSTEM_PASSTHRU_H

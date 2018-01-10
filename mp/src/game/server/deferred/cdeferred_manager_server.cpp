@@ -127,6 +127,8 @@ static ConVar deferred_autoenvlight_diffuse_intensity("deferred_autoenvlight_dif
 
 void CDeferredManagerServer::LevelInitPreEntity()
 {
+	if ( gpGlobals->eLoadType == MapLoad_LoadGame )
+		return;
 	const char* const entStr = engine->GetMapEntitiesString();
 
 	if ( V_stristr( entStr, "light_deferred_global" ) )

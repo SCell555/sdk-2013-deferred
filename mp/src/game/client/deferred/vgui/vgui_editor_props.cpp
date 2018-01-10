@@ -13,6 +13,8 @@
 #include "vgui_controls/TextEntry.h"
 #include "matsys_controls/colorpickerpanel.h"
 
+#include "tier0/memdbgon.h"
+
 using namespace vgui;
 
 class VisibilityClient
@@ -362,9 +364,9 @@ public:
 				float flData = atof( text );
 
 				if ( bHasMin )
-					flData = MAX( flMin, flData );
+					flData = Max( flMin, flData );
 				if ( bHasMax )
-					flData = MIN( flMax, flData );
+					flData = Min( flMax, flData );
 
 				GetValue()->SetFloat( NULL, flData );
 			}
@@ -374,9 +376,9 @@ public:
 				int iData = atoi( text );
 
 				if ( bHasMin )
-					iData = MAX( iMin, iData );
+					iData = Max( iMin, iData );
 				if ( bHasMax )
-					iData = MIN( iMax, iData );
+					iData = Min( iMax, iData );
 
 				GetValue()->SetInt( NULL, iData );
 			}

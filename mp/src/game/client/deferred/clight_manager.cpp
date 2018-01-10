@@ -9,6 +9,8 @@
 #include "tier0/fasttimer.h"
 #include "tier1/callqueue.h"
 
+#include "tier0/memdbgon.h"
+
 static CLightingManager __g_lightingMan;
 CLightingManager *GetLightingManager()
 {
@@ -110,6 +112,12 @@ void CLightingManager::LightSetup( const CViewSetup &setup )
 	CullLights();
 
 #if DEFCFG_USE_SSE
+	if ( m_bSortDataNeedsRealloc )
+	{
+		AllocateSortDataBuffer();
+		m_bSortDataNeedsRealloc = false;
+	}
+
 	BuildLightSortDataBuffer();
 #endif
 
@@ -158,7 +166,7 @@ void CLightingManager::AddLight( def_light_t *l )
 	m_hDeferredLights.AddToTail( l );
 
 #if DEFCFG_USE_SSE
-	AllocateSortDataBuffer();
+	m_bSortDataNeedsRealloc = true;
 #endif
 }
 
@@ -166,11 +174,12 @@ bool CLightingManager::RemoveLight( def_light_t *l )
 {
 #if DEBUG
 	AssertMsg( m_bVolatileLists == false, "You MUST NOT remove lights while rendering." );
-#endif 
+#endif
 
 #if DEFCFG_USE_SSE
 	bool bSuccess = m_hDeferredLights.FindAndRemove( l );
-	AllocateSortDataBuffer();
+	if( bSuccess )
+		m_bSortDataNeedsRealloc = true;
 	return bSuccess;
 #else
 	return m_hDeferredLights.FindAndRemove( l );
@@ -227,7 +236,7 @@ void CLightingManager::AllocateSortDataBuffer()
 		return;
 
 	const int iSortBufferDataSize = m_hDeferredLights.Count() % 4 == 0
-			? m_hDeferredLights.Count() / 4 
+			? m_hDeferredLights.Count() / 4
 			: ((m_hDeferredLights.Count() - (m_hDeferredLights.Count() % 4)) / 4) + 1;
 
 	m_pSortDataX4 = reinterpret_cast<def_light_presortdatax4_t*>(
@@ -236,17 +245,17 @@ void CLightingManager::AllocateSortDataBuffer()
 }
 
 void CLightingManager::BuildLightSortDataBuffer()
-{	
+{
 	const int iPartiallyFullSortDataElementCount = m_hRenderLights.Count() % 4;
 	m_uiSortDataCount = ( m_hRenderLights.Count() - iPartiallyFullSortDataElementCount ) / 4;
-	
+
 	for( uint i = 0, baseLightIdx = 0; i < m_uiSortDataCount; i++, baseLightIdx += 4 )
 	{
 		def_light_presortdatax4_t& sortData = m_pSortDataX4[i];
 
 		sortData.count = 4;
 
-		def_light_t* lights[4] = 
+		def_light_t* lights[4] =
 		{
 			m_hRenderLights[baseLightIdx],
 			m_hRenderLights[baseLightIdx+1],
@@ -259,7 +268,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 		sortData.lights[2] = lights[2];
 		sortData.lights[3] = lights[3];
 
-		float boundsMinX[4] = 
+		float boundsMinX[4] =
 			{
 				lights[0]->bounds_min_naive.x,
 				lights[1]->bounds_min_naive.x,
@@ -268,7 +277,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 			};
 		sortData.bounds_min_naive[0] = LoadUnalignedSIMD( boundsMinX );
 
-		float boundsMinY[4] = 
+		float boundsMinY[4] =
 			{
 				lights[0]->bounds_min_naive.y,
 				lights[1]->bounds_min_naive.y,
@@ -277,7 +286,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 			};
 		sortData.bounds_min_naive[1] = LoadUnalignedSIMD( boundsMinY );
 
-		float boundsMinZ[4] = 
+		float boundsMinZ[4] =
 			{
 				lights[0]->bounds_min_naive.z,
 				lights[1]->bounds_min_naive.z,
@@ -286,7 +295,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 			};
 		sortData.bounds_min_naive[2] = LoadUnalignedSIMD( boundsMinZ );
 
-		float boundsMaxX[4] = 
+		float boundsMaxX[4] =
 			{
 				lights[0]->bounds_max_naive.x,
 				lights[1]->bounds_max_naive.x,
@@ -295,7 +304,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 			};
 		sortData.bounds_max_naive[0] = LoadUnalignedSIMD( boundsMaxX );
 
-		float boundsMaxY[4] = 
+		float boundsMaxY[4] =
 			{
 				lights[0]->bounds_max_naive.y,
 				lights[1]->bounds_max_naive.y,
@@ -304,7 +313,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 			};
 		sortData.bounds_max_naive[1] = LoadUnalignedSIMD( boundsMaxY );
 
-		float boundsMaxZ[4] = 
+		float boundsMaxZ[4] =
 			{
 				lights[0]->bounds_max_naive.z,
 				lights[1]->bounds_max_naive.z,
@@ -313,17 +322,17 @@ void CLightingManager::BuildLightSortDataBuffer()
 			};
 		sortData.bounds_max_naive[2] = LoadUnalignedSIMD( boundsMaxZ );
 
-		int hasShadowX4[4] = 
-			{ 
+		int hasShadowX4[4] =
+			{
 				lights[0]->HasShadow() ? 1 : 0,
 				lights[1]->HasShadow() ? 1 : 0,
 				lights[2]->HasShadow() ? 1 : 0,
 				lights[3]->HasShadow() ? 1 : 0
 			};
 		sortData.hasShadow = LoadUnalignedIntSIMD( hasShadowX4 );
-			
-		int hasVolumetricsX4[4] = 
-			{ 
+
+		int hasVolumetricsX4[4] =
+			{
 				lights[0]->HasVolumetrics() ? 1 : 0,
 				lights[1]->HasVolumetrics() ? 1 : 0,
 				lights[2]->HasVolumetrics() ? 1 : 0,
@@ -344,7 +353,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 		float boundsMaxX[4] = {0};
 		float boundsMaxY[4] = {0};
 		float boundsMaxZ[4] = {0};
-		int hasShadowX4[4] = {0};		
+		int hasShadowX4[4] = {0};
 		int hasVolumetricsX4[4] = {0};
 
 		int iBaseLightIndex = m_uiSortDataCount * 4;
@@ -465,11 +474,11 @@ void CLightingManager::CullLights()
 	FOR_EACH_VEC_FAST_END
 }
 
-inline fltx4 IsPointInBoundsX4( const Vector point, fltx4 boundsMin[3], fltx4 boundsMax[3] )
+inline fltx4 IsPointInBoundsX4( const Vector& point, fltx4 boundsMin[3], fltx4 boundsMax[3] )
 {
-	fltx4 pointX = ReplicateX4( point.x );
-	fltx4 pointY = ReplicateX4( point.y );
-	fltx4 pointZ = ReplicateX4( point.z );
+	const fltx4& pointX = ReplicateX4( point.x );
+	const fltx4& pointY = ReplicateX4( point.y );
+	const fltx4& pointZ = ReplicateX4( point.z );
 
 	return	AndSIMD
 			(
@@ -503,15 +512,15 @@ void CLightingManager::SortLights()
 
 	m_bDrawVolumetrics = false;
 
-	float zNear = m_flzNear + 2;
+	const float zNear = m_flzNear + 2;
 
-	Vector vecBloat( zNear, zNear, zNear );
+	const Vector vecBloat( zNear, zNear, zNear );
 
-	Vector camMins( m_vecViewOrigin - vecBloat );
-	Vector camMaxs( m_vecViewOrigin + vecBloat );
+	const Vector camMins( m_vecViewOrigin - vecBloat );
+	const Vector camMaxs( m_vecViewOrigin + vecBloat );
 
 #if DEFCFG_USE_SSE
-	fltx4 zNearX4 = ReplicateX4( zNear );
+	const fltx4& zNearX4 = ReplicateX4( zNear );
 
 	for( uint i = 0; i < m_uiSortDataCount; i++ )
 	{
@@ -562,7 +571,7 @@ void CLightingManager::SortLights()
 			}
 		}
 
-		fltx4 volume = AndSIMD( s.hasVolumetrics, s.hasVolumetrics );
+		const fltx4& volume = AndSIMD( s.hasVolumetrics, s.hasVolumetrics );
 
 		m_bDrawVolumetrics = m_bDrawVolumetrics || !IsAllZeros( volume );
 	}
@@ -600,7 +609,7 @@ void CLightingManager::SortLights()
 			const bool bSpot = l->IsSpot();
 			const float flSizeFactor = bSpot ? 1.5f : 2.25f;
 
-			Vector viewVec = l->boundsCenter - m_vecViewOrigin;
+			const Vector& viewVec = l->boundsCenter - m_vecViewOrigin;
 			const float flDot = DotProduct( m_vecForward, viewVec.Normalized() );
 
 			const float flCoverageFactor = flSizeFactor * l->flRadius / l->flDistance_ViewOrigin * flDot;
@@ -635,13 +644,13 @@ FORCEINLINE float CLightingManager::DoLightStyle( def_light_t *l )
 
 	if ( gpGlobals->curtime > l->flLastRandomTime )
 	{
-		l->flLastRandomTime = gpGlobals->curtime + 1.0f - MIN( 1, l->flStyle_Speed );
+		l->flLastRandomTime = gpGlobals->curtime + 1.0f - Min( 1.f, l->flStyle_Speed );
 
 		random->SetSeed( l->iStyleSeed );
-		l->flLastRandomValue = 1.0f - random->RandomFloat( 0, MIN( 1, l->flStyle_Amount ) );
+		l->flLastRandomValue = 1.0f - random->RandomFloat( 0, Min( 1.f, l->flStyle_Amount ) );
 	}
 
-	float ran = l->flLastRandomValue;
+	const float ran = l->flLastRandomValue;
 
 	float sine = FastCos( gpGlobals->curtime * l->flStyle_Speed + l->iStyleSeed ) * 0.5f + 0.5f;
 	sine = Bias( sine, l->flStyle_Smooth );
@@ -700,14 +709,14 @@ FORCEINLINE int CLightingManager::WriteLight( def_light_t *l, float *pfl4 )
 
 	int numConsts = 0;
 
-	float flLightstyle = DoLightStyle( l );
-	float flDistance = l->flDistance_ViewOrigin;
-	float flMasterFade = flLightstyle * ( 1.0f - SATURATE( ( flDistance - l->iVisible_Dist ) / l->iVisible_Range ) );
+	const float flLightstyle = DoLightStyle( l );
+	const float flDistance = l->flDistance_ViewOrigin;
+	const float flMasterFade = flLightstyle * ( 1.0f - SATURATE( ( flDistance - l->iVisible_Dist ) / l->iVisible_Range ) );
 
 	const int iFloatSize = sizeof( float );
 
-	Vector colDiffuse = l->col_diffuse * flMasterFade;
-	Vector colAmbient = l->col_ambient * flMasterFade;
+	const Vector& colDiffuse = l->col_diffuse * flMasterFade;
+	const Vector& colAmbient = l->col_ambient * flMasterFade;
 
 	switch ( l->iLighttype )
 	{
@@ -1001,10 +1010,10 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 			while ( lightsShadowedCookied.Count() > 0 || lightsShadowed.Count() > 0 ||
 				lightsCookied.Count() > 0 || lightsSimple.Count() > 0 )
 			{
-				int drawShadowedCookied = MIN( MAX_LIGHTS_SHADOWEDCOOKIE, lightsShadowedCookied.Count() );
-				int drawShadowed = MIN( MAX_LIGHTS_SHADOWED, lightsShadowed.Count() );
-				int drawCookied = MIN( MAX_LIGHTS_COOKIE, lightsCookied.Count() );
-				int drawSimple = MIN( MAX_LIGHTS_SIMPLE, lightsSimple.Count() );
+				int drawShadowedCookied = Min( MAX_LIGHTS_SHADOWEDCOOKIE, lightsShadowedCookied.Count() );
+				int drawShadowed = Min( MAX_LIGHTS_SHADOWED, lightsShadowed.Count() );
+				int drawCookied = Min( MAX_LIGHTS_COOKIE, lightsCookied.Count() );
+				int drawSimple = Min( MAX_LIGHTS_SIMPLE, lightsSimple.Count() );
 
 				int numRows = ( drawShadowedCookied * lightTypes[i].constCount_advanced +
 					drawShadowed * lightTypes[i].constCount_advanced +
@@ -1042,7 +1051,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 					iPassesDrawnFullscreen[i]++;
 
 					//JACK: Here we can use the MAX_LIGHTS_X macros to mean the max light textures to use
-					//		and render multiple lower LOD lights to the same texture, will need to commit the 
+					//		and render multiple lower LOD lights to the same texture, will need to commit the
 					//		number of lights to draw, light sample lod, and texture id,
 
 					for ( int iShadowed = 0; iShadowed < (drawShadowedCookied+drawShadowed); iShadowed++ )
@@ -1098,7 +1107,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 						const float flCameraLightDelta = (view.origin).DistTo(entry.pLight->pos);
 						int iVolumeLOD = 4;
 						if( flCameraLightDelta < entry.pLight->flVolumeLOD0Dist )
-						{ 
+						{
 							iVolumeLOD = 0;
 						}
 						else if( flCameraLightDelta < entry.pLight->flVolumeLOD1Dist )
@@ -1195,13 +1204,13 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 			pRenderContext->PopMatrix();
 
 			//ShaderStencilState_t stencilLightVolume;
-			//set to reference 1 where draw succeeds 
+			//set to reference 1 where draw succeeds
 			//pRenderContext->Bind( lightTypes[i].pMatPassWorldStencilStage );
 			//pMatPassWorldStencilStage only draws the backface where depth test fails
 			//pRenderContext->SetStencilState( stencilLightVolume );
 			//l->pMesh_World->Draw();
 			//set to only draw where stencil is reference 1, set depth test to nearer
-			//pRenderContext->SetStencilState( stencilLightVolume );			
+			//pRenderContext->SetStencilState( stencilLightVolume );
 		}
 		FOR_EACH_VEC_FAST_END
 
@@ -1261,7 +1270,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 			pRenderContext->Bind( lightTypes[i].pMatPassWorld );
 
 			//ShaderStencilState_t stencilLightVolume;
-			//set to reference 1 where draw succeeds 
+			//set to reference 1 where draw succeeds
 			//pRenderContext->Bind( lightTypes[i].pMatPassWorldStencilStage );
 			//pMatPassWorldStencilStage only draws the backface where depth test fails
 			//pRenderContext->SetStencilState( stencilLightVolume );
@@ -1280,7 +1289,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 				const float flCameraLightDelta = (view.origin).DistTo(l->pos);
 				int iVolumeLOD = 4;
 				if( flCameraLightDelta < l->flVolumeLOD0Dist )
-				{ 
+				{
 					iVolumeLOD = 0;
 				}
 				else if( flCameraLightDelta < l->flVolumeLOD1Dist )
@@ -1386,7 +1395,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 			pRenderContext->Bind( lightTypes[i].pMatPassWorld );
 
 			//ShaderStencilState_t stencilLightVolume;
-			//set to reference 1 where draw succeeds 
+			//set to reference 1 where draw succeeds
 			//pRenderContext->Bind( lightTypes[i].pMatPassWorldStencilStage );
 			//pMatPassWorldStencilStage only draws the backface where depth test fails
 			//pRenderContext->SetStencilState( stencilLightVolume );
@@ -1405,7 +1414,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 				const float flCameraLightDelta = (view.origin).DistTo(l->pos);
 				int iVolumeLOD = 4;
 				if( flCameraLightDelta < l->flVolumeLOD0Dist )
-				{ 
+				{
 					iVolumeLOD = 0;
 				}
 				else if( flCameraLightDelta < l->flVolumeLOD1Dist )

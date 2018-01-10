@@ -7,6 +7,8 @@
 #include "collisionutils.h"
 #include "raytrace.h"
 
+#include "tier0/memdbgon.h"
+
 class CLightLeafEnum : public ISpatialLeafEnumerator
 {
 public:
@@ -495,23 +497,12 @@ void def_light_t::UpdateXForms()
 			Vector points[5];
 			const int numPoints = ARRAYSIZE( points );
 #if DEFCFG_USE_SSE
-			static bool bSIMDDataInitialised = false;
-			static fltx4 _normPos[4];
-			
-			if( !bSIMDDataInitialised )
-			{
-				_normPos[0] = LoadOneSIMD();
-
-				const float pNormPos1[4] = { -1, 1, 1, 1 },
-					pNormPos2[4] = { -1, -1, 1, 1 },
-					pNormPos3[4] = { 1, -1, 1, 1 };
-
-				_normPos[1] = _mm_loadu_ps( pNormPos1 );
-				_normPos[2] = _mm_loadu_ps( pNormPos2 );
-				_normPos[3] = _mm_loadu_ps( pNormPos3 );
-
-				bSIMDDataInitialised = true;
-			}
+			static const fltx4 ALIGN32 _normPos[4] ALIGN32_POST = {
+				{  1.f,  1.f, 1.f, 1.f },
+				{ -1.f,  1.f, 1.f, 1.f },
+				{ -1.f, -1.f, 1.f, 1.f },
+				{  1.f, -1.f, 1.f, 1.f }
+			};
 
 			fltx4 _spotMVPInvSSE[4];
 
@@ -521,11 +512,11 @@ void def_light_t::UpdateXForms()
 			_spotMVPInvSSE[3] =	_mm_loadu_ps( spotMVPInv[3] );
 
 			TransposeSIMD
-				( 
+				(
 					_spotMVPInvSSE[0],
 					_spotMVPInvSSE[1],
 					_spotMVPInvSSE[2],
-					_spotMVPInvSSE[3] 
+					_spotMVPInvSSE[3]
 				);
 
 			for( int i = 0; i < 4; i++ )
@@ -564,7 +555,7 @@ void def_light_t::UpdateXForms()
 
 			for ( int i = 0; i < 5; i++ )
 			{
-				RayTracingEnvironment environment;
+				//RayTracingEnvironment environment;
 				UTIL_TraceLine( pos, list[i], MASK_SOLID, NULL, COLLISION_GROUP_DEBRIS, &tr );
 				list[ i ] = tr.endpos;
 			}
@@ -580,8 +571,8 @@ void def_light_t::UpdateXForms()
 
 	if ( ( bounds_max - bounds_min ).LengthSqr() < 1 )
 	{
-		bounds_max = pos + Vector( __ND1, __ND1, __ND1 );
-		bounds_min = pos - Vector( __ND1, __ND1, __ND1 );
+		bounds_max = pos + __ND1;
+		bounds_min = pos - __ND1;
 	}
 
 	QAngle worldAng = ang;
@@ -609,7 +600,7 @@ void def_light_t::UpdateXForms()
 
 	AssertMsgOnce( leaves.m_LeafList.Count() <= DEFLIGHT_MAX_LEAVES, "You sure have got a huge light there, or crappy leaves." );
 
-	iNumLeaves = MIN( DEFLIGHT_MAX_LEAVES, leaves.m_LeafList.Count() );
+	iNumLeaves = Min( DEFLIGHT_MAX_LEAVES, leaves.m_LeafList.Count() );
 	Q_memcpy( iLeaveIDs, leaves.m_LeafList.Base(), sizeof(int) * iNumLeaves );
 }
 
@@ -722,7 +713,7 @@ void def_light_t::UpdateVolumetrics()
 		}
 	}
 #endif
-	
+
 	if ( pMesh_Volumetrics != NULL )
 		pRenderContext->DestroyStaticMesh( pMesh_Volumetrics );
 	pMesh_Volumetrics = NULL;

@@ -1,6 +1,6 @@
 //====== Copyright © Sandern Corporation, All rights reserved. ===========//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================//
@@ -51,9 +51,9 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 		IMaterialVar *pVar = pParams[ i ];
 		const char *pVarName = pVar->GetName();
 
-		if (!V_stricmp("$flags", pVarName) || 
-			!V_stricmp("$flags_defined", pVarName) || 
-			!V_stricmp("$flags2", pVarName) || 
+		if (!V_stricmp("$flags", pVarName) ||
+			!V_stricmp("$flags_defined", pVarName) ||
+			!V_stricmp("$flags2", pVarName) ||
 			!V_stricmp("$flags_defined2", pVarName) )
 			continue;
 
@@ -126,6 +126,7 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 
 	const bool alphaBlending = pMat->IsTranslucent() || pMat->GetMaterialVarFlag( MATERIAL_VAR_TRANSLUCENT );
 	const bool translucentOverride = pMat->IsAlphaTested() || pMat->GetMaterialVarFlag( MATERIAL_VAR_ALPHATEST ) || alphaBlending;
+	const bool bSelfillum = pMat->GetMaterialVarFlag( MATERIAL_VAR_SELFILLUM );
 
 	const bool bDecal = ( pszOldShadername != NULL && Q_stristr( pszOldShadername, "decal" ) != NULL ) ||
 		( pszMatname != NULL && Q_stristr( pszMatname, "decal" ) != NULL ) ||
@@ -147,8 +148,13 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 	{
 		msg->SetInt( "$nocull", 1 );
 	}
-	
-	pMat->SetShaderAndParams(msg);
+
+	if ( bSelfillum )
+	{
+		msg->SetInt( "$selfillum", 1 );
+	}
+
+	pMat->SetShaderAndParams( msg );
 
 	pMat->RefreshPreservingMaterialVars();
 }

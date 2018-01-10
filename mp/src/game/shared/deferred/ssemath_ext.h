@@ -3,7 +3,7 @@
 
 #include "mathlib/ssemath.h"
 
-FORCEINLINE float Dot4SIMD2( const fltx4 &a, const fltx4 &b )
+FORCEINLINE float Dot4SIMD2( FLTX4 a, FLTX4 b )
 {
 	fltx4 x = MulSIMD( a, b );
 	fltx4 y = _mm_movehl_ps( x, x );
@@ -11,11 +11,7 @@ FORCEINLINE float Dot4SIMD2( const fltx4 &a, const fltx4 &b )
 	x = _mm_shuffle_ps( x, x, _MM_SHUFFLE( 0, 0, 0, 1 ) );
 	x = _mm_add_ss( y, x );
 
-#ifdef GNUC
-	return ((float*)&x)[0];
-#else
-	return x.m128_f32[0];
-#endif
+	return SubFloat( x, 0 );
 }
 
 FORCEINLINE void NormalizeInPlaceSIMD( fltx4 &v )
@@ -47,12 +43,12 @@ FORCEINLINE void NormaliseFourInPlace( fltx4& v0, fltx4& v1, fltx4& v2, fltx4& v
 }
 
 // assumes that m is transposed before hand
-FORCEINLINE fltx4 FourDotProducts( fltx4* m, fltx4 v )
+FORCEINLINE fltx4 FourDotProducts( fltx4* m, FLTX4 v )
 {
-	fltx4 dot=MulSIMD( m[0], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 0, 0, 0, 0 ) ) );
-	dot=MaddSIMD( m[1], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 1, 1, 1, 1 ) ), dot);
-	dot=MaddSIMD( m[2], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 2, 2, 2, 2 ) ), dot);
-	dot=MaddSIMD( m[3], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 3, 3, 3, 3 ) ), dot);
+	fltx4 dot = MulSIMD( m[0], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 0, 0, 0, 0 ) ) );
+	dot = MaddSIMD( m[1], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 1, 1, 1, 1 ) ), dot );
+	dot = MaddSIMD( m[2], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 2, 2, 2, 2 ) ), dot );
+	dot = MaddSIMD( m[3], _mm_shuffle_ps( v, v, MM_SHUFFLE_REV( 3, 3, 3, 3 ) ), dot );
 
 	return dot;
 }
@@ -60,14 +56,14 @@ FORCEINLINE fltx4 FourDotProducts( fltx4* m, fltx4 v )
 // assumes that all are transposed before hand
 FORCEINLINE void FourCrossProducts
 (
-	const fltx4& a0,
-	const fltx4& a1,
-	const fltx4& a2,
-	const fltx4& a3,
-	const fltx4& b0,
-	const fltx4& b1,
-	const fltx4& b2,
-	const fltx4& b3,
+	FLTX4 a0,
+	FLTX4 a1,
+	FLTX4 a2,
+	FLTX4 a3,
+	FLTX4 b0,
+	FLTX4 b1,
+	FLTX4 b2,
+	FLTX4 b3,
 	fltx4& out0,
 	fltx4& out1,
 	fltx4& out2,
@@ -87,9 +83,9 @@ FORCEINLINE void FourCrossProducts
 	TransposeSIMD( x0, x1, x2, x3 );
 	TransposeSIMD( y0, y1, y2, y3 );*/
 
-	out0 = SubSIMD(MulSIMD(a1,b2),MulSIMD(a2,b1));
-	out1 = SubSIMD(MulSIMD(a2,b0),MulSIMD(a0,b2));
-	out2 = SubSIMD(MulSIMD(a0,b1),MulSIMD(a1,b0));
+	out0 = SubSIMD( MulSIMD( a1, b2 ), MulSIMD( a2, b1 ) );
+	out1 = SubSIMD( MulSIMD( a2, b0 ), MulSIMD( a0, b2 ) );
+	out2 = SubSIMD( MulSIMD( a0, b1 ), MulSIMD( a1, b0 ) );
 	out3 = LoadOneSIMD();
 
 	TransposeSIMD( out0, out1, out2, out3 );

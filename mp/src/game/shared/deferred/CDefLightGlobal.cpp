@@ -2,6 +2,8 @@
 #include "cbase.h"
 #include "deferred/deferred_shared_common.h"
 
+#include "tier0/memdbgon.h"
+
 static CDeferredLightGlobal *__g_pGlobalLight = NULL;
 CDeferredLightGlobal *GetGlobalLight()
 {

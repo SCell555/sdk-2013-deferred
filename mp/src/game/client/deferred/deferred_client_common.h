@@ -52,7 +52,8 @@ extern ConVar deferred_radiosity_debug;
 
 #include "deferred/viewrender_deferred.h"
 
-#include "deferred/flashlighteffect_deferred.h"
+//#include "deferred/flashlighteffect_deferred.h"
+#include "flashlighteffect.h"
 #include "deferred/materialsystem_passthru.h"
 
 void OnCookieTableChanged( void *object, INetworkStringTable *stringTable, int stringNumber, const char *newString, void const *newData );
@@ -127,33 +128,18 @@ FORCEINLINE void DrawFrustum( VMatrix &invScreenToWorld )
 
 // returns false when no intersection
 #if DEFCFG_USE_SSE
-FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatrix &invScreenToWorld_b )
+FORCEINLINE bool IntersectFrustumWithFrustum( const VMatrix &invScreenToWorld_a, const VMatrix &invScreenToWorld_b )
 {
-	static bool bSIMDDataInitialised = false;
-	static fltx4 _normPos[8];
-
-	if( !bSIMDDataInitialised )
-	{
-		const float pNormPos0[4] = { -1, 1, 0, 1 },
-			pNormPos1[4] = { 1, 1, 0, 1 },
-			pNormPos2[4] = { 1, -1, 0, 1 },
-			pNormPos3[4] = { -1, -1, 0, 1 },
-			pNormPos4[4] = { -1, 1, 1, 1 },
-			pNormPos5[4] = { 1, 1, 1, 1 },
-			pNormPos6[4] = { 1, -1, 1, 1 },
-			pNormPos7[4] = { -1, -1, 1, 1 };
-
-		_normPos[0] = LoadUnalignedSIMD( pNormPos0 );
-		_normPos[1] = LoadUnalignedSIMD( pNormPos1 );
-		_normPos[2] = LoadUnalignedSIMD( pNormPos2 );
-		_normPos[3] = LoadUnalignedSIMD( pNormPos3 );
-		_normPos[4] = LoadUnalignedSIMD( pNormPos4 );
-		_normPos[5] = LoadUnalignedSIMD( pNormPos5 );
-		_normPos[6] = LoadUnalignedSIMD( pNormPos6 );
-		_normPos[7] = LoadUnalignedSIMD( pNormPos7 );
-
-		bSIMDDataInitialised = true;
-	}
+	static const fltx4 ALIGN128 _normPos[8] ALIGN128_POST = {
+		{ -1.f,  1.f, 0.f, 1.f },
+		{  1.f,  1.f, 0.f, 1.f },
+		{  1.f, -1.f, 0.f, 1.f },
+		{ -1.f, -1.f, 0.f, 1.f },
+		{ -1.f,  1.f, 1.f, 1.f },
+		{  1.f,  1.f, 1.f, 1.f },
+		{  1.f, -1.f, 1.f, 1.f },
+		{ -1.f, -1.f, 1.f, 1.f }
+	};
 
 	fltx4 _pointx4[2][8];
 	fltx4 axes[22];
@@ -197,10 +183,9 @@ FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatr
 			_w = 1.0f / _w;
 		}
 
-		fltx4 _fourWs = ReplicateX4( _w );
-		_pointx4[0][i] = MulSIMD( _pointx4[0][i], _fourWs );
+		_pointx4[0][i] = MulSIMD( _pointx4[0][i], ReplicateX4( _w ) );
 
-		_pointx4[1][i] = FourDotProducts( _invScreenToWorldAInSSE, _normPos[i] );
+		_pointx4[1][i] = FourDotProducts( _invScreenToWorldBInSSE, _normPos[i] );
 
 		_w = SubFloat( _pointx4[1][i], 3 );
 		if( _w != 0 )
@@ -208,8 +193,7 @@ FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatr
 			_w = 1.0f / _w;
 		}
 
-		_fourWs = ReplicateX4( _w );
-		_pointx4[1][i] = MulSIMD( _pointx4[1][i], _fourWs );
+		_pointx4[1][i] = MulSIMD( _pointx4[1][i], ReplicateX4( _w ) );
 	}
 
 	for ( int i = 0; i < 2; i++ ) // build minimal frustum frame
@@ -229,7 +213,7 @@ FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatr
 		NormalizeInPlaceSIMD( on_frustum_directions[x][1] );
 
 		NormaliseFourInPlace
-			( 
+			(
 				on_frustum_directions[x][2],
 				on_frustum_directions[x][3],
 				on_frustum_directions[x][4],
@@ -248,7 +232,7 @@ FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatr
 				on_frustum_directions[i][2], // up
 				on_frustum_directions[i][4], // right
 
-				on_frustum_directions[i][1], 
+				on_frustum_directions[i][1],
 				on_frustum_directions[i][5],
 				on_frustum_directions[i][3],
 				on_frustum_directions[i][3],
@@ -266,7 +250,7 @@ FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatr
 				pAxes[3],
 				pAxes[1],
 
-				on_frustum_directions[i][5], 
+				on_frustum_directions[i][5],
 				pAxes[3],
 				pAxes[2],
 				pAxes[2],
@@ -311,11 +295,11 @@ FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatr
 			float point_frustum_a = Dot4SIMD2( _pointx4[0][x], axes[i] );
 			float point_frustum_b = Dot4SIMD2( _pointx4[1][x], axes[i] );
 
-			bounds_frusta[0][0] = MIN( bounds_frusta[0][0], point_frustum_a );
-			bounds_frusta[0][1] = MAX( bounds_frusta[0][1], point_frustum_a );
+			bounds_frusta[0][0] = Min( bounds_frusta[0][0], point_frustum_a );
+			bounds_frusta[0][1] = Max( bounds_frusta[0][1], point_frustum_a );
 
-			bounds_frusta[1][0] = MIN( bounds_frusta[1][0], point_frustum_b );
-			bounds_frusta[1][1] = MAX( bounds_frusta[1][1], point_frustum_b );
+			bounds_frusta[1][0] = Min( bounds_frusta[1][0], point_frustum_b );
+			bounds_frusta[1][1] = Max( bounds_frusta[1][1], point_frustum_b );
 		}
 
 		if ( bounds_frusta[0][1] < bounds_frusta[1][0] ||
@@ -400,11 +384,11 @@ FORCEINLINE bool IntersectFrustumWithFrustum( VMatrix &invScreenToWorld_a, VMatr
 			float point_frustum_a = DotProduct( _points[0][x], axes[i] );
 			float point_frustum_b = DotProduct( _points[1][x], axes[i] );
 
-			bounds_frusta[0][0] = MIN( bounds_frusta[0][0], point_frustum_a );
-			bounds_frusta[0][1] = MAX( bounds_frusta[0][1], point_frustum_a );
+			bounds_frusta[0][0] = Min( bounds_frusta[0][0], point_frustum_a );
+			bounds_frusta[0][1] = Max( bounds_frusta[0][1], point_frustum_a );
 
-			bounds_frusta[1][0] = MIN( bounds_frusta[1][0], point_frustum_b );
-			bounds_frusta[1][1] = MAX( bounds_frusta[1][1], point_frustum_b );
+			bounds_frusta[1][0] = Min( bounds_frusta[1][0], point_frustum_b );
+			bounds_frusta[1][1] = Max( bounds_frusta[1][1], point_frustum_b );
 		}
 
 		if ( bounds_frusta[0][1] < bounds_frusta[1][0] ||

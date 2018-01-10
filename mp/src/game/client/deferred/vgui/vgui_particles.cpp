@@ -5,6 +5,8 @@
 #include "vgui/ISurface.h"
 #include "particles/particles.h"
 
+#include "tier0/memdbgon.h"
+
 
 using namespace vgui;
 

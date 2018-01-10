@@ -6,6 +6,8 @@
 #include "vgui/IPanel.h"
 #include "vgui/ISurface.h"
 
+#include "tier0/memdbgon.h"
+
 
 using namespace vgui;
 

@@ -11,6 +11,8 @@
 
 #include "filesystem.h"
 
+#include "tier0/memdbgon.h"
+
 using namespace vgui;
 
 ConVar deferred_lighteditor_defaultvmfpath( "deferred_lighteditor_defaultvmfpath", "", FCVAR_ARCHIVE );

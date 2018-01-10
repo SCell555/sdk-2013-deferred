@@ -97,7 +97,8 @@ private:
 
 #if DEFCFG_USE_SSE
 	def_light_presortdatax4_t* m_pSortDataX4;
-	unsigned int m_uiSortDataCount;			
+	unsigned int m_uiSortDataCount;
+	bool m_bSortDataNeedsRealloc;
 #endif
 
 	CUtlVector< def_light_t* > m_hDeferredLights;

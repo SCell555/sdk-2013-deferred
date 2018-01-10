@@ -3,6 +3,8 @@
 
 #include "iinput.h"
 
+#include "tier0/memdbgon.h"
+
 ConVar r_flashlightvolumetrics("r_flashlightvolumetrics", "0", FCVAR_ARCHIVE);
 
 CFlashlightEffectDeferred::CFlashlightEffectDeferred( int nEntIndex ) : CFlashlightEffect( nEntIndex )
@@ -39,7 +41,7 @@ void CFlashlightEffectDeferred::UpdateLightProjection( FlashlightState_t &state 
 	m_pDefLight->flRadius = state.m_FarZ;
 	m_pDefLight->iLighttype = DEFLIGHTTYPE_SPOT;
 
-	float flFov = MAX( state.m_fHorizontalFOVDegrees, state.m_fVerticalFOVDegrees );
+	float flFov = Max( state.m_fHorizontalFOVDegrees, state.m_fVerticalFOVDegrees );
 	m_pDefLight->flSpotCone_Outer = SPOT_DEGREE_TO_RAD( flFov );
 	m_pDefLight->flSpotCone_Inner = 1;
 

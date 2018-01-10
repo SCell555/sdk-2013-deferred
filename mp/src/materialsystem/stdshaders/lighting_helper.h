@@ -42,7 +42,7 @@ FORCEINLINE void CommitShadowcastingConstants_Proj( IShaderDynamicAPI *pShaderAP
 FORCEINLINE void CommitGlobalLightForward( IShaderDynamicAPI *pShaderAPI,
 	int iFirstRegister )
 {
-	Vector4D vecLight = GetDeferredExt()->GetLightData_Global().vecLight;
+	const Vector4D& vecLight = GetDeferredExt()->GetLightData_Global().vecLight;
 	pShaderAPI->SetPixelShaderConstant( iFirstRegister++, vecLight.Base() );
 }
 
@@ -93,7 +93,7 @@ FORCEINLINE void CommitShadowProjectionConstants_Ortho_Composite( IShaderDynamic
 		float fl_1[4] = { 0, 0, 0, 0 };
 
 		MakeShadowProjectionConstants( fl_0, fl_1, data.iRes_x, data.iRes_y );
-		
+
 		pShaderAPI->SetPixelShaderConstant( iCurRegister, fl_0 );
 		iCurRegister += numCascades;
 		pShaderAPI->SetPixelShaderConstant( iCurRegister, fl_1 );
@@ -105,7 +105,7 @@ FORCEINLINE void CommitShadowProjectionConstants_Ortho_Composite( IShaderDynamic
 FORCEINLINE void CommitShadowProjectionConstants_DPSM( IShaderDynamicAPI *pShaderAPI,
 	int iFirstRegister )
 {
-	shadowData_general_t data = GetDeferredExt()->GetShadowData_General();
+	const shadowData_general_t& data = GetDeferredExt()->GetShadowData_General();
 
 	float fl_0[4] = { 0, 0, 0, 0 };
 	float fl_1[4] = { 0, 0, 0, 0 };
@@ -119,7 +119,7 @@ FORCEINLINE void CommitShadowProjectionConstants_DPSM( IShaderDynamicAPI *pShade
 FORCEINLINE void CommitShadowProjectionConstants_Proj( IShaderDynamicAPI *pShaderAPI,
 	int iFirstRegister )
 {
-	shadowData_general_t data = GetDeferredExt()->GetShadowData_General();
+	const shadowData_general_t& data = GetDeferredExt()->GetShadowData_General();
 
 	float fl_0[4] = { 0, 0, 0, 0 };
 	float fl_1[4] = { 0, 0, 0, 0 };
@@ -147,7 +147,7 @@ FORCEINLINE Vector4D MakeHalfAmbient( Vector4D ambient_low, Vector4D ambient_hig
 	lowDelta *= 0.5f;
 	lowDelta += ambient_high;
 	for (int i = 0; i < 3; i++)
-		lowDelta[i] = MAX(0,lowDelta[i]);
+		lowDelta[i] = Max(0.f, lowDelta[i]);
 	return lowDelta;
 }
 
