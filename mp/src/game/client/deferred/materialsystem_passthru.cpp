@@ -144,7 +144,8 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 		msg->SetInt( "$alphatest", 1 );
 	}
 
-	if ( pMat->IsTwoSided() )
+	// Find a better solution to this...
+	if (true) //( pMat->IsTwoSided() )
 	{
 		msg->SetInt( "$nocull", 1 );
 	}
