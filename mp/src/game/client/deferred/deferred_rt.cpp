@@ -99,12 +99,12 @@ const ImageFormat fmt_gbuffer0 =
 	const ImageFormat fmt_radNormal = IMAGE_FORMAT_RGB888;
 	const ImageFormat fmt_radBuffer = IMAGE_FORMAT_RGB888;
 
-	if ( fmt_depth == IMAGE_FORMAT_NV_DST16 )
+	if ( fmt_depth == IMAGE_FORMAT_NV_DST16 || fmt_depth == IMAGE_FORMAT_ATI_DST16 )
 		g_flDepthScalar = pow( 2.0, 16 );
-	else if ( fmt_depth == IMAGE_FORMAT_NV_DST24 )
+	else if ( fmt_depth == IMAGE_FORMAT_NV_DST24 || fmt_depth == IMAGE_FORMAT_ATI_DST24 )
 		g_flDepthScalar = pow( 2.0, 24 );
 
-	AssertMsg( fmt_depth == IMAGE_FORMAT_NV_DST16 || fmt_depth == IMAGE_FORMAT_NV_DST24, "Unexpected depth format" );
+	AssertMsg( fmt_depth == IMAGE_FORMAT_NV_DST16 || fmt_depth == IMAGE_FORMAT_NV_DST24 || fmt_depth == IMAGE_FORMAT_ATI_DST16 || fmt_depth == IMAGE_FORMAT_ATI_DST24, "Unexpected depth format" );
 
 	const unsigned int gbufferFlags		=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
 	const unsigned int lightAccumFlags	=		TEXTUREFLAGS_CLAMPS | TEXTUREFLAGS_CLAMPT | TEXTUREFLAGS_RENDERTARGET | TEXTUREFLAGS_POINTSAMPLE;
