@@ -1,6 +1,6 @@
 //===== Copyright © 1996-2005, Valve Corporation, All rights reserved. ======//
 //
-// Purpose: 
+// Purpose:
 //
 // $Header: $
 // $NoKeywords: $
@@ -25,14 +25,14 @@
 
 // DEFINE_FALLBACK_SHADER( DecalModulate, DEFERRED_DECALMODULATE )
 
-BEGIN_VS_SHADER( DEFERRED_DECALMODULATE, 
+BEGIN_VS_SHADER( DEFERRED_DECALMODULATE,
 			  "" )
-			  
+
 	BEGIN_SHADER_PARAMS
 		SHADER_PARAM( FOGEXPONENT, SHADER_PARAM_TYPE_FLOAT, "0.4", "exponent to tweak fog fade" )
 		SHADER_PARAM( FOGSCALE, SHADER_PARAM_TYPE_FLOAT, "1.0", "scale to tweak fog fade" )
 	END_SHADER_PARAMS
-	
+
 	SHADER_FALLBACK
 	{
 		return 0;
@@ -183,9 +183,9 @@ BEGIN_VS_SHADER( DEFERRED_DECALMODULATE,
 			Vector4D transformation[2];
 			transformation[0].Init( 1.0f, 0.0f, 0.0f, 0.0f );
 			transformation[1].Init( 0.0f, 1.0f, 0.0f, 0.0f );
-		 	pShaderAPI->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_0, transformation[0].Base(), 2 ); 
+		 	pShaderAPI->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_0, transformation[0].Base(), 2 );
 
-			pShaderAPI->SetPixelShaderFogParams( PSREG_FOG_PARAMS );					
+			pShaderAPI->SetPixelShaderFogParams( PSREG_FOG_PARAMS );
 
 			float vEyePos_SpecExponent[4];
 			pShaderAPI->GetWorldSpaceCameraPosition( vEyePos_SpecExponent );

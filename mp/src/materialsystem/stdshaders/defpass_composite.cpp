@@ -33,6 +33,22 @@ void InitParmsComposite( const defParms_composite &info, CBaseVSShader *pShader,
 	PARM_INIT_VEC3( info.iSelfIllumTint, 1.0f, 1.0f, 1.0f );
 	PARM_INIT_INT( info.iSelfIllumMaskInEnvmapAlpha, 0 );
 	PARM_INIT_INT( info.iSelfIllumFresnelModulate, 0 );
+
+	InitIntParam( info.iTreeSway, params, 0 );
+	InitFloatParam( info.iTreeSwayHeight, params, 1000.0f );
+	InitFloatParam( info.iTreeSwayStartHeight, params, 0.1f );
+	InitFloatParam( info.iTreeSwayRadius, params, 300.0f );
+	InitFloatParam( info.iTreeSwayStartRadius, params, 0.2f );
+	InitFloatParam( info.iTreeSwaySpeed, params, 1.0f );
+	InitFloatParam( info.iTreeSwaySpeedHighWindMultiplier, params, 2.0f );
+	InitFloatParam( info.iTreeSwayStrength, params, 10.0f );
+	InitFloatParam( info.iTreeSwayScrumbleSpeed, params, 5.0f );
+	InitFloatParam( info.iTreeSwayScrumbleStrength, params, 10.0f );
+	InitFloatParam( info.iTreeSwayScrumbleFrequency, params, 12.0f );
+	InitFloatParam( info.iTreeSwayFalloffExp, params, 1.5f );
+	InitFloatParam( info.iTreeSwayScrumbleFalloffExp, params, 1.0f );
+	InitFloatParam( info.iTreeSwaySpeedLerpStart, params, 3.0f );
+	InitFloatParam( info.iTreeSwaySpeedLerpEnd, params, 6.0f );
 }
 
 void InitPassComposite( const defParms_composite &info, CBaseVSShader *pShader, IMaterialVar **params )
@@ -93,6 +109,8 @@ void DrawPassComposite( const defParms_composite &info, CBaseVSShader *pShader, 
 	const bool bGBufferNormal = bEnvmap || bRimLight || bNeedsFresnel;
 	const bool bWorldEyeVec = bGBufferNormal;
 
+	const int nTreeSwayMode = clamp( GetIntParam( info.iTreeSway, params, 0 ), 0, 2 );
+	const bool bTreeSway = nTreeSwayMode != 0;
 
 	AssertMsgOnce( !(bTranslucent || bAlphatest) || !bAlbedo2,
 		"blended albedo not supported by gbuffer pass!" );
@@ -191,6 +209,7 @@ void DrawPassComposite( const defParms_composite &info, CBaseVSShader *pShader, 
 		SET_STATIC_VERTEX_SHADER_COMBO( EYEVEC, bWorldEyeVec );
 		SET_STATIC_VERTEX_SHADER_COMBO( BASETEXTURE2, bAlbedo2 );
 		SET_STATIC_VERTEX_SHADER_COMBO( BLENDMODULATE, bBlendmodulate );
+		SET_STATIC_VERTEX_SHADER_COMBO( TREESWAY, nTreeSwayMode );
 		SET_STATIC_VERTEX_SHADER( composite_vs30 );
 
 		DECLARE_STATIC_PIXEL_SHADER( composite_ps30 );
@@ -309,6 +328,32 @@ void DrawPassComposite( const defParms_composite &info, CBaseVSShader *pShader, 
 				tmpBuf.SetPixelShaderConstant( 12, params[info.iEnvmapParallax]->GetMatrixValue().Base(), 4 );
 			}
 
+			if ( bTreeSway )
+			{
+				float flParams[4];
+				flParams[0] = GetFloatParam( info.iTreeSwaySpeedHighWindMultiplier, params, 2.0f );
+				flParams[1] = GetFloatParam( info.iTreeSwayScrumbleFalloffExp, params, 1.0f );
+				flParams[2] = GetFloatParam( info.iTreeSwayFalloffExp, params, 1.0f );
+				flParams[3] = GetFloatParam( info.iTreeSwayScrumbleSpeed, params, 3.0f );
+				tmpBuf.SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_5, flParams );
+
+				flParams[0] = GetFloatParam( info.iTreeSwayHeight, params, 1000.0f );
+				flParams[1] = GetFloatParam( info.iTreeSwayStartHeight, params, 0.1f );
+				flParams[2] = GetFloatParam( info.iTreeSwayRadius, params, 300.0f );
+				flParams[3] = GetFloatParam( info.iTreeSwayStartRadius, params, 0.2f );
+				tmpBuf.SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_7, flParams );
+
+				flParams[0] = GetFloatParam( info.iTreeSwaySpeed, params, 1.0f );
+				flParams[1] = GetFloatParam( info.iTreeSwayStrength, params, 10.0f );
+				flParams[2] = GetFloatParam( info.iTreeSwayScrumbleFrequency, params, 12.0f );
+				flParams[3] = GetFloatParam( info.iTreeSwayScrumbleStrength, params, 10.0f );
+				tmpBuf.SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_8, flParams );
+
+				flParams[0] = GetFloatParam( info.iTreeSwaySpeedLerpStart, params, 3.0f );
+				flParams[1] = GetFloatParam( info.iTreeSwaySpeedLerpEnd, params, 6.0f );
+				tmpBuf.SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_9, flParams );
+			}
+
 			tmpBuf.End();
 
 			pDeferredContext->SetCommands( CDeferredPerMaterialContextData::DEFSTAGE_COMPOSITE, tmpBuf.Copy() );
@@ -318,7 +363,7 @@ void DrawPassComposite( const defParms_composite &info, CBaseVSShader *pShader, 
 
 		if ( bModel && bFastVTex )
 			pShader->SetHWMorphVertexShaderState( VERTEX_SHADER_SHADER_SPECIFIC_CONST_10, VERTEX_SHADER_SHADER_SPECIFIC_CONST_11, SHADER_VERTEXTEXTURE_SAMPLER0 );
-		
+
 		DECLARE_DYNAMIC_VERTEX_SHADER( composite_vs30 );
 		SET_DYNAMIC_VERTEX_SHADER_COMBO( COMPRESSED_VERTS, (bModel && (int)vertexCompression) ? 1 : 0 );
 		SET_DYNAMIC_VERTEX_SHADER_COMBO( SKINNING, (bModel && pShaderAPI->GetCurrentNumBones() > 0) ? 1 : 0 );
@@ -359,6 +404,17 @@ void DrawPassComposite( const defParms_composite &info, CBaseVSShader *pShader, 
 		if ( bSelfIllum )
 		{
 			pShaderAPI->SetPixelShaderConstant( 10, params[ info.iSelfIllumTint ]->GetVecValue() );
+		}
+
+		if ( bTreeSway )
+		{
+			float fTempConst[4];
+			fTempConst[0] = 0; // unused
+			fTempConst[1] = pShaderAPI->CurrentTime();
+			const Vector& windDir = pShaderAPI->GetVectorRenderingParameter( VECTOR_RENDERPARM_WIND_DIRECTION );
+			fTempConst[2] = windDir.x;
+			fTempConst[3] = windDir.y;
+			pShaderAPI->SetVertexShaderConstant( VERTEX_SHADER_SHADER_SPECIFIC_CONST_6, fTempConst );
 		}
 	}
 

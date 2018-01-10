@@ -136,7 +136,7 @@ BEGIN_VS_SHADER( DEFERRED_BRUSH, "" )
 			defParms_gBuffer parms_gbuffer;
 			SetupParmsGBuffer( parms_gbuffer );
 			InitParmsGBuffer( parms_gbuffer, this, params );
-		
+
 			defParms_shadow parms_shadow;
 			SetupParmsShadow( parms_shadow );
 			InitParmsShadowPass( parms_shadow, this, params );

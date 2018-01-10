@@ -2,6 +2,7 @@
 // STATIC:		"MODEL"					"0..1"
 // STATIC:		"MORPHING_VTEX"			"0..1"
 // STATIC:		"MULTITEXTURE"			"0..1"
+// STATIC:		"TREESWAY"				"0..2"
 
 // DYNAMIC:		"COMPRESSED_VERTS"		"0..1"
 // DYNAMIC:		"SKINNING"				"0..1"
@@ -41,6 +42,37 @@ const float3 g_vecOrigin					: register( SHADER_SPECIFIC_CONST_2 );
 
 const float4x3 g_matView			: register( SHADER_SPECIFIC_CONST_7 );
 
+#endif
+
+#if TREESWAY
+const float4 flTreeSwayParams1			: register( SHADER_SPECIFIC_CONST_3 );
+const float4 flTreeSwayParams2			: register( SHADER_SPECIFIC_CONST_4 );
+const float4 flTreeSwayParams3			: register( SHADER_SPECIFIC_CONST_5 );
+const float4 flTreeSwayParams4			: register( SHADER_SPECIFIC_CONST_6 );
+const float4 flTreeSwayParams5			: register( c219 );
+
+#define g_flFastSwaySpeedScale flTreeSwayParams1.x
+#define g_flScrumbleFalloffCurve flTreeSwayParams1.y
+#define g_flSwayFalloffCurve flTreeSwayParams1.z
+#define g_flScrumbleSpeed flTreeSwayParams1.w
+
+#define g_flTime flTreeSwayParams2.y
+#define g_vWindDir flTreeSwayParams2.zw
+
+#define g_flHeight flTreeSwayParams3.x
+#define g_flStartHeight flTreeSwayParams3.y
+#define g_flRadius flTreeSwayParams3.z
+#define g_flStartRadius flTreeSwayParams3.w
+
+#define g_flSwaySpeed flTreeSwayParams4.x
+#define g_flSwayIntensity flTreeSwayParams4.y
+#define g_flScrumbleWaveCount flTreeSwayParams4.z
+#define g_flScrumbleIntensity flTreeSwayParams4.w
+
+#define g_flWindSpeedLerpStart flTreeSwayParams5.x
+#define g_flWindSpeedLerpEnd flTreeSwayParams5.y
+
+#include "tree_sway.h"
 #endif
 
 struct VS_INPUT
@@ -128,13 +160,23 @@ VS_OUTPUT main( const VS_INPUT In )
 #endif
 #endif
 
+#if TREESWAY
+	vPos.xyz = ComputeTreeSway( vPos.xyz, g_flTime );
+#endif
+
 	SkinPositionAndNormal( g_bSkinning, vPos, vNormal,
 		In.vBoneWeights, In.vBoneIndices,
 		worldPos, worldNormal );
 
 #else // MODEL
 
-	worldPos = mul( float4( In.vPos, 1 ), cModel[0] );
+	float3 vPos = In.vPos;
+
+#if TREESWAY
+	vPos.xyz = ComputeTreeSway( vPos.xyz, g_flTime );
+#endif
+
+	worldPos = mul( float4( vPos, 1 ), cModel[0] );
 	worldNormal = mul( In.vNormal, ( float3x3 )cModel[0] );
 
 #endif // NOT MODEL

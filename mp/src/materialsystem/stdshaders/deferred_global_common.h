@@ -93,10 +93,10 @@
 #define DEFRTNAME_SHADOWCOLOR_ORTHO "_rt_ShadowColor_ortho_"	// + %02i
 #define DEFRTNAME_SHADOWCOLOR_PROJ "_rt_ShadowColor_proj_"		// + %02i
 #if DEFCFG_ADAPTIVE_SHADOWMAP_LOD
-#	define DEFRTNAME_SHADOWDEPTH_PROJ_LOD1 "_rt_ShadowDepth_proj_lod1_"	// + %02i	
-#	define DEFRTNAME_SHADOWCOLOR_PROJ_LOD1 "_rt_ShadowColor_proj_lod1_"	// + %02i	
-#	define DEFRTNAME_SHADOWDEPTH_PROJ_LOD2 "_rt_ShadowDepth_proj_lod2_"	// + %02i	
-#	define DEFRTNAME_SHADOWCOLOR_PROJ_LOD2 "_rt_ShadowColor_proj_lod2_"	// + %02i	
+#	define DEFRTNAME_SHADOWDEPTH_PROJ_LOD1 "_rt_ShadowDepth_proj_lod1_"	// + %02i
+#	define DEFRTNAME_SHADOWCOLOR_PROJ_LOD1 "_rt_ShadowColor_proj_lod1_"	// + %02i
+#	define DEFRTNAME_SHADOWDEPTH_PROJ_LOD2 "_rt_ShadowDepth_proj_lod2_"	// + %02i
+#	define DEFRTNAME_SHADOWCOLOR_PROJ_LOD2 "_rt_ShadowColor_proj_lod2_"	// + %02i
 #endif
 #define DEFRTNAME_SHADOWCOLOR_DP "_rt_ShadowColor_dp_"			// + %02i
 #define DEFRTNAME_SHADOWRAD_ALBEDO_ORTHO "_rt_ShadowRad_Albedo_ortho_"	// + %02i
@@ -116,8 +116,8 @@
 #if CSM_USE_COMPOSITED_TARGET
 /* Composited resolution
  */
-#	define CSM_COMP_RES_X 4096
-#	define CSM_COMP_RES_Y 2048
+#	define CSM_COMP_RES_X 8192
+#	define CSM_COMP_RES_Y 4096
 #endif
 
 
