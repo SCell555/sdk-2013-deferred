@@ -22,12 +22,10 @@
 			"episodic"
 			{
 				"vpk"	"ep1_pak"
-				"vpk"	"ep1_sound_vo_english"
 			}
 			"ep2"
 			{
 				"vpk"	"ep2_pak"
-				"vpk"	"ep2_sound_vo_english"
 			}
 		}
 	}
