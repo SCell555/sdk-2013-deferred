@@ -85,12 +85,7 @@ const ImageFormat fmt_gbuffer0 =
 	const ImageFormat fmt_volumAccum = IMAGE_FORMAT_RGB888;
 	const ImageFormat fmt_projVGUI = IMAGE_FORMAT_RGB888;
 
-	const bool bShadowUseColor =
-#ifdef SHADOWMAPPING_USE_COLOR
-		true;
-#else
-		false;
-#endif
+	const bool bShadowUseColor = !GetDeferredManager()->UsingHardwareFiltering();
 
 	const ImageFormat fmt_depth = GetDeferredManager()->GetShadowDepthFormat();
 	const ImageFormat fmt_depthColor = bShadowUseColor ? IMAGE_FORMAT_R32F

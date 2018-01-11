@@ -51,19 +51,22 @@ public:
 	virtual bool Init();
 	virtual void Shutdown();
 
-	inline bool IsDeferredRenderingEnabled();
+	inline bool IsDeferredRenderingEnabled() const;
 
 	ImageFormat GetShadowDepthFormat();
 	ImageFormat GetNullFormat();
 
-	inline IMaterial *GetDeferredMaterial( DEF_MATERIALS mat );
+	inline IMaterial *GetDeferredMaterial( DEF_MATERIALS mat ) const;
 
 	void LevelInitPreEntity();
 	void LevelShutdownPostEntity();
 
+	bool UsingHardwareFiltering() const { return m_bHardwareFiltering; }
+
 private:
 
 	bool m_bDefRenderingEnabled;
+	bool m_bHardwareFiltering;
 
 	void InitializeDeferredMaterials();
 	void ShutdownDeferredMaterials();
@@ -74,12 +77,12 @@ private:
 	CUtlVector<def_light_t*> m_lights;
 };
 
-bool CDeferredManagerClient::IsDeferredRenderingEnabled()
+bool CDeferredManagerClient::IsDeferredRenderingEnabled() const
 {
 	return m_bDefRenderingEnabled;
 }
 
-IMaterial *CDeferredManagerClient::GetDeferredMaterial( DEF_MATERIALS mat )
+IMaterial *CDeferredManagerClient::GetDeferredMaterial( DEF_MATERIALS mat ) const
 {
 	Assert( mat >= 0 && mat < DEF_MAT_COUNT );
 

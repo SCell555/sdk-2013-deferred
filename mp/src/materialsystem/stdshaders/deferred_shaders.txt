@@ -2,8 +2,8 @@
 // gbuffer_ps30.fxc
 // gbuffer_defshading_ps30.fxc
 
-// shadowpass_vs30.fxc
-// shadowpass_ps30.fxc
+shadowpass_vs30.fxc
+shadowpass_ps30.fxc
 
 // composite_vs30.fxc
 // composite_ps30.fxc
@@ -23,8 +23,8 @@ lightingpass_spot_ps30.fxc
 // volume_blend_ps30.fxc
 // volume_prepass_vs30.fxc
 // volume_prepass_ps30.fxc
-// volumpass_point_ps30.fxc
-// volumpass_spot_ps30.fxc
+volumpass_point_ps30.fxc
+volumpass_spot_ps30.fxc
 
 // radiosity_gen_global_ps30.fxc
 // radiosity_gen_vs30.fxc

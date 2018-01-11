@@ -150,6 +150,7 @@ public:
 	virtual void CommitTexture_ShadowRadOutput_Ortho( ITexture *pAlbedo, ITexture *pNormal ) = 0;
 	virtual void CommitTexture_Radiosity( ITexture *pTexRadBuffer0, ITexture *pTexRadBuffer1,
 		ITexture *pTexRadNormal0, ITexture *pTexRadNormal1 ) = 0;
+	virtual void SetUsingHardwareFiltering( bool bHardware ) = 0;
 };
 
 #define DEFERRED_EXTENSION_VERSION "DeferredExtensionVersion001"
@@ -203,6 +204,7 @@ public:
 	virtual void CommitTexture_ShadowRadOutput_Ortho( ITexture *pAlbedo, ITexture *pNormal );
 	virtual void CommitTexture_Radiosity( ITexture *pTexRadBuffer0, ITexture *pTexRadBuffer1,
 		ITexture *pTexRadNormal0, ITexture *pTexRadNormal1 );
+	virtual void SetUsingHardwareFiltering(bool bHardware);
 
 	inline float *GetOriginBase();
 	inline float *GetForwardBase();
@@ -248,6 +250,7 @@ public:
 	inline ITexture *GetTexture_ShadowRad_Ortho_Normal();
 	inline ITexture *GetTexture_RadBuffer( const int &index );
 	inline ITexture *GetTexture_RadNormal( const int &index );
+	inline bool		UsingHardwareFiltering();
 
 private:
 	bool m_bDefLightingEnabled;
@@ -292,6 +295,7 @@ private:
 	ITexture *m_pTexShadowRad_Ortho[ 2 ];
 	ITexture *m_pTexRadBuffer[ 2 ];
 	ITexture *m_pTexRadNormal[ 2 ];
+	bool m_bHardwareFiltering;
 };
 
 float *CDeferredExtension::GetOriginBase()
@@ -448,6 +452,11 @@ ITexture *CDeferredExtension::GetTexture_RadNormal( const int &index )
 	Assert( index >= 0 && index < 2 );
 	return m_pTexRadNormal[index];
 }
+bool CDeferredExtension::UsingHardwareFiltering()
+{
+	return m_bHardwareFiltering;
+}
+
 #endif
 
 #ifdef CLIENT_DLL

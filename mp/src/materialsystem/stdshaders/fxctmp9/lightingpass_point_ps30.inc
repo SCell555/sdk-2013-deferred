@@ -2,6 +2,27 @@
 class lightingpass_point_ps30_Static_Index
 {
 private:
+	int m_nHARDWARE_FILTER;
+#ifdef _DEBUG
+	bool m_bHARDWARE_FILTER;
+#endif
+public:
+	void SetHARDWARE_FILTER( int i )
+	{
+		Assert( i >= 0 && i <= 1 );
+		m_nHARDWARE_FILTER = i;
+#ifdef _DEBUG
+		m_bHARDWARE_FILTER = true;
+#endif
+	}
+	void SetHARDWARE_FILTER( bool i )
+	{
+		m_nHARDWARE_FILTER = i ? 1 : 0;
+#ifdef _DEBUG
+		m_bHARDWARE_FILTER = true;
+#endif
+	}
+private:
 	int m_nUSEWORLDTRANSFORM;
 #ifdef _DEBUG
 	bool m_bUSEWORLDTRANSFORM;
@@ -26,6 +47,10 @@ public:
 	lightingpass_point_ps30_Static_Index( )
 	{
 #ifdef _DEBUG
+		m_bHARDWARE_FILTER = false;
+#endif // _DEBUG
+		m_nHARDWARE_FILTER = 0;
+#ifdef _DEBUG
 		m_bUSEWORLDTRANSFORM = false;
 #endif // _DEBUG
 		m_nUSEWORLDTRANSFORM = 0;
@@ -35,13 +60,13 @@ public:
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllStaticVarsDefined = m_bUSEWORLDTRANSFORM;
+		bool bAllStaticVarsDefined = m_bHARDWARE_FILTER && m_bUSEWORLDTRANSFORM;
 		Assert( bAllStaticVarsDefined );
 #endif // _DEBUG
-		return ( 528 * m_nUSEWORLDTRANSFORM ) + 0;
+		return ( 528 * m_nHARDWARE_FILTER ) + ( 1056 * m_nUSEWORLDTRANSFORM ) + 0;
 	}
 };
-#define shaderStaticTest_lightingpass_point_ps30 psh_forgot_to_set_static_USEWORLDTRANSFORM + 0
+#define shaderStaticTest_lightingpass_point_ps30 psh_forgot_to_set_static_HARDWARE_FILTER + psh_forgot_to_set_static_USEWORLDTRANSFORM + 0
 class lightingpass_point_ps30_Dynamic_Index
 {
 private:

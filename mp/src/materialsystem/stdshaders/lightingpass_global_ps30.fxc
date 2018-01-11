@@ -1,4 +1,5 @@
 
+// STATIC:		"HARDWARE_FILTER"			"0..1"
 // DYNAMIC:		"HAS_SHADOW"		"0..1"
 
 

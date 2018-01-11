@@ -89,6 +89,7 @@ void DrawPassLightPass( const lightPassParms &info, CBaseVSShader *pShader, IMat
 			{
 				DECLARE_STATIC_PIXEL_SHADER( lightingpass_point_ps30 );
 				SET_STATIC_PIXEL_SHADER_COMBO( USEWORLDTRANSFORM, bWorldProjection ? 1 : 0 );
+				SET_STATIC_PIXEL_SHADER_COMBO( HARDWARE_FILTER, GetDeferredExt()->UsingHardwareFiltering() );
 				SET_STATIC_PIXEL_SHADER( lightingpass_point_ps30 );
 			}
 			break;
@@ -96,6 +97,7 @@ void DrawPassLightPass( const lightPassParms &info, CBaseVSShader *pShader, IMat
 			{
 				DECLARE_STATIC_PIXEL_SHADER( lightingpass_spot_ps30 );
 				SET_STATIC_PIXEL_SHADER_COMBO( USEWORLDTRANSFORM, bWorldProjection ? 1 : 0 );
+				SET_STATIC_PIXEL_SHADER_COMBO( HARDWARE_FILTER, GetDeferredExt()->UsingHardwareFiltering() );
 				SET_STATIC_PIXEL_SHADER( lightingpass_spot_ps30 );
 			}
 			break;

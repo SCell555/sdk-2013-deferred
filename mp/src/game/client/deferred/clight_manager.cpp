@@ -1468,13 +1468,12 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 	{
 		Assert( iNumLightTypes == 2 );
 
-		const char *pszFilterName = "UNKNOWN FILTER";
+		const char *pszFilterName = "5x5 GAUSS";
 		const char *pszProfile = "HARDWARE";
+		if ( !GetDeferredManager()->UsingHardwareFiltering() )
+			pszProfile = "SOFTWARE";
 
-#if SHADOWMAPPING_USE_COLOR
-		pszProfile = "SOFTWARE";
-#endif
-
+#if 0
 		switch ( SHADOWMAPPING_METHOD )
 		{
 		case SHADOWMAPPING_DEPTH_COLOR__RAW:
@@ -1497,6 +1496,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 		default:
 			Assert(0); // add filter name to this switch case
 		}
+#endif
 
 		engine->Con_NPrintf( 17, "STATS - RENDERING" );
 		engine->Con_NPrintf( 18, "Fullscreen passes - point: %i, spot: %i, total: %i",

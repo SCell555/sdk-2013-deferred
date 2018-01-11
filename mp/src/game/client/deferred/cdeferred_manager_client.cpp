@@ -74,6 +74,16 @@ bool CDeferredManagerClient::Init()
 			ConVarRef r_shadows( "r_shadows" );
 			r_shadows.SetValue( "0" );
 
+#define VENDOR_NVIDIA 0x10DE
+#define VENDOR_INTEL 0x8086
+#define VENDOR_ATI 0x1002
+#define VENDOR_AMD 0x1022
+
+			MaterialAdapterInfo_t info;
+			materials->GetDisplayAdapterInfo( materials->GetCurrentAdapter(), info );
+			m_bHardwareFiltering = info.m_VendorID == VENDOR_NVIDIA || info.m_VendorID == VENDOR_INTEL;
+			GetDeferredExt()->SetUsingHardwareFiltering( m_bHardwareFiltering ); // remove intel?
+
 			InitDeferredRTs( true );
 
 			materials->AddModeChangeCallBack( &DefRTsOnModeChanged );
@@ -89,14 +99,9 @@ bool CDeferredManagerClient::Init()
 		Warning( "Your hardware does not seem to support shader model 3.0. If you think that this is an error (hybrid GPUs), add -forcedeferred as start parameter.\n" );
 		g_pCurrentViewRender = new CViewRender();
 	}
+#if 0
 	else
 	{
-#define VENDOR_NVIDIA 0x10DE
-#define VENDOR_INTEL 0x8086
-#define VENDOR_ATI 0x1002
-#define VENDOR_AMD 0x1022
-
-#ifndef SHADOWMAPPING_USE_COLOR
 		MaterialAdapterInfo_t info;
 		materials->GetDisplayAdapterInfo( materials->GetCurrentAdapter(), info );
 
@@ -109,8 +114,8 @@ bool CDeferredManagerClient::Init()
 			pATIWarning->InvalidateLayout();
 			pATIWarning->DoModal();
 		}
-#endif
 	}
+#endif
 
 	view = g_pCurrentViewRender;
 

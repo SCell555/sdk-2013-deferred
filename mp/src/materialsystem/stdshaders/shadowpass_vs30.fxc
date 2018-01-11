@@ -1,4 +1,5 @@
 
+// STATIC:		"HARDWARE_FILTER"		"0..1"
 // STATIC:		"MODEL"					"0..1"
 // STATIC:		"MORPHING_VTEX"			"0..1"
 // STATIC:		"MULTITEXTURE"			"0..1"
