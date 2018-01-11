@@ -24,12 +24,11 @@ ipch
 *.mak
 *.mak.vpc_crc
 *.xcodeproj/
+*.project
+*.a
 obj*/
 !devtools/*.mak
 !utils/smdlexp/smdlexp.mak
-
-# Linux files
-*.project
 
 # Specific Source build products
 client.pdb
@@ -38,6 +37,11 @@ client.lib
 server.pdb
 server.dll
 server.lib
+
+mathlib.lib
+tier1.lib
+vgui_controls.lib
+raytrace.lib
 
 client.so
 client.so.dbg
