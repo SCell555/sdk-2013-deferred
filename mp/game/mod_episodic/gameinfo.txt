@@ -14,21 +14,21 @@
 	}
 	supportsvr	1
 
-	// mount
-	// {
-		// 420
-		// {
-			// "head"	"1"
-			// "episodic"
-			// {
-				// "vpk"	"ep1_pak"
-			// }
-			// "ep2"
-			// {
-				// "vpk"	"ep2_pak"
-			// }
-		// }
-	// }
+	mount
+	{
+		420
+		{
+			"head"	"1"
+			"episodic"
+			{
+				"vpk"	"ep1_pak"
+			}
+			"ep2"
+			{
+				"vpk"	"ep2_pak"
+			}
+		}
+	}
 
 	FileSystem
 	{
@@ -82,8 +82,6 @@
 			game				|all_source_engine_paths|hl2/hl2_misc.vpk
 			platform			|all_source_engine_paths|platform/platform_misc.vpk
 
-			game				"D:\Steam\steamapps\sourcemods\HL Extreme"
-			
 			// Add the HL2 directory as a game search path.  This is also where where writes
 			// to the "game" path go.
 			game+game_write		|gameinfo_path|
