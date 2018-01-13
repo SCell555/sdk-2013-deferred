@@ -43,6 +43,7 @@ BEGIN_VS_SHADER( LIGHTING_GLOBAL, "" )
 			SET_STATIC_VERTEX_SHADER( defconstruct_vs30 );
 
 			DECLARE_STATIC_PIXEL_SHADER( lightingpass_global_ps30 );
+            SET_STATIC_PIXEL_SHADER_COMBO( HARDWARE_FILTER, GetDeferredExt()->UsingHardwareFiltering() );
 			SET_STATIC_PIXEL_SHADER( lightingpass_global_ps30 );
 		}
 		DYNAMIC_STATE

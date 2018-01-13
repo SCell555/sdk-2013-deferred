@@ -1594,8 +1594,10 @@ void CDeferredViewRender::Shutdown()
 
 	for ( CUtlVector<IMesh*>& list : m_hRadiosityDebugMeshList )
 	{
-		for ( IMesh* &mesh : list )
+        const int count = list.Count();
+		for ( int i = 0; i < count; i++ )
 		{
+            IMesh* mesh = list[i];
 			Assert( mesh != NULL );
 
 			pRenderContext->DestroyStaticMesh( mesh );

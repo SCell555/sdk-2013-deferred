@@ -60,6 +60,18 @@ bool CDeferredManagerClient::Init()
 
 		if ( bGotDefShaderDll )
 		{
+#define VENDOR_NVIDIA 0x10DE
+#define VENDOR_INTEL 0x8086
+#define VENDOR_ATI 0x1002
+#define VENDOR_AMD 0x1022
+
+			MaterialAdapterInfo_t info;
+			materials->GetDisplayAdapterInfo(materials->GetCurrentAdapter(), info);
+			m_bHardwareFiltering = info.m_VendorID == VENDOR_NVIDIA || info.m_VendorID == VENDOR_INTEL; // remove intel?
+			GetDeferredExt()->SetUsingHardwareFiltering( m_bHardwareFiltering );
+			static const Color k( 0, 255, 128, 255 );
+			ConColorMsg( k, "Running deferred with %s filtering\n", m_bHardwareFiltering ? "HARDWARE" : "SOFTWARE" );
+
 			g_pOldMatSystem = materials;
 
 			g_DeferredMaterialSystem.InitPassThru( materials );
@@ -73,16 +85,6 @@ bool CDeferredManagerClient::Init()
 
 			ConVarRef r_shadows( "r_shadows" );
 			r_shadows.SetValue( "0" );
-
-#define VENDOR_NVIDIA 0x10DE
-#define VENDOR_INTEL 0x8086
-#define VENDOR_ATI 0x1002
-#define VENDOR_AMD 0x1022
-
-			MaterialAdapterInfo_t info;
-			materials->GetDisplayAdapterInfo( materials->GetCurrentAdapter(), info );
-			m_bHardwareFiltering = info.m_VendorID == VENDOR_NVIDIA || info.m_VendorID == VENDOR_INTEL;
-			GetDeferredExt()->SetUsingHardwareFiltering( m_bHardwareFiltering ); // remove intel?
 
 			InitDeferredRTs( true );
 
@@ -99,23 +101,6 @@ bool CDeferredManagerClient::Init()
 		Warning( "Your hardware does not seem to support shader model 3.0. If you think that this is an error (hybrid GPUs), add -forcedeferred as start parameter.\n" );
 		g_pCurrentViewRender = new CViewRender();
 	}
-#if 0
-	else
-	{
-		MaterialAdapterInfo_t info;
-		materials->GetDisplayAdapterInfo( materials->GetCurrentAdapter(), info );
-
-		if ( info.m_VendorID == VENDOR_ATI ||
-			info.m_VendorID == VENDOR_AMD )
-		{
-			vgui::MessageBox *pATIWarning = new vgui::MessageBox("UNSUPPORTED HARDWARE", VarArgs( "AMD/ATI IS NOT YET SUPPORTED IN HARDWARE FILTERING MODE\n"
-				"(cdeferred_manager_client.cpp #%i).", __LINE__ ) );
-
-			pATIWarning->InvalidateLayout();
-			pATIWarning->DoModal();
-		}
-	}
-#endif
 
 	view = g_pCurrentViewRender;
 
