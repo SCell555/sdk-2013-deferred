@@ -1,6 +1,7 @@
 
 #include "cbase.h"
 #include "deferred/deferred_shared_common.h"
+#include "mapentities.h"
 #include "filesystem.h"
 #include "bspfile.h"
 #include "utlbuffer.h"
@@ -124,12 +125,23 @@ static ConVar deferred_autoenvlight_ambient_intensity_low("deferred_autoenvlight
 static ConVar deferred_autoenvlight_ambient_intensity_high("deferred_autoenvlight_ambient_intensity_high", "0.45");
 static ConVar deferred_autoenvlight_diffuse_intensity("deferred_autoenvlight_diffuse_intensity", "1");
 
+KeyValues* FindParentOfKey( KeyValues* root, KeyValues* find )
+{
+	FOR_EACH_TRUE_SUBKEY( root, child )
+	{
+		if ( child == find )
+			return root;
+		if ( KeyValues* tmp = FindParentOfKey( child, find ) )
+			return tmp;
+	}
+	return NULL;
+}
 
 void CDeferredManagerServer::LevelInitPreEntity()
 {
 	if ( gpGlobals->eLoadType == MapLoad_LoadGame )
 		return;
-	const char* const entStr = engine->GetMapEntitiesString();
+	const char* entStr = engine->GetMapEntitiesString();
 
 	if ( V_stristr( entStr, "light_deferred_global" ) )
 		return;
@@ -180,49 +192,55 @@ void CDeferredManagerServer::LevelInitPreEntity()
 
 	g_pFullFileSystem->Close( hFile );
 
-	CUtlBuffer entityData( entStr, V_strlen( entStr ) + 1, CUtlBuffer::TEXT_BUFFER | CUtlBuffer::READ_ONLY | CUtlBuffer::CONTAINS_CRLF );
+	KeyValuesAD vmfFile( "vmf" );
 
-	KeyValuesAD vmfFile("vmf");
-	char token[1024];
-	while ( entityData.ParseToken( "{", "}", token, 1024 ) )
+	char szTokenBuffer[MAPKEY_MAXLENGTH];
+	for ( ; true; entStr = MapEntity_SkipToNextEntity( entStr, szTokenBuffer ) )
 	{
-		CUtlBuffer tmpBuffer(0, 0, CUtlBuffer::TEXT_BUFFER);
-		tmpBuffer.PutString( R"("entity")" "\n{\n" );
-		tmpBuffer.PutString( token );
-		tmpBuffer.PutString( "\n}" );
-		KeyValues* pSubKey = new KeyValues( "entity" );
-		pSubKey->LoadFromBuffer( "entity", tmpBuffer );
-		if ( V_stristr( pSubKey->GetString( "classname" ), "light" ) )
-			vmfFile->AddSubKey( pSubKey );
+		char token[MAPKEY_MAXLENGTH];
+		entStr = MapEntity_ParseToken( entStr, token );
+
+		if ( !entStr )
+			break;
+
+		if ( token[0] != '{' )
+		{
+			Error( "MapEntity_ParseAllEntities: found %s when expecting {", token );
+			continue;
+		}
+		
+		CEntityMapData entData( (char*)entStr );
+		
+		char className[MAPKEY_MAXLENGTH];
+		entData.ExtractValue( "classname", className );
+		int iType;
+		if ( FStrEq( className, "light" ) )
+			iType = 0;
+		else if ( FStrEq( className, "light_spot" ) )
+			iType = 1;
+		else if ( FStrEq( className, "point_spotlight" ) )
+			iType = 2;
+		else if ( FStrEq( className, "light_environment" ) )
+			iType = 3;
 		else
-			pSubKey->deleteThis();
+			continue;
+		
+		char keyName[MAPKEY_MAXLENGTH];
+		char value[MAPKEY_MAXLENGTH];
+		KeyValues* pSubKey = new KeyValues( className );
+		if ( entData.GetFirstKey( keyName, value ) )
+		{
+			do 
+			{
+				pSubKey->SetString( keyName, value );
+			} 
+			while ( entData.GetNextKey( keyName, value ) );
+		}
+		pSubKey->SetInt( "light_type", iType );
+		vmfFile->AddSubKey( pSubKey );
 	}
 
-	FOR_EACH_TRUE_SUBKEY( vmfFile, entity )
-	{
-		KeyValues* clsName = entity->FindKey( "classname" );
-		KeyValues* lightType = entity->FindKey( "light_type", true );
-		if (FStrEq( clsName->GetString(), "light" ))
-		{
-			lightType->SetInt( NULL, 0 );
-		}
-		else if (FStrEq( clsName->GetString(), "light_spot" ))
-		{
-			lightType->SetInt( NULL, 1 );
-		}
-		else if (FStrEq( clsName->GetString(), "point_spotlight" ))
-		{
-			lightType->SetInt( NULL, 2 );
-		}
-		else if (FStrEq( clsName->GetString(), "light_environment" ))
-		{
-			lightType->SetInt( NULL, 3 );
-		}
-		else
-			lightType->SetInt( NULL, -1 );
-		entity->RemoveSubKey( clsName );
-		clsName->deleteThis();
-	}
+	KeyValuesDumpAsDevMsg( vmfFile, 0, 4 );
 
 	struct SpotLightPair_t
 	{
@@ -398,6 +416,9 @@ void CDeferredManagerServer::LevelInitPreEntity()
 				unspawnedLights.AddToTail( &light );
 			}
 		}
+
+		if ( ( enginetrace->GetPointContents( pos ) & CONTENTS_SOLID ) != 0 )
+			continue;
 
 		out:
 		CDeferredLight* lightEntity = static_cast<CDeferredLight*>( CBaseEntity::CreateNoSpawn( "light_deferred", pos, rot ) );
