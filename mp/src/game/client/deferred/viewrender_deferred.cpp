@@ -31,6 +31,8 @@
 #include "vgui_controls/Controls.h"
 #include "debugoverlay_shared.h"
 
+#include "viewrender_deferred_helper.h"
+
 #include "tier0/memdbgon.h"
 
 extern ConVar r_drawopaquerenderables;
@@ -573,6 +575,8 @@ void CBaseWorldViewDeferred::DrawExecute( float waterHeight, view_id_t viewID, f
 
 	pRenderContext.SafeRelease();
 
+	helper::bDisableDecalRendering = m_bDrawWorldNormal;
+
 	DrawWorldDeferred( waterZAdjust );
 
 	//if ( m_DrawFlags & DF_DRAW_ENTITITES )
@@ -600,6 +604,7 @@ void CBaseWorldViewDeferred::DrawExecute( float waterHeight, view_id_t viewID, f
 	m_DrawFlags = iDrawFlagsBackup;
 
 	g_CurrentViewID = savedViewID;
+	helper::bDisableDecalRendering = false;
 }
 
 void CBaseWorldViewDeferred::PushView( float waterHeight )
