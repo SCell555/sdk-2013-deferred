@@ -160,7 +160,7 @@ PS_OUTPUT main( const PS_INPUT In )
 
 	Out.vColor_0 = flAlbedoSample;
 	Out.vColor_1 = float4( In.worldNormal_Depth.w, 0, 0, 1 );
-	Out.vColor_2 = float4( worldNormal, PackLightingControls( phong_exp / 63.0f,
+	Out.vColor_2 = float4( worldNormal, PackLightingControls( phong_exp,
 		g_flHalflambert_Litface.x, g_flHalflambert_Litface.y ) );;
 	Out.vColor_3 = float4( 0, 0, 0, 0 );
 

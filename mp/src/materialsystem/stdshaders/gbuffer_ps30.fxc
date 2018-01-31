@@ -144,7 +144,7 @@ PS_OUTPUT main( const PS_INPUT In )
 #endif
 
 #if DEFCFG_LIGHTCTRL_PACKING
-	Out.vColor_0 = float4( worldNormal, PackLightingControls( phong_exp / 63.0f,
+	Out.vColor_0 = float4( worldNormal, PackLightingControls( phong_exp,
 		g_flHalflambert_Litface.x, g_flHalflambert_Litface.y ) );
 #else
 	Out.vColor_0 = float4( worldNormal, 1 );
