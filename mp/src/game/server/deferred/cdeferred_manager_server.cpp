@@ -125,18 +125,6 @@ static ConVar deferred_autoenvlight_ambient_intensity_low("deferred_autoenvlight
 static ConVar deferred_autoenvlight_ambient_intensity_high("deferred_autoenvlight_ambient_intensity_high", "0.45");
 static ConVar deferred_autoenvlight_diffuse_intensity("deferred_autoenvlight_diffuse_intensity", "1");
 
-KeyValues* FindParentOfKey( KeyValues* root, KeyValues* find )
-{
-	FOR_EACH_TRUE_SUBKEY( root, child )
-	{
-		if ( child == find )
-			return root;
-		if ( KeyValues* tmp = FindParentOfKey( child, find ) )
-			return tmp;
-	}
-	return NULL;
-}
-
 void CDeferredManagerServer::LevelInitPreEntity()
 {
 	if ( gpGlobals->eLoadType == MapLoad_LoadGame )
