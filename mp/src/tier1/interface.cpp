@@ -328,7 +328,7 @@ CSysModule *Sys_LoadModule( const char *pModuleName, Sys_Flags flags /* = SYS_NO
 				0,
 				NULL 
 			);
-
+			Msg( "Failed to load %s: %s\n", pModuleName, lpMsgBuf );
 			LocalFree( (HLOCAL)lpMsgBuf );
 #elif defined( _X360 )
 			DWORD error = GetLastError();
