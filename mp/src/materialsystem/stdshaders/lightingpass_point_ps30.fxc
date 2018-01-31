@@ -44,6 +44,9 @@
 
 sampler sNormals							: register( s0 );
 sampler sDepth								: register( s1 );
+#if !DEFCFG_LIGHTCTRL_PACKING
+sampler sLightCtrl							: register( s2 );
+#endif
 
 const float3 g_vecViewOrigin				: register( c0 );
 const float4 g_vecShadowMappingTweaks_0		: register( c1 );
@@ -154,6 +157,13 @@ PS_OUTPUT main( const PS_INPUT In )
 	bool half_lambert, litface;
 #if DEFCFG_CHEAP_LIGHTS
 	phong_exp = half_lambert = litface = 0;
+#elif !DEFCFG_LIGHTCTRL_PACKING
+	{
+		float4 flLightCtrl = tex2D( sLightCtrl, vecTexcoords );
+		phong_exp = flLightCtrl.x;
+		half_lambert = flLightCtrl.y;
+		litface = flLightCtrl.z;
+	}
 #else
 	UnpackLightingControls( flNormalCtrl.a, phong_exp, half_lambert, litface );
 #endif

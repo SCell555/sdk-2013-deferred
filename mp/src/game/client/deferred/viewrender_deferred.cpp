@@ -903,6 +903,8 @@ void CGBufferView::PushGBuffer( bool bInitial, float zScale, bool bClearDepth )
 #if DEFCFG_DEFERRED_SHADING == 1
 	pRenderContext->SetRenderTargetEx( 2, pNormals );
 	pRenderContext->SetRenderTargetEx( 3, GetDefRT_Specular() );
+#elif !DEFCFG_LIGHTCTRL_PACKING
+	pRenderContext->SetRenderTargetEx( 2, GetDefRT_LightCtrl() );
 #endif
 
 	pRenderContext->SetIntRenderingParameter( INT_RENDERPARM_DEFERRED_RENDER_STAGE,

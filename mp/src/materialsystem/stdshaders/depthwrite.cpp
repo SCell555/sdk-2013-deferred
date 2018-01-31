@@ -8,6 +8,7 @@
 
 #include "BaseVSShader.h"
 
+#if 0
 #include "defpass_shadow.h"
 #include "deferred_context.h"
 
@@ -58,3 +59,5 @@ BEGIN_VS_SHADER_FLAGS( DepthWrite, "Help for Depth Write", SHADER_NOT_EDITABLE )
 			DrawPassShadowPass( info, this, params, pShaderShadow, pShaderAPI, vertexCompression, pDefContext );
 		}
 END_SHADER
+
+#endif

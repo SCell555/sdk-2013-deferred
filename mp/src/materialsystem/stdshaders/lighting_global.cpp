@@ -34,6 +34,9 @@ BEGIN_VS_SHADER( LIGHTING_GLOBAL, "" )
 			pShaderShadow->EnableTexture( SHADER_SAMPLER0, true );
 			pShaderShadow->EnableTexture( SHADER_SAMPLER1, true );
 			pShaderShadow->EnableTexture( SHADER_SAMPLER2, true );
+#if !DEFCFG_LIGHTCTRL_PACKING
+			pShaderShadow->EnableTexture( SHADER_SAMPLER3, true );
+#endif
 
 			pShaderShadow->VertexShaderVertexFormat( VERTEX_POSITION, 1, NULL, 0 );
 
@@ -63,6 +66,9 @@ BEGIN_VS_SHADER( LIGHTING_GLOBAL, "" )
 
 			BindTexture( SHADER_SAMPLER0, GetDeferredExt()->GetTexture_Normals() );
 			BindTexture( SHADER_SAMPLER1, GetDeferredExt()->GetTexture_Depth() );
+#if !DEFCFG_LIGHTCTRL_PACKING
+			BindTexture( SHADER_SAMPLER3, GetDeferredExt()->GetTexture_LightCtrl() );
+#endif
 
 			if ( data.bShadow )
 			{

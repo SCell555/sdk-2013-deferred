@@ -45,16 +45,11 @@ bool CDeferredManagerClient::Init()
 {
 	AssertMsg( g_pCurrentViewRender == NULL, "viewrender already allocated?!" );
 
-	const bool bForceDeferred = CommandLine() && CommandLine()->FindParm("-forcedeferred") != 0;
-	bool bSM30 = g_pMaterialSystemHardwareConfig->GetDXSupportLevel() >= 95;
-
-	if ( !bSM30 )
+	if ( g_pMaterialSystemHardwareConfig->GetDXSupportLevel() < 95 )
 	{
 		Warning( "The engine doesn't recognize your GPU to support SM3.0, running deferred anyway...\n" );
-		bSM30 = true;
 	}
 
-	if ( bSM30 || bForceDeferred )
 	{
 		const bool bGotDefShaderDll = ConnectDeferredExt();
 
@@ -68,7 +63,7 @@ bool CDeferredManagerClient::Init()
 			MaterialAdapterInfo_t info;
 			materials->GetDisplayAdapterInfo(materials->GetCurrentAdapter(), info);
 			m_bHardwareFiltering = info.m_VendorID == VENDOR_NVIDIA || info.m_VendorID == VENDOR_INTEL; // remove intel?
-			GetDeferredExt()->SetUsingHardwareFiltering( m_bHardwareFiltering );
+			GetDeferredExt()->SetUsingHardwareFiltering( m_bHardwareFiltering && !CommandLine()->FindParm( "-software" ) );
 			static const Color k( 0, 255, 128, 255 );
 			ConColorMsg( k, "Running deferred with %s filtering\n", m_bHardwareFiltering ? "HARDWARE" : "SOFTWARE" );
 

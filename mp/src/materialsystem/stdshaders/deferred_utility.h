@@ -3,8 +3,8 @@
 
 
 #define DEFAULT_ALPHATESTREF 0.5f
-#define DEFAULT_PHONG_SCALE 0.3f
-#define DEFAULT_PHONG_EXP 0.15f
+#define DEFAULT_PHONG_SCALE 0.0f
+#define DEFAULT_PHONG_EXP 0.0f
 #define DEFAULT_PHONG_BOOST 1.0f
 
 #define PARM_VALID( x ) ( x != -1 )

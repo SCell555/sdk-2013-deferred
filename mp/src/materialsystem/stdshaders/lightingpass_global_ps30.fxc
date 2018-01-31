@@ -8,6 +8,9 @@
 
 sampler sNormals							: register( s0 );
 sampler sDepth								: register( s1 );
+#if !DEFCFG_LIGHTCTRL_PACKING
+sampler sLightCtrl							: register( s3 );
+#endif
 
 #if HAS_SHADOW
 sampler sShadowDepth						: register( s2 );
@@ -51,7 +54,17 @@ PS_OUTPUT main( const PS_INPUT In )
 
 	float4 flNormalCtrl = tex2D( sNormals, In.vTexCoord );
 	float3 flNormal = normalize( flNormalCtrl.xyz * 2.0f - 1.0f );
+	
+#if !DEFCFG_LIGHTCTRL_PACKING
+	{
+		float4 flLightCtrl = tex2D( sLightCtrl, In.vTexCoord );
+		phong_exp = flLightCtrl.x;
+		half_lambert = flLightCtrl.y;
+		litface = flLightCtrl.z;
+	}
+#else
 	UnpackLightingControls( flNormalCtrl.a, phong_exp, half_lambert, litface );
+#endif
 
 	float3 flLitNormal = lerp( 1, dot( flNormal, g_vecLightVec_Forward ), litface ) * flNormal;
 
