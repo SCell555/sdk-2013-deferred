@@ -43,6 +43,11 @@ tier1.lib
 vgui_controls.lib
 raytrace.lib
 
+mathlib.a
+tier1.a
+vgui_controls.a
+raytrace.a
+
 client.so
 client.so.dbg
 server.so
