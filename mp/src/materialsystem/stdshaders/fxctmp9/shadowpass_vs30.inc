@@ -2,27 +2,6 @@
 class shadowpass_vs30_Static_Index
 {
 private:
-	int m_nHARDWARE_FILTER;
-#ifdef _DEBUG
-	bool m_bHARDWARE_FILTER;
-#endif
-public:
-	void SetHARDWARE_FILTER( int i )
-	{
-		Assert( i >= 0 && i <= 1 );
-		m_nHARDWARE_FILTER = i;
-#ifdef _DEBUG
-		m_bHARDWARE_FILTER = true;
-#endif
-	}
-	void SetHARDWARE_FILTER( bool i )
-	{
-		m_nHARDWARE_FILTER = i ? 1 : 0;
-#ifdef _DEBUG
-		m_bHARDWARE_FILTER = true;
-#endif
-	}
-private:
 	int m_nMODEL;
 #ifdef _DEBUG
 	bool m_bMODEL;
@@ -110,10 +89,6 @@ public:
 	shadowpass_vs30_Static_Index( )
 	{
 #ifdef _DEBUG
-		m_bHARDWARE_FILTER = false;
-#endif // _DEBUG
-		m_nHARDWARE_FILTER = 0;
-#ifdef _DEBUG
 		m_bMODEL = false;
 #endif // _DEBUG
 		m_nMODEL = 0;
@@ -135,13 +110,13 @@ public:
 		// Asserts to make sure that we aren't using any skipped combinations.
 		// Asserts to make sure that we are setting all of the combination vars.
 #ifdef _DEBUG
-		bool bAllStaticVarsDefined = m_bHARDWARE_FILTER && m_bMODEL && m_bMORPHING_VTEX && m_bMULTITEXTURE && m_bTREESWAY;
+		bool bAllStaticVarsDefined = m_bMODEL && m_bMORPHING_VTEX && m_bMULTITEXTURE && m_bTREESWAY;
 		Assert( bAllStaticVarsDefined );
 #endif // _DEBUG
-		return ( 48 * m_nHARDWARE_FILTER ) + ( 96 * m_nMODEL ) + ( 192 * m_nMORPHING_VTEX ) + ( 384 * m_nMULTITEXTURE ) + ( 768 * m_nTREESWAY ) + 0;
+		return ( 48 * m_nMODEL ) + ( 96 * m_nMORPHING_VTEX ) + ( 192 * m_nMULTITEXTURE ) + ( 384 * m_nTREESWAY ) + 0;
 	}
 };
-#define shaderStaticTest_shadowpass_vs30 vsh_forgot_to_set_static_HARDWARE_FILTER + vsh_forgot_to_set_static_MODEL + vsh_forgot_to_set_static_MORPHING_VTEX + vsh_forgot_to_set_static_MULTITEXTURE + vsh_forgot_to_set_static_TREESWAY + 0
+#define shaderStaticTest_shadowpass_vs30 vsh_forgot_to_set_static_MODEL + vsh_forgot_to_set_static_MORPHING_VTEX + vsh_forgot_to_set_static_MULTITEXTURE + vsh_forgot_to_set_static_TREESWAY + 0
 class shadowpass_vs30_Dynamic_Index
 {
 private:

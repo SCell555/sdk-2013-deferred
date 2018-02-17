@@ -11,6 +11,7 @@ FORCEINLINE void CommitBaseDeferredConstants_Frustum( IShaderDynamicAPI* pShader
 	else
 		pShaderAPI->SetPixelShaderConstant( iFirstFrustumRegister, GetDeferredExt()->GetFrustumDeltaBase(), 3 );
 }
+
 FORCEINLINE void CommitBaseDeferredConstants_Origin( IShaderDynamicAPI* pShaderAPI,
 	const int iPixelShaderOriginRegister )
 {
@@ -21,14 +22,14 @@ FORCEINLINE void CommitBaseDeferredConstants_Origin( IShaderDynamicAPI* pShaderA
 FORCEINLINE void CommitShadowcastingConstants_Ortho( IShaderDynamicAPI *pShaderAPI, const int index,
 	int iForwardRegister, int iSlopeRegister, int iOriginRegister )
 {
-	Vector4D fwd = GetDeferredExt()->GetLightData_Global().vecLight;
-	fwd *= -1.f;
+	const Vector4D& fwd = -GetDeferredExt()->GetLightData_Global().vecLight;
 	const shadowData_ortho_t &data = GetDeferredExt()->GetShadowData_Ortho( index );
 
 	pShaderAPI->SetVertexShaderConstant( iForwardRegister, fwd.Base() );
 	pShaderAPI->SetVertexShaderConstant( iSlopeRegister, data.vecSlopeSettings.Base() );
 	pShaderAPI->SetVertexShaderConstant( iOriginRegister, data.vecOrigin.Base() );
 }
+
 FORCEINLINE void CommitShadowcastingConstants_Proj( IShaderDynamicAPI *pShaderAPI, const int index,
 	int iForwardRegister, int iSlopeRegister, int iOriginRegister )
 {
@@ -61,8 +62,7 @@ FORCEINLINE void CommitShadowProjectionConstants_Ortho_Single( IShaderDynamicAPI
 	const int index, int iFirstRegister )
 {
 	const shadowData_ortho_t &data = GetDeferredExt()->GetShadowData_Ortho( index );
-	Vector4D fwd = GetDeferredExt()->GetLightData_Global().vecLight;
-	fwd *= -1.f;
+	const Vector4D& fwd = -GetDeferredExt()->GetLightData_Global().vecLight;
 
 	pShaderAPI->SetPixelShaderConstant( iFirstRegister, data.matWorldToTexture.Base(), 3 );
 	iFirstRegister += 3;
@@ -136,16 +136,13 @@ FORCEINLINE void CommitViewVertexShader( IShaderDynamicAPI *pShaderAPI,
 	VMatrix v;
 	v.Identity();
 	pShaderAPI->GetMatrix( MATERIAL_VIEW, v.Base() );
-	v = v.Transpose();
-	pShaderAPI->SetVertexShaderConstant( iRegView, v.Base(), 3 );
+	pShaderAPI->SetVertexShaderConstant( iRegView, v.Transpose().Base(), 3 );
 }
 
-FORCEINLINE Vector4D MakeHalfAmbient( Vector4D ambient_low, Vector4D ambient_high )
+FORCEINLINE Vector4D MakeHalfAmbient( const Vector4D& ambient_low, const Vector4D& ambient_high )
 {
-	Vector4D lowDelta = ambient_low;
-	lowDelta -= ambient_high;
-	lowDelta *= 0.5f;
-	lowDelta += ambient_high;
+	Vector4D lowDelta = ambient_low - ambient_high;
+	lowDelta = ambient_high + lowDelta * 0.5f;
 	for (int i = 0; i < 3; i++)
 		lowDelta[i] = Max(0.f, lowDelta[i]);
 	return lowDelta;
@@ -165,6 +162,5 @@ FORCEINLINE void CommitHalfScreenTexel( IShaderDynamicAPI *pShaderAPI,
 {
 	CommitFullScreenTexel( pShaderAPI, iConstantRegister, flScale * 0.5f );
 }
-
 
 #endif

@@ -28,27 +28,22 @@ namespace Memory
 
 		while ( *input )
 		{
-			if ( isspace( *input ) )
+			if ( *input == ' ' )
 			{
 				++input;
 			}
 
-			BytePattern::Entry entry;
-
 			if ( isxdigit( *input ) )
 			{
-				entry.Unknown = false;
-				entry.Value = strtol( input, NULL, 16 );
+				ret.Bytes.push_back( { strtol( input, NULL, 16 ), false } );
 
 				input += 2;
 			}
 			else
 			{
-				entry.Unknown = true;
+				ret.Bytes.push_back( { 0, true } );
 				input += 2;
 			}
-
-			ret.Bytes.emplace_back( entry );
 		}
 
 		return ret;
@@ -85,7 +80,7 @@ namespace Memory
 
 		for ( size_t i = 0; i <= searchlength - length; ++i )
 		{
-			const uint8* addr = static_cast< const uint8* >( start ) + i;
+			const uint8* addr = static_cast<const uint8*>( start ) + i;
 
 			if ( DataCompare( addr, patternstart, length ) )
 			{
@@ -100,11 +95,6 @@ namespace Memory
 namespace helper
 {
 	bool bDisableDecalRendering = false;
-}
-CON_COMMAND( test_render, "" )
-{
-	using namespace helper;
-	bDisableDecalRendering = !bDisableDecalRendering;
 }
 
 void( *DecalSurfaceDrawOriginal )( IMatRenderContext* pRenderContext, int renderGroup, float a3 );

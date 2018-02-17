@@ -193,7 +193,3 @@ void CDeferredExtension::CommitTexture_Radiosity( ITexture *pTexRadBuffer0, ITex
 	m_pTexRadNormal[0] = pTexRadNormal0;
 	m_pTexRadNormal[1] = pTexRadNormal1;
 }
-void CDeferredExtension::SetUsingHardwareFiltering( bool bHardware )
-{
-	m_bHardwareFiltering = bHardware;
-}

@@ -101,13 +101,11 @@ void DrawPassShadowPass( const defParms_shadow &info, CBaseVSShader *pShader, IM
 		SET_STATIC_VERTEX_SHADER_COMBO( MORPHING_VTEX, bModel && bFastVTex );
 		SET_STATIC_VERTEX_SHADER_COMBO( MULTITEXTURE, bAlbedo2 );
 		SET_STATIC_VERTEX_SHADER_COMBO( TREESWAY, nTreeSwayMode );
-		SET_STATIC_VERTEX_SHADER_COMBO( HARDWARE_FILTER, GetDeferredExt()->UsingHardwareFiltering() );
 		SET_STATIC_VERTEX_SHADER( shadowpass_vs30 );
 
 		DECLARE_STATIC_PIXEL_SHADER( shadowpass_ps30 );
 		SET_STATIC_PIXEL_SHADER_COMBO( ALPHATEST, bAlphatest );
 		SET_STATIC_PIXEL_SHADER_COMBO( MULTITEXTURE, bAlbedo2 );
-		SET_STATIC_PIXEL_SHADER_COMBO( HARDWARE_FILTER, GetDeferredExt()->UsingHardwareFiltering() );
 		SET_STATIC_PIXEL_SHADER( shadowpass_ps30 );
 	}
 	DYNAMIC_STATE
@@ -235,8 +233,9 @@ void DrawPassShadowPass( const defParms_shadow &info, CBaseVSShader *pShader, IM
 			break;
 		}
 
-		if ( !GetDeferredExt()->UsingHardwareFiltering() )
-			CommitViewVertexShader( pShaderAPI, VERTEX_SHADER_SHADER_SPECIFIC_CONST_7 );
+#ifdef SHADOWMAPPING_USE_COLOR
+		CommitViewVertexShader( pShaderAPI, VERTEX_SHADER_SHADER_SPECIFIC_CONST_7 );
+#endif
 	}
 
 	pShader->Draw();

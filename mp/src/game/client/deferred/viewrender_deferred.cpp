@@ -1331,17 +1331,11 @@ void CBaseShadowView::PushView( float waterHeight )
 	CMatRenderContextPtr pRenderContext( materials );
 	pRenderContext->PushRenderTargetAndViewport( m_pDummyTexture, m_pDepthTexture, x, y, width, height );
 
-#if defined( DEBUG )
+#if defined( DEBUG ) || defined( SHADOWMAPPING_USE_COLOR )
 	pRenderContext->ClearColor4ub( 255, 255, 255, 255 );
 	pRenderContext->ClearBuffers( true, true );
 #else
-	if ( GetDeferredManager()->UsingHardwareFiltering() )
-		pRenderContext->ClearBuffers( false, true );
-	else
-	{
-		pRenderContext->ClearColor4ub( 255, 255, 255, 255 );
-		pRenderContext->ClearBuffers( true, true );
-	}
+	pRenderContext->ClearBuffers( false, true );
 #endif
 
 	if ( m_bOutputRadiosity )

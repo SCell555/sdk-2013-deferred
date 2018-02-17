@@ -61,12 +61,9 @@ public:
 	void LevelInitPreEntity();
 	void LevelShutdownPostEntity();
 
-	bool UsingHardwareFiltering() const { return m_bHardwareFiltering; }
-
 private:
 
 	bool m_bDefRenderingEnabled;
-	bool m_bHardwareFiltering;
 
 	void InitializeDeferredMaterials();
 	void ShutdownDeferredMaterials();
