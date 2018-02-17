@@ -405,9 +405,6 @@ void CDeferredManagerServer::LevelInitPreEntity()
 			}
 		}
 
-		if ( ( enginetrace->GetPointContents( pos ) & CONTENTS_SOLID ) != 0 )
-			continue;
-
 		out:
 		CDeferredLight* lightEntity = static_cast<CDeferredLight*>( CBaseEntity::CreateNoSpawn( "light_deferred", pos, rot ) );
 		if ( !lightEntity )

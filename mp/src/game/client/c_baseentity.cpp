@@ -1927,6 +1927,61 @@ float *C_BaseEntity::GetRenderClipPlane( void )
 		return NULL;
 }
 
+void C_BaseEntity::InstallBrushSurfaceRenderer( IBrushRenderer* renderer )
+{
+	m_bHasSpecialRenderer = renderer != NULL;
+	render->InstallBrushSurfaceRenderer( renderer );
+}
+
+static class CDefaultBrushRenderer : public IBrushRenderer
+{
+public:
+	bool RenderBrushModelSurface( IClientEntity* pBaseEntity, IBrushSurface* pBrushSurface ) OVERRIDE
+	{
+		const uint32 numVertices = pBrushSurface->GetVertexCount();
+		if ( vertexBufferSize < numVertices )
+		{
+			MEM_ALLOC_CREDIT_CLASS();
+			if ( vertices )
+				MemAlloc_FreeAligned( vertices );
+			vertexBufferSize = numVertices;
+			vertices = static_cast<BrushVertex_t*>( MemAlloc_AllocAligned( numVertices * sizeof( BrushVertex_t ), sizeof( BrushVertex_t ) ) );
+		}
+		pBrushSurface->GetVertexData( vertices );
+		CMatRenderContextPtr pRenderContext( materials );
+		CMeshBuilder builder;
+		builder.Begin( pRenderContext->GetDynamicMesh( true, 0, 0, pBrushSurface->GetMaterial() ), MATERIAL_POLYGON, numVertices );
+		for ( uint32 i = 0; i < numVertices; ++i )
+		{
+			BrushVertex_t& vertex = vertices[i];
+			builder.Position3fv( vertex.m_Pos.Base() );
+			builder.Normal3fv( vertex.m_Normal.Base() );
+			if ( vertex.m_TangentS.IsValid() )
+				builder.TangentS3fv( vertex.m_TangentS.Base() );
+			if ( vertex.m_TangentT.IsValid() )
+				builder.TangentT3fv( vertex.m_TangentT.Base() );
+			builder.TexCoord2fv( 0, vertex.m_TexCoord.Base() );
+			builder.TexCoord2fv( 1, vertex.m_LightmapCoord.Base() );
+			builder.AdvanceVertex();
+		}
+
+		builder.End( false, true );
+
+		return true;
+	}
+
+	CDefaultBrushRenderer() : vertices( NULL ), vertexBufferSize( 0 ) {}
+
+	~CDefaultBrushRenderer()
+	{
+		if ( vertices )
+			MemAlloc_FreeAligned( vertices );
+	}
+
+private:
+	BrushVertex_t* vertices;
+	uint32 vertexBufferSize;
+} defaultRenderer;
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -1947,6 +2002,9 @@ int C_BaseEntity::DrawBrushModel( bool bDrawingTranslucency, int nFlags, bool bT
 		DepthMode = DEPTH_MODE_SHADOW;
 	}
 
+	if ( !m_bHasSpecialRenderer )
+		render->InstallBrushSurfaceRenderer( &defaultRenderer );
+
 	if ( DepthMode != DEPTH_MODE_NORMAL )
 	{
 		render->DrawBrushModelShadowDepth( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), DepthMode );
@@ -1960,6 +2018,9 @@ int C_BaseEntity::DrawBrushModel( bool bDrawingTranslucency, int nFlags, bool bT
 		}
 		render->DrawBrushModelEx( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), mode );
 	}
+
+	if ( !m_bHasSpecialRenderer )
+		render->InstallBrushSurfaceRenderer( NULL );
 
 	return 1;
 }
