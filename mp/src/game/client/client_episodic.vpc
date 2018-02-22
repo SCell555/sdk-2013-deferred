@@ -101,6 +101,15 @@ $Project "Client (Episodic)"
 				$File	"deferred\materialsystem_passthru.cpp"
 				$File	"deferred\materialsystem_passthru.h"
 				$File	"deferred\viewrender_deferred_helper.cpp"
+				{
+					$Configuration
+					{
+						$Compiler
+						{
+							$AdditionalIncludeDirectories	"$BASE;$SRCDIR\thirdparty\minhook\include"
+						}
+					}
+				}
 				$File	"deferred\viewrender_deferred_helper.h"
 				$File	"deferred\viewrender_deferred.cpp"
 				$File	"deferred\viewrender_deferred.h"

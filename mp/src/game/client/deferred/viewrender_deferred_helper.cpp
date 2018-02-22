@@ -5,7 +5,9 @@
 #include "winlite.h"
 #include "Psapi.h"
 #undef GetObject
-#include "../thirdparty/minhook/include/MinHook.h"
+#include "MinHook.h"
+
+#pragma comment(lib, "Psapi.lib")
 
 #include "tier0/memdbgon.h"
 
