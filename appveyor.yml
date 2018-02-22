@@ -1,0 +1,35 @@
+version: '{branch}-{build}'
+
+branches:
+  only:
+    - master
+
+skip_tags: true
+max_jobs: 1
+image: Visual Studio 2015
+clone_folder: C:\projects\sdk-2013-deferred
+clone_depth: 1
+
+install:
+  - cd C:\projects\sdk-2013-deferred\mp\src
+  - devtools\bin\vpc.exe /episodic +game +shaders /mksln game.sln
+  - copy game.sln+sln_data.txt game.sln
+
+configuration: Release
+
+build:
+  parallel: true
+  project: mp\src\game.sln
+
+  verbosity: minimal
+
+test: off  
+  
+after_build:
+  - if exist C:\projects\sdk-2013-deferred\mp\game\mod_episodic\bin\*.pdb del /f C:\projects\sdk-2013-deferred\mp\game\mod_episodic\bin\*.pdb
+  - set APPVEYOR_REPO_COMMIT=%APPVEYOR_REPO_COMMIT:~0,7%
+
+artifacts:
+  - path: mp\game\mod_episodic\bin
+    name: game_bin_$(APPVEYOR_REPO_COMMIT)
+    type: zip
