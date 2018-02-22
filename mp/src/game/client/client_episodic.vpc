@@ -57,6 +57,24 @@ $Project "Client (Episodic)"
 					$File	"deferred\vgui\vgui_projectable.cpp"
 					$File	"deferred\vgui\vgui_projectable.h"
 				}
+				
+				$Folder	"Hooking"
+				{
+					$File	"$SRCDIR\thirdparty\minhook\src\buffer.c"		\
+							"$SRCDIR\thirdparty\minhook\src\hook.c"			\
+							"$SRCDIR\thirdparty\minhook\src\trampoline.c"	\
+							"$SRCDIR\thirdparty\minhook\src\hde\hde32.c"
+					{
+						$Configuration
+						{
+							$Compiler
+							{
+								$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
+								$DisableSpecificWarnings		"4316;4100;4244;4701;4310"
+							}
+						}
+					}
+				}
 			
 				$File	"deferred\cascade_t.h"
 				$File	"deferred\cascade_t.cpp"
@@ -82,6 +100,8 @@ $Project "Client (Episodic)"
 				$File	"deferred\IDeferredExtClient.cpp"
 				$File	"deferred\materialsystem_passthru.cpp"
 				$File	"deferred\materialsystem_passthru.h"
+				$File	"deferred\viewrender_deferred_helper.cpp"
+				$File	"deferred\viewrender_deferred_helper.h"
 				$File	"deferred\viewrender_deferred.cpp"
 				$File	"deferred\viewrender_deferred.h"
 				$File	"$SRCDIR\public\deferred_light_lump.cpp"
