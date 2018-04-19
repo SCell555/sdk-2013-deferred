@@ -128,8 +128,8 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 	const bool translucentOverride = pMat->IsAlphaTested() || pMat->GetMaterialVarFlag( MATERIAL_VAR_ALPHATEST ) || alphaBlending;
 	const bool bSelfillum = pMat->GetMaterialVarFlag( MATERIAL_VAR_SELFILLUM );
 
-	const bool bDecal = ( pszOldShadername != NULL && Q_stristr( pszOldShadername, "decal" ) != NULL ) ||
-		( pszMatname != NULL && Q_stristr( pszMatname, "decal" ) != NULL ) ||
+	const bool bDecal = ( pszOldShadername != NULL && V_stristr( pszOldShadername, "decal" ) != NULL ) ||
+		( pszMatname != NULL && V_stristr( pszMatname, "decal" ) != NULL ) ||
 		pMat->GetMaterialVarFlag( MATERIAL_VAR_DECAL );
 
 	if ( bDecal )
@@ -145,7 +145,7 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 	}
 
 	// Find a better solution to this...
-	if (true) //( pMat->IsTwoSided() )
+	if ( pMat->IsTwoSided() || FStrEq( pszOldShadername, "LightmappedGeneric" ) || FStrEq( pszOldShadername, "WorldVertexTransition" ) )
 	{
 		msg->SetInt( "$nocull", 1 );
 	}
@@ -166,7 +166,7 @@ IMaterial* CDeferredMaterialSystem::FindProceduralMaterial( const char* pMateria
 	const char* pShaderName = pVMTKeyValues->GetName();
 	for ( const char* const* row : pszShaderReplaceDict )
 	{
-		if ( Q_stristr( pShaderName, row[0] ) == pShaderName )
+		if ( FStrEq( pShaderName, row[0] ) )
 		{
 			pVMTKeyValues->SetName( row[1] );
 			matCount++;
@@ -181,7 +181,7 @@ IMaterial* CDeferredMaterialSystem::CreateMaterial( const char* pMaterialName, K
 	const char* pShaderName = pVMTKeyValues->GetName();
 	for ( const char* const* row : pszShaderReplaceDict )
 	{
-		if ( Q_stristr( pShaderName, row[0] ) == pShaderName )
+		if ( FStrEq( pShaderName, row[0] ) )
 		{
 			pVMTKeyValues->SetName( row[1] );
 			matCount++;
@@ -201,7 +201,7 @@ IMaterial* CDeferredMaterialSystem::ReplaceMaterialInternal( IMaterial* pMat ) c
 	{
 		for ( const char* const* row : pszShaderReplaceDict )
 		{
-			if ( Q_stristr( pShaderName, row[0] ) == pShaderName )
+			if ( FStrEq( pShaderName, row[0] ) )
 			{
 				ShaderReplaceReplMat( row[1], pMat );
 				matCount++;
