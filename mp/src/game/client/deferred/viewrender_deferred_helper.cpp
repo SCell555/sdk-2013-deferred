@@ -3,11 +3,16 @@
 
 #include <vector>
 #include "winlite.h"
-#include "Psapi.h"
 #undef GetObject
 #include "MinHook.h"
 
+#ifdef __linux__
+#include <dlfcn.h>
+#include <libgen.h>
+#else
+#include "Psapi.h"
 #pragma comment(lib, "Psapi.lib")
+#endif
 
 #include "tier0/memdbgon.h"
 
@@ -94,6 +99,47 @@ namespace Memory
 	}
 }
 
+// taken from https://github.com/momentum-mod/game
+#ifdef __linux__
+int GetModuleInformation( const char *name, void **base, size_t *length )
+{
+	// this is the only way to do this on linux, lol
+	FILE *f = fopen( "/proc/self/maps", "r" );
+	if (!f)
+		return 1;
+
+	char buf[PATH_MAX+100];
+	while ( !feof( f ) )
+	{
+		if ( !fgets( buf, sizeof( buf ), f ) )
+			break;
+
+		char *tmp = strrchr( buf, '\n' );
+		if ( tmp )
+			*tmp = '\0';
+
+		char *mapname = strchr( buf, '/' );
+		if ( !mapname )
+			continue;
+
+		char perm[5];
+		unsigned long begin, end;
+		sscanf( buf, "%lx-%lx %4s", &begin, &end, perm );
+		
+		if ( strcmp( basename( mapname ), name ) == 0 && perm[0] == 'r' && perm[2] == 'x' )
+		{
+			*base = (void*)begin;
+			*length = (size_t)end-begin;
+			fclose( f );
+			return 0;
+		}
+	}
+
+	fclose( f );
+	return 2;
+}
+#endif
+
 namespace helper
 {
 	bool bDisableDecalRendering = false;
@@ -122,14 +168,23 @@ public:
 	bool Init() OVERRIDE
 	{
 		using namespace Memory;
-		CSysModule* engineDll = Sys_LoadModule( "engine.dll" );
-		MODULEINFO info;
-		GetModuleInformation( GetCurrentProcess(), reinterpret_cast< HMODULE >( engineDll ), &info, sizeof( info ) );
-
+#ifdef WIN32
+		CSysModule* engineDll = Sys_LoadModule( "engine" DLL_EXT_STRING );
 		const BytePattern& decalSurfaceDrawPattern			= GetPatternFromString( "55 8B EC A1 ?? ?? ?? ?? 83 EC 24" );
 		const BytePattern& dispInfo_DrawDecalsGroupPattern	= GetPatternFromString( "55 8B EC 81 EC ?? ?? ?? ?? 8B 0D ?? ?? ?? ?? 56 8B 01 FF 90 ?? ?? ?? ?? 8B F0 89 75 E0" );
-
+		MODULEINFO info;
+		GetModuleInformation( GetCurrentProcess(), reinterpret_cast<HMODULE>( engineDll ), &info, sizeof( info ) );
 #define FUNC_FROM_PATTERN( name )	void* name##Func = FindPattern( info.lpBaseOfDll, info.SizeOfImage, name##Pattern )
+#elif __linux__
+		const BytePattern& decalSurfaceDrawPattern			= GetPatternFromString( "55 89 E5 57 56 53 31 DB 83 EC ?? C7 45 ?? ?? ?? ?? ?? A1 ?? ?? ?? ?? C7 45 ?? ?? ?? ?? ?? 8B 75 ?? C7 45 ?? ?? ?? ?? ?? 8B 7D ??" );
+		const BytePattern& dispInfo_DrawDecalsGroupPattern	= GetPatternFromString( "55 89 E5 57 56 53 81 EC ?? ?? ?? ?? A1 ?? ?? ?? ?? 8B 5D ?? 8B 10 89 04 24 FF 92 ?? ?? ?? ?? 85 C0 89 85 ?? ?? ?? ??" );
+		void* pBase;
+		size_t length;
+		GetModuleInformation( "engine" DLL_EXT_STRING, &pBase, &length );
+#define FUNC_FROM_PATTERN( name )	void* name##Func = FindPattern( pBase, length, name##Pattern )
+#else
+	#error	"Not supported platform!"
+#endif
 
 		FUNC_FROM_PATTERN( decalSurfaceDraw );
 		FUNC_FROM_PATTERN( dispInfo_DrawDecalsGroup );
