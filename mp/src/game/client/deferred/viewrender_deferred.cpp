@@ -923,7 +923,7 @@ void CGBufferView::PushGBuffer( bool bInitial, float zScale, bool bClearDepth )
 
 	defData_setZScale data;
 	data.zScale = zScale;
-	QUEUE_FIRE( defData_setZScale, Fire, data );
+	QUEUE_FIRE( CommitZScale, zScale );
 }
 
 void CGBufferView::PopGBuffer()
@@ -1445,26 +1445,25 @@ void COrthoShadowView::CommitData()
 	AngleVectors( angles, &fwd, &right, &down );
 	down *= -1.0f;
 
-	sendShadowDataOrtho shadowData;
-	shadowData.index = iCascadeIndex;
+	shadowData_ortho_t shadowData;
 
 #if CSM_USE_COMPOSITED_TARGET
-	shadowData.data.iRes_x = CSM_COMP_RES_X;
-	shadowData.data.iRes_y = CSM_COMP_RES_Y;
+	shadowData.iRes_x = CSM_COMP_RES_X;
+	shadowData.iRes_y = CSM_COMP_RES_Y;
 #else
-	shadowData.data.iRes_x = width;
-	shadowData.data.iRes_y = height;
+	shadowData.iRes_x = width;
+	shadowData.iRes_y = height;
 #endif
 
-	shadowData.data.vecSlopeSettings.Init(
+	shadowData.vecSlopeSettings.Init(
 		data.flSlopeScaleMin, data.flSlopeScaleMax, data.flNormalScaleMax, 1.0f / zFar
 		);
-	shadowData.data.vecOrigin.Init( origin );
+	shadowData.vecOrigin.Init( origin );
 
 	Vector4D matrix_scale_offset( 0.5f, -0.5f, 0.5f, 0.5f );
 
 #if CSM_USE_COMPOSITED_TARGET
-	shadowData.data.vecUVTransform.Init( x / (float)CSM_COMP_RES_X,
+	shadowData.vecUVTransform.Init( x / (float)CSM_COMP_RES_X,
 		y / (float)CSM_COMP_RES_Y,
 		width / (float) CSM_COMP_RES_X,
 		height / (float) CSM_COMP_RES_Y );
@@ -1479,9 +1478,9 @@ void COrthoShadowView::CommitData()
 	screenToTexture[0][3] = matrix_scale_offset.z;
 	screenToTexture[1][3] = matrix_scale_offset.w;
 
-	MatrixMultiply( screenToTexture, c, shadowData.data.matWorldToTexture );
+	MatrixMultiply( screenToTexture, c, shadowData.matWorldToTexture );
 
-	QUEUE_FIRE( sendShadowDataOrtho, Fire, shadowData );
+	QUEUE_FIRE( CommitShadowData_Ortho, iCascadeIndex, shadowData );
 
 	CMatRenderContextPtr pRenderContext( materials );
 	pRenderContext->SetIntRenderingParameter( INT_RENDERPARM_DEFERRED_SHADOW_INDEX, iCascadeIndex );
@@ -1562,15 +1561,14 @@ void CSpotLightShadowView::CommitData()
 	Vector fwd;
 	AngleVectors( angles, &fwd );
 
-	sendShadowDataProj data;
-	data.index = m_iIndex;
-	data.data.vecForward.Init( fwd );
-	data.data.vecOrigin.Init( origin );
+	shadowData_proj_t data;
+	data.vecForward.Init( fwd );
+	data.vecOrigin.Init( origin );
 	// slope min, slope max, normal max, depth
 	//data.data.vecSlopeSettings.Init( 0.005f, 0.02f, 3, zFar );
-	data.data.vecSlopeSettings.Init( 0.001f, 0.005f, 3, 0 );
+	data.vecSlopeSettings.Init( 0.001f, 0.005f, 3, 0 );
 
-	QUEUE_FIRE( sendShadowDataProj, Fire, data );
+	QUEUE_FIRE( CommitShadowData_Proj, m_iIndex, data );
 
 	CMatRenderContextPtr pRenderContext( materials );
 	pRenderContext->SetIntRenderingParameter( INT_RENDERPARM_DEFERRED_SHADOW_INDEX, m_iIndex );
@@ -1899,31 +1897,28 @@ void CDeferredViewRender::PerformLighting( const CViewSetup &view )
 			};
 		};
 
-		defData_setGlobalLightState lightDataState;
-		lightDataState.state = GetActiveGlobalLightState();
+		lightData_Global_t lightDataState = GetActiveGlobalLightState();
 
 		if ( !GetLightingEditor()->IsEditorLightingActive() &&
 			deferred_override_globalLight_enable.GetBool() )
 		{
-			lightDataState.state.bShadow = deferred_override_globalLight_shadow_enable.GetBool();
-			UTIL_StringToVector( lightDataState.state.diff.AsVector3D().Base(), deferred_override_globalLight_diffuse.GetString() );
-			UTIL_StringToVector( lightDataState.state.ambh.AsVector3D().Base(), deferred_override_globalLight_ambient_high.GetString() );
-			UTIL_StringToVector( lightDataState.state.ambl.AsVector3D().Base(), deferred_override_globalLight_ambient_low.GetString() );
+			lightDataState.bShadow = deferred_override_globalLight_shadow_enable.GetBool();
+			UTIL_StringToVector( lightDataState.diff.AsVector3D().Base(), deferred_override_globalLight_diffuse.GetString() );
+			UTIL_StringToVector( lightDataState.ambh.AsVector3D().Base(), deferred_override_globalLight_ambient_high.GetString() );
+			UTIL_StringToVector( lightDataState.ambl.AsVector3D().Base(), deferred_override_globalLight_ambient_low.GetString() );
 
-			lightDataState.state.bEnabled = ( lightDataState.state.diff.LengthSqr() > 0.01f ||
-				lightDataState.state.ambh.LengthSqr() > 0.01f ||
-				lightDataState.state.ambl.LengthSqr() > 0.01f );
+			lightDataState.bEnabled = ( lightDataState.diff.LengthSqr() > 0.01f ||
+				lightDataState.ambh.LengthSqr() > 0.01f ||
+				lightDataState.ambl.LengthSqr() > 0.01f );
 		}
 
-		QUEUE_FIRE( defData_setGlobalLightState, Fire, lightDataState );
+		QUEUE_FIRE( CommitLightData_Global, lightDataState );
 
-		if ( lightDataState.state.bEnabled )
+		if ( lightDataState.bEnabled )
 		{
-			bool bShadowedGlobal = lightDataState.state.bShadow;
-
-			if ( bShadowedGlobal )
+			if ( lightDataState.bShadow )
 			{
-				Vector origins[2] = { view.origin, view.origin + lightDataState.state.vecLight.AsVector3D() * 1024 };
+				Vector origins[2] = { view.origin, view.origin + lightDataState.vecLight.AsVector3D() * 1024 };
 				render->ViewSetupVis( false, 2, origins );
 
 				RenderCascadedShadows( view, bRadiosityEnabled );
@@ -2056,11 +2051,11 @@ void CDeferredViewRender::UpdateRadiosityPosition()
 		};
 	};
 
-	defData_setupRadiosity radSetup;
-	radSetup.data.vecOrigin[0] = m_vecRadiosityOrigin[0];
-	radSetup.data.vecOrigin[1] = m_vecRadiosityOrigin[1];
+	radiosityData_t radSetup;
+	radSetup.vecOrigin[0] = m_vecRadiosityOrigin[0];
+	radSetup.vecOrigin[1] = m_vecRadiosityOrigin[1];
 
-	QUEUE_FIRE( defData_setupRadiosity, Fire, radSetup );
+	QUEUE_FIRE( CommitRadiosityData, radSetup );
 }
 
 void CDeferredViewRender::PerformRadiosityGlobal( const int iRadiosityCascade, const CViewSetup &view )
@@ -2847,29 +2842,6 @@ void CDeferredViewRender::RenderView( const CViewSetup &view, int nClearFlags, i
 	m_CurrentView = worldView;
 }
 
-struct defData_setGlobals
-{
-public:
-	Vector orig, fwd;
-	float zDists[2];
-	VMatrix frustumDeltas;
-#if DEFCFG_BILATERAL_DEPTH_TEST
-	VMatrix worldCameraDepthTex;
-#endif
-
-	static void Fire( defData_setGlobals d )
-	{
-		IDeferredExtension *pDef = GetDeferredExt();
-		pDef->CommitOrigin( d.orig );
-		pDef->CommitViewForward( d.fwd );
-		pDef->CommitZDists( d.zDists[0], d.zDists[1] );
-		pDef->CommitFrustumDeltas( d.frustumDeltas );
-#if DEFCFG_BILATERAL_DEPTH_TEST
-		pDef->CommitWorldToCameraDepthTex( d.worldCameraDepthTex );
-#endif
-	};
-};
-
 void CDeferredViewRender::ProcessDeferredGlobals( const CViewSetup &view )
 {
 	VMatrix matPerspective, matView, matViewProj, screen2world;
@@ -2909,15 +2881,12 @@ void CDeferredViewRender::ProcessDeferredGlobals( const CViewSetup &view )
 	frustum_right /= view.zFar;
 	frustum_up /= view.zFar;
 
-	defData_setGlobals data;
-	data.orig = view.origin;
-	AngleVectors( view.angles, &data.fwd );
-	data.zDists[0] = view.zNear;
-	data.zDists[1] = view.zFar;
+	Vector fwd;
+	AngleVectors( view.angles, &fwd );
 
-	data.frustumDeltas.Identity();
-	data.frustumDeltas.SetBasisVectors( frustum_cc, frustum_right, frustum_up );
-	data.frustumDeltas = data.frustumDeltas.Transpose3x3();
+	VMatrix frustumDeltas;
+	frustumDeltas.Identity();
+	frustumDeltas.SetBasisVectors( frustum_cc, frustum_right, frustum_up );
 
 #if DEFCFG_BILATERAL_DEPTH_TEST
 	VMatrix matWorldToCameraDepthTex;
@@ -2925,10 +2894,10 @@ void CDeferredViewRender::ProcessDeferredGlobals( const CViewSetup &view )
 	matWorldToCameraDepthTex[0][3] = matWorldToCameraDepthTex[1][3] = 0.5f;
 	MatrixMultiply( matWorldToCameraDepthTex, matViewProj, matWorldToCameraDepthTex );
 
-	data.worldCameraDepthTex = matWorldToCameraDepthTex.Transpose();
+	QUEUE_FIRE( CommitCommonData, view.origin, fwd, view.zNear, view.zFar, frustumDeltas.Transpose3x3(), matWorldToCameraDepthTex.Transpose() );
+#else
+	QUEUE_FIRE( CommitCommonData, view.origin, fwd, view.zNear, view.zFar, frustumDeltas.Transpose3x3() );
 #endif
-
-	QUEUE_FIRE( defData_setGlobals, Fire, data );
 }
 
 IMesh *CDeferredViewRender::GetRadiosityScreenGrid( const int iCascade )

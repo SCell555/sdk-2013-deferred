@@ -107,19 +107,45 @@ struct radiosityData_t
 	Vector vecOrigin[2];
 };
 
+#include "tier0/memdbgon.h"
+
+struct lightDataCommon_t
+{
+	lightDataCommon_t( size_t dataCount )
+	{
+		pFlData = new float[dataCount];
+	}
+	void DeleteThis()
+	{
+		delete[] pFlData;
+		delete this;
+	}
+
+	float* pFlData;
+	int numRows;
+	int numShadowedCookied;
+	int numShadowed;
+	int numCookied;
+	int numSimple;
+};
+
+#include "tier0/memdbgoff.h"
+
 class IDeferredExtension : public IBaseInterface
 {
 public:
 	virtual void EnableDeferredLighting() = 0;
 
-	virtual void CommitOrigin( const Vector &origin ) = 0;
-	virtual void CommitViewForward( const Vector &fwd ) = 0;
-	virtual void CommitZDists( const float &zNear, const float &zFar ) = 0;
-	virtual void CommitZScale( const float &zFar ) = 0;
-	virtual void CommitFrustumDeltas( const VMatrix &matTFrustum ) = 0;
+	virtual void CommitCommonData( const Vector &origin,
+								   const Vector &fwd,
+								   const float &zNear, const float &zFar,
+								   const VMatrix &matTFrustum
 #if DEFCFG_BILATERAL_DEPTH_TEST
-	virtual void CommitWorldToCameraDepthTex( const VMatrix &matWorldCameraDepthTex ) = 0;
+								,  const VMatrix &matWorldCameraDepthTex
 #endif
+																) = 0;
+
+	virtual void CommitZScale( const float &zScale ) = 0;
 
 	virtual void CommitShadowData_Ortho( const int &index, const shadowData_ortho_t &data ) = 0;
 	virtual void CommitShadowData_Proj( const int &index, const shadowData_proj_t &data ) = 0;
@@ -130,9 +156,7 @@ public:
 	virtual void CommitRadiosityData( const radiosityData_t &data ) = 0;
 
 	virtual void CommitLightData_Global( const lightData_Global_t &data ) = 0;
-	virtual float *CommitLightData_Common( float *pFlData, int numRows,
-		int numShadowedCookied, int numShadowed,
-		int numCookied, int numSimple ) = 0;
+	virtual void CommitLightData_Common( lightDataCommon_t* pData ) = 0;
 
 	virtual void CommitTexture_General( ITexture *pTexNormals, ITexture *pTexDepth,
 #if ( DEFCFG_LIGHTCTRL_PACKING == 0 )
@@ -152,7 +176,7 @@ public:
 		ITexture *pTexRadNormal0, ITexture *pTexRadNormal1 ) = 0;
 };
 
-#define DEFERRED_EXTENSION_VERSION "DeferredExtensionVersion001"
+#define DEFERRED_EXTENSION_VERSION "DeferredExtensionVersion002"
 
 #ifdef STDSHADER_DX9_DLL_EXPORT
 
@@ -166,14 +190,16 @@ public:
 	bool IsDeferredLightingEnabled() const;
 	bool IsRadiosityEnabled() const;
 
-	virtual void CommitOrigin( const Vector &origin );
-	virtual void CommitViewForward( const Vector &fwd );
-	virtual void CommitZDists( const float &zNear, const float &zFar );
-	virtual void CommitZScale( const float &zFar );
-	virtual void CommitFrustumDeltas( const VMatrix &matTFrustum );
+	void CommitCommonData( const Vector &origin,
+						   const Vector &fwd,
+						   const float &zNear, const float &zFar,
+						   const VMatrix &matTFrustum
 #if DEFCFG_BILATERAL_DEPTH_TEST
-	virtual void CommitWorldToCameraDepthTex( const VMatrix &matWorldCameraDepthTex );
+						   , const VMatrix &matWorldCameraDepthTex
 #endif
+														);
+
+	virtual void CommitZScale( const float &zScale );
 
 	virtual void CommitShadowData_Ortho( const int &index, const shadowData_ortho_t &data );
 	virtual void CommitShadowData_Proj( const int &index, const shadowData_proj_t &data );
@@ -183,9 +209,7 @@ public:
 	virtual void CommitRadiosityData( const radiosityData_t &data );
 
 	virtual void CommitLightData_Global( const lightData_Global_t &data );
-	virtual float *CommitLightData_Common( float *pFlData, int numRows,
-		int numShadowedCookied, int numShadowed,
-		int numCookied, int numSimple );
+	virtual void CommitLightData_Common( lightDataCommon_t* pData );
 
 	virtual void CommitTexture_General( ITexture *pTexNormals, ITexture *pTexDepth,
 #if ( DEFCFG_LIGHTCTRL_PACKING == 0 )
@@ -268,7 +292,7 @@ private:
 	radiosityData_t m_dataRadiosity;
 
 	lightData_Global_t m_globalLight;
-	float *m_pflCommonLightData;
+	lightDataCommon_t *m_pflCommonLightData;
 	int m_iCommon_NumRows;
 	int m_iNumCommon_ShadowedCookied;
 	int m_iNumCommon_Shadowed;
@@ -373,7 +397,9 @@ int CDeferredExtension::GetNumActiveLights_Simple()
 }
 float *CDeferredExtension::GetActiveLightData()
 {
-	return m_pflCommonLightData;
+	if ( m_pflCommonLightData )
+		return m_pflCommonLightData->pFlData;
+	return NULL;
 }
 int CDeferredExtension::GetActiveLights_NumRows()
 {

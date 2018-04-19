@@ -59,16 +59,16 @@ extern ConVar deferred_radiosity_debug;
 void OnCookieTableChanged( void *object, INetworkStringTable *stringTable, int stringNumber, const char *newString, void const *newData );
 
 
-#define QUEUE_FIRE( helperName, functionName, varName ){\
+#define QUEUE_FIRE( functionName, ... ){\
 		CMatRenderContextPtr pRenderContext( materials );\
 		ICallQueue *pCallQueue = pRenderContext->GetCallQueue();\
 		if ( pCallQueue )\
-			pCallQueue->QueueCall( helperName::functionName, varName );\
+			pCallQueue->QueueCall( GetDeferredExt(), &IDeferredExtension::functionName, __VA_ARGS__ );\
 		else\
-			helperName::functionName( varName );\
+			GetDeferredExt()->functionName( __VA_ARGS__ );\
 	}
 
-#define SATURATE( x ) ( clamp( (x), 0, 1 ) )
+#define SATURATE( x ) ( Clamp( (x), 0.f, 1.f ) )
 
 inline void DrawLightPassFullscreen( IMaterial *pMaterial, int w, int t )
 {

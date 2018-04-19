@@ -1,6 +1,6 @@
-
 #include "cbase.h"
 #include "deferred/deferred_shared_common.h"
+#include "deferred/vgui/vgui_deferred.h"
 #include "collisionutils.h"
 
 #include "viewrender.h"
@@ -12,7 +12,8 @@
 #include "tier0/memdbgon.h"
 
 static CLightingManager __g_lightingMan;
-CLightingManager *GetLightingManager()
+
+CLightingManager* GetLightingManager()
 {
 	return &__g_lightingMan;
 }
@@ -34,17 +35,15 @@ CLightingManager::CLightingManager() : BaseClass( "LightingManagerSystem" )
 
 	m_vecViewOrigin.Init();
 	m_vecForward.Init();
-	m_flzNear = 0;
+	m_flzNear          = 0;
 	m_bDrawVolumetrics = false;
 #if DEFCFG_USE_SSE
-	m_pSortDataX4 = NULL;
+	m_pSortDataX4     = NULL;
 	m_uiSortDataCount = 0;
 #endif
 }
 
-CLightingManager::~CLightingManager()
-{
-}
+CLightingManager::~CLightingManager() {}
 
 bool CLightingManager::Init()
 {
@@ -58,7 +57,7 @@ void CLightingManager::Shutdown()
 	materials->RemoveReleaseFunc( LightingResourceRelease );
 
 #if DEFCFG_USE_SSE
-	if( m_pSortDataX4 != NULL )
+	if ( m_pSortDataX4 != NULL )
 	{
 		MemAlloc_FreeAligned( m_pSortDataX4 );
 		m_pSortDataX4 = NULL;
@@ -66,29 +65,25 @@ void CLightingManager::Shutdown()
 #endif
 }
 
-void CLightingManager::LevelInitPostEntity()
-{
-}
+void CLightingManager::LevelInitPostEntity() {}
 
 void CLightingManager::LevelShutdownPostEntity()
 {
 	m_hRenderLights.Purge();
 
 	for ( int i = 0; i < LSORT_COUNT; i++ )
-		m_hPreSortedLights[ i ].Purge();
+		m_hPreSortedLights[i].Purge();
 }
 
-void CLightingManager::Update( float ft )
-{
-}
+void CLightingManager::Update( float ft ) {}
 
 void CLightingManager::SetRenderWorldLights( bool bRender )
 {
 	m_bDrawWorldLights = bRender;
 }
 
-void CLightingManager::SetRenderConstants( const VMatrix &ScreenToWorld,
-		const CViewSetup &setup )
+void CLightingManager::SetRenderConstants( const VMatrix&    ScreenToWorld,
+                                           const CViewSetup& setup )
 {
 	m_matScreenToWorld = ScreenToWorld;
 
@@ -98,7 +93,7 @@ void CLightingManager::SetRenderConstants( const VMatrix &ScreenToWorld,
 	m_flzNear = setup.zNear;
 }
 
-void CLightingManager::LightSetup( const CViewSetup &setup )
+void CLightingManager::LightSetup( const CViewSetup& setup )
 {
 	// Remove lights that have run out of time
 	UpdateTemplights( gpGlobals->frametime );
@@ -140,9 +135,9 @@ void CLightingManager::LightTearDown()
 #endif
 }
 
-void CLightingManager::OnCookieStringReceived( const char *pszString, const int &index )
+void CLightingManager::OnCookieStringReceived( const char* pszString, const int& index )
 {
-	ITexture *pTexCookie = materials->FindTexture( pszString, TEXTURE_GROUP_OTHER );
+	ITexture* pTexCookie = materials->FindTexture( pszString, TEXTURE_GROUP_OTHER );
 
 	if ( IsErrorTexture( pTexCookie ) )
 		return;
@@ -159,7 +154,7 @@ void CLightingManager::OnMaterialReload()
 	FOR_EACH_VEC_FAST_END
 }
 
-void CLightingManager::AddLight( def_light_t *l )
+void CLightingManager::AddLight( def_light_t* l )
 {
 	Assert( !m_hDeferredLights.HasElement( l ) );
 
@@ -170,23 +165,23 @@ void CLightingManager::AddLight( def_light_t *l )
 #endif
 }
 
-bool CLightingManager::RemoveLight( def_light_t *l )
+bool CLightingManager::RemoveLight( def_light_t* l )
 {
 #if DEBUG
 	AssertMsg( m_bVolatileLists == false, "You MUST NOT remove lights while rendering." );
 #endif
 
 #if DEFCFG_USE_SSE
-	bool bSuccess = m_hDeferredLights.FindAndRemove( l );
-	if( bSuccess )
-		m_bSortDataNeedsRealloc = true;
+	const bool bSuccess = m_hDeferredLights.FindAndRemove( l );
+	//if ( bSuccess )
+	//	m_bSortDataNeedsRealloc = true;
 	return bSuccess;
 #else
 	return m_hDeferredLights.FindAndRemove( l );
 #endif
 }
 
-bool CLightingManager::IsLightRendered( def_light_t *l ) const
+bool CLightingManager::IsLightRendered( def_light_t* l ) const
 {
 #if DEBUG
 	AssertMsg( m_bVolatileLists, "Only works correctly during rendering." );
@@ -200,18 +195,18 @@ int CLightingManager::CountTempLights() const
 	return m_hDeferredTempLights.Count();
 }
 
-void CLightingManager::AddTempLight( def_light_temp_t *l )
+void CLightingManager::AddTempLight( def_light_temp_t* l )
 {
 	m_hDeferredTempLights.AddToTail( l );
 	AddLight( l );
 }
 
-void CLightingManager::UpdateTemplights(float deltaTime)
+void CLightingManager::UpdateTemplights( float deltaTime )
 {
-	for( int i = m_hDeferredTempLights.Count() -1; i >= 0; i-- )
+	for ( int i = m_hDeferredTempLights.Count() - 1; i >= 0; i-- )
 	{
 		def_light_temp_t* light = m_hDeferredTempLights[i];
-		if( light->fEndLifeTime < gpGlobals->curtime )
+		if ( light->fEndLifeTime < gpGlobals->curtime )
 		{
 			RemoveLight( light );
 			m_hDeferredTempLights.Remove( i );
@@ -226,30 +221,29 @@ void CLightingManager::UpdateTemplights(float deltaTime)
 #if DEFCFG_USE_SSE
 void CLightingManager::AllocateSortDataBuffer()
 {
-	if( m_pSortDataX4 != NULL )
-	{
-		MemAlloc_FreeAligned( m_pSortDataX4 );
-		m_pSortDataX4 = NULL;
-	}
-
-	if( m_hDeferredLights.Count() == 0 )
+	const int count = m_hDeferredLights.Count();
+	if ( count == 0 )
 		return;
 
-	const int iSortBufferDataSize = m_hDeferredLights.Count() % 4 == 0
-			? m_hDeferredLights.Count() / 4
-			: ((m_hDeferredLights.Count() - (m_hDeferredLights.Count() % 4)) / 4) + 1;
+	const int iSortBufferDataSize = count % 4 == 0
+		                                ? count / 4
+		                                : ( ( count - ( count % 4 ) ) / 4 ) + 1;
 
-	m_pSortDataX4 = reinterpret_cast<def_light_presortdatax4_t*>(
-		MemAlloc_AllocAligned( iSortBufferDataSize * sizeof(def_light_presortdatax4_t),
-		sizeof(fltx4) ));
+	if ( m_SortBufferDataSize > iSortBufferDataSize )
+		return;
+
+	m_SortBufferDataSize = iSortBufferDataSize;
+	m_pSortDataX4        = reinterpret_cast<def_light_presortdatax4_t*>(
+		MemAlloc_ReallocAligned( m_pSortDataX4, iSortBufferDataSize * sizeof( def_light_presortdatax4_t ),
+		                         sizeof( fltx4 ) * 4 ) );
 }
 
 void CLightingManager::BuildLightSortDataBuffer()
 {
 	const int iPartiallyFullSortDataElementCount = m_hRenderLights.Count() % 4;
-	m_uiSortDataCount = ( m_hRenderLights.Count() - iPartiallyFullSortDataElementCount ) / 4;
+	m_uiSortDataCount                            = ( m_hRenderLights.Count() - iPartiallyFullSortDataElementCount ) / 4;
 
-	for( uint i = 0, baseLightIdx = 0; i < m_uiSortDataCount; i++, baseLightIdx += 4 )
+	for ( uint i = 0, baseLightIdx = 0; i < m_uiSortDataCount; i++, baseLightIdx += 4 )
 	{
 		def_light_presortdatax4_t& sortData = m_pSortDataX4[i];
 
@@ -258,9 +252,9 @@ void CLightingManager::BuildLightSortDataBuffer()
 		def_light_t* lights[4] =
 		{
 			m_hRenderLights[baseLightIdx],
-			m_hRenderLights[baseLightIdx+1],
-			m_hRenderLights[baseLightIdx+2],
-			m_hRenderLights[baseLightIdx+3]
+			m_hRenderLights[baseLightIdx + 1],
+			m_hRenderLights[baseLightIdx + 2],
+			m_hRenderLights[baseLightIdx + 3]
 		};
 
 		sortData.lights[0] = lights[0];
@@ -269,96 +263,96 @@ void CLightingManager::BuildLightSortDataBuffer()
 		sortData.lights[3] = lights[3];
 
 		float boundsMinX[4] =
-			{
-				lights[0]->bounds_min_naive.x,
-				lights[1]->bounds_min_naive.x,
-				lights[2]->bounds_min_naive.x,
-				lights[3]->bounds_min_naive.x
-			};
+		{
+			lights[0]->bounds_min_naive.x,
+			lights[1]->bounds_min_naive.x,
+			lights[2]->bounds_min_naive.x,
+			lights[3]->bounds_min_naive.x
+		};
 		sortData.bounds_min_naive[0] = LoadUnalignedSIMD( boundsMinX );
 
 		float boundsMinY[4] =
-			{
-				lights[0]->bounds_min_naive.y,
-				lights[1]->bounds_min_naive.y,
-				lights[2]->bounds_min_naive.y,
-				lights[3]->bounds_min_naive.y
-			};
+		{
+			lights[0]->bounds_min_naive.y,
+			lights[1]->bounds_min_naive.y,
+			lights[2]->bounds_min_naive.y,
+			lights[3]->bounds_min_naive.y
+		};
 		sortData.bounds_min_naive[1] = LoadUnalignedSIMD( boundsMinY );
 
 		float boundsMinZ[4] =
-			{
-				lights[0]->bounds_min_naive.z,
-				lights[1]->bounds_min_naive.z,
-				lights[2]->bounds_min_naive.z,
-				lights[3]->bounds_min_naive.z
-			};
+		{
+			lights[0]->bounds_min_naive.z,
+			lights[1]->bounds_min_naive.z,
+			lights[2]->bounds_min_naive.z,
+			lights[3]->bounds_min_naive.z
+		};
 		sortData.bounds_min_naive[2] = LoadUnalignedSIMD( boundsMinZ );
 
 		float boundsMaxX[4] =
-			{
-				lights[0]->bounds_max_naive.x,
-				lights[1]->bounds_max_naive.x,
-				lights[2]->bounds_max_naive.x,
-				lights[3]->bounds_max_naive.x
-			};
+		{
+			lights[0]->bounds_max_naive.x,
+			lights[1]->bounds_max_naive.x,
+			lights[2]->bounds_max_naive.x,
+			lights[3]->bounds_max_naive.x
+		};
 		sortData.bounds_max_naive[0] = LoadUnalignedSIMD( boundsMaxX );
 
 		float boundsMaxY[4] =
-			{
-				lights[0]->bounds_max_naive.y,
-				lights[1]->bounds_max_naive.y,
-				lights[2]->bounds_max_naive.y,
-				lights[3]->bounds_max_naive.y
-			};
+		{
+			lights[0]->bounds_max_naive.y,
+			lights[1]->bounds_max_naive.y,
+			lights[2]->bounds_max_naive.y,
+			lights[3]->bounds_max_naive.y
+		};
 		sortData.bounds_max_naive[1] = LoadUnalignedSIMD( boundsMaxY );
 
 		float boundsMaxZ[4] =
-			{
-				lights[0]->bounds_max_naive.z,
-				lights[1]->bounds_max_naive.z,
-				lights[2]->bounds_max_naive.z,
-				lights[3]->bounds_max_naive.z
-			};
+		{
+			lights[0]->bounds_max_naive.z,
+			lights[1]->bounds_max_naive.z,
+			lights[2]->bounds_max_naive.z,
+			lights[3]->bounds_max_naive.z
+		};
 		sortData.bounds_max_naive[2] = LoadUnalignedSIMD( boundsMaxZ );
 
 		int hasShadowX4[4] =
-			{
-				lights[0]->HasShadow() ? 1 : 0,
-				lights[1]->HasShadow() ? 1 : 0,
-				lights[2]->HasShadow() ? 1 : 0,
-				lights[3]->HasShadow() ? 1 : 0
-			};
+		{
+			lights[0]->HasShadow() ? 1 : 0,
+			lights[1]->HasShadow() ? 1 : 0,
+			lights[2]->HasShadow() ? 1 : 0,
+			lights[3]->HasShadow() ? 1 : 0
+		};
 		sortData.hasShadow = LoadUnalignedIntSIMD( hasShadowX4 );
 
 		int hasVolumetricsX4[4] =
-			{
-				lights[0]->HasVolumetrics() ? 1 : 0,
-				lights[1]->HasVolumetrics() ? 1 : 0,
-				lights[2]->HasVolumetrics() ? 1 : 0,
-				lights[3]->HasVolumetrics() ? 1 : 0
-			};
+		{
+			lights[0]->HasVolumetrics() ? 1 : 0,
+			lights[1]->HasVolumetrics() ? 1 : 0,
+			lights[2]->HasVolumetrics() ? 1 : 0,
+			lights[3]->HasVolumetrics() ? 1 : 0
+		};
 		sortData.hasVolumetrics = LoadUnalignedIntSIMD( hasVolumetricsX4 );
 	}
 
-	if( iPartiallyFullSortDataElementCount != 0 )
+	if ( iPartiallyFullSortDataElementCount != 0 )
 	{
 		def_light_presortdatax4_t& sortData = m_pSortDataX4[m_uiSortDataCount];
 
 		sortData.count = iPartiallyFullSortDataElementCount;
 
-		float boundsMinX[4] = {0};
-		float boundsMinY[4] = {0};
-		float boundsMinZ[4] = {0};
-		float boundsMaxX[4] = {0};
-		float boundsMaxY[4] = {0};
-		float boundsMaxZ[4] = {0};
-		int hasShadowX4[4] = {0};
-		int hasVolumetricsX4[4] = {0};
+		float boundsMinX[4]       = { 0 };
+		float boundsMinY[4]       = { 0 };
+		float boundsMinZ[4]       = { 0 };
+		float boundsMaxX[4]       = { 0 };
+		float boundsMaxY[4]       = { 0 };
+		float boundsMaxZ[4]       = { 0 };
+		int   hasShadowX4[4]      = { 0 };
+		int   hasVolumetricsX4[4] = { 0 };
 
 		int iBaseLightIndex = m_uiSortDataCount * 4;
 
-		for( int i = 0; i < iPartiallyFullSortDataElementCount; i++ )
+		for ( int i = 0; i < iPartiallyFullSortDataElementCount; i++ )
 		{
 			def_light_t* l = m_hRenderLights[iBaseLightIndex + i];
 
@@ -374,7 +368,7 @@ void CLightingManager::BuildLightSortDataBuffer()
 
 			hasShadowX4[i] = l->HasShadow() ? 1 : 0;
 
-			hasVolumetricsX4[i] =l->HasVolumetrics() ? 1 : 0;
+			hasVolumetricsX4[i] = l->HasVolumetrics() ? 1 : 0;
 		}
 
 		sortData.bounds_min_naive[0] = LoadUnalignedSIMD( boundsMinX );
@@ -399,7 +393,7 @@ void CLightingManager::ClearTmpLists()
 	m_hRenderLights.RemoveAll();
 
 	for ( int i = 0; i < LSORT_COUNT; i++ )
-		m_hPreSortedLights[ i ].RemoveAll();
+		m_hPreSortedLights[i].RemoveAll();
 }
 
 void CLightingManager::PrepareLights()
@@ -450,7 +444,7 @@ void CLightingManager::CullLights()
 		//	continue;
 
 		if ( engine->CullBox( l->bounds_min_naive, l->bounds_max_naive ) )
-		//if ( engine->CullBox( l->bounds_min, l->bounds_max ) )
+			//if ( engine->CullBox( l->bounds_min, l->bounds_max ) )
 			continue;
 
 		if ( l->IsSpot() && l->HasShadow() )
@@ -465,9 +459,9 @@ void CLightingManager::CullLights()
 			continue;
 
 		l->flDistance_ViewOrigin = veclightDelta.Length();
-		l->flShadowFade = l->HasShadow() ?
-			( SATURATE( ( l->flDistance_ViewOrigin - l->iShadow_Dist ) / l->iShadow_Range ) )
-			: 1.0f;
+		l->flShadowFade          = l->HasShadow()
+			                           ? ( SATURATE( ( l->flDistance_ViewOrigin - l->iShadow_Dist ) / l->iShadow_Range ) )
+			                           : 1.0f;
 
 		m_hRenderLights.AddToTail( l );
 	}
@@ -480,27 +474,27 @@ inline fltx4 IsPointInBoundsX4( const Vector& point, fltx4 boundsMin[3], fltx4 b
 	const fltx4& pointY = ReplicateX4( point.y );
 	const fltx4& pointZ = ReplicateX4( point.z );
 
-	return	AndSIMD
+	return AndSIMD
+	(
+		AndSIMD
+		(
+			AndSIMD
 			(
-				AndSIMD
-				(
-					AndSIMD
-					(
-						CmpGeSIMD( pointX, boundsMin[0] ),
-						CmpLeSIMD( pointX, boundsMax[0] )
-					),
-					AndSIMD
-					(
-						CmpGeSIMD( pointY, boundsMin[1] ),
-						CmpLeSIMD( pointY, boundsMax[1] )
-					)
-				),
-				AndSIMD
-				(
-					CmpGeSIMD( pointZ, boundsMin[2] ),
-					CmpLeSIMD( pointZ, boundsMax[2] )
-				)
-			);
+				CmpGeSIMD( pointX, boundsMin[0] ),
+				CmpLeSIMD( pointX, boundsMax[0] )
+			),
+			AndSIMD
+			(
+				CmpGeSIMD( pointY, boundsMin[1] ),
+				CmpLeSIMD( pointY, boundsMax[1] )
+			)
+		),
+		AndSIMD
+		(
+			CmpGeSIMD( pointZ, boundsMin[2] ),
+			CmpLeSIMD( pointZ, boundsMax[2] )
+		)
+	);
 }
 
 void CLightingManager::SortLights()
@@ -522,29 +516,33 @@ void CLightingManager::SortLights()
 #if DEFCFG_USE_SSE
 	const fltx4& zNearX4 = ReplicateX4( zNear );
 
-	for( uint i = 0; i < m_uiSortDataCount; i++ )
+	for ( uint i = 0; i < m_uiSortDataCount; i++ )
 	{
 		def_light_presortdatax4_t& s = m_pSortDataX4[i];
 
-		fltx4 adjustedMins[3] = { SubSIMD( s.bounds_min_naive[0], zNearX4 ),
+		fltx4 adjustedMins[3] = {
+			SubSIMD( s.bounds_min_naive[0], zNearX4 ),
 			SubSIMD( s.bounds_min_naive[1], zNearX4 ),
-			SubSIMD( s.bounds_min_naive[2], zNearX4 ) };
+			SubSIMD( s.bounds_min_naive[2], zNearX4 )
+		};
 
-		fltx4 adjustedMaxs[3] = { AddSIMD( s.bounds_max_naive[0], zNearX4 ),
+		fltx4 adjustedMaxs[3] = {
+			AddSIMD( s.bounds_max_naive[0], zNearX4 ),
 			AddSIMD( s.bounds_max_naive[1], zNearX4 ),
-			AddSIMD( s.bounds_max_naive[2], zNearX4 ) };
+			AddSIMD( s.bounds_max_naive[2], zNearX4 )
+		};
 
 		fltx4 needsFullscreen = IsPointInBoundsX4( m_vecViewOrigin,
-			adjustedMins, adjustedMaxs );
+		                                           adjustedMins, adjustedMaxs );
 
 		//Jack: this is terrible I know
-		for( uint i = 0; i < s.count; i++ )
+		for ( uint i = 0; i < s.count; i++ )
 		{
-			if( s.lights[i]->IsSpot() )
+			if ( s.lights[i]->IsSpot() )
 			{
-				if( IS_NAN( SubFloat( needsFullscreen, i ) ) )
+				if ( IS_NAN( SubFloat( needsFullscreen, i ) ) )
 				{
-					if( !R_CullBox( camMins, camMaxs,s.lights[i]->spotFrustum ) )
+					if ( !R_CullBox( camMins, camMaxs, s.lights[i]->spotFrustum ) )
 					{
 						m_hPreSortedLights[LSORT_SPOT_FULLSCREEN].AddToTail( s.lights[i] );
 					}
@@ -560,7 +558,7 @@ void CLightingManager::SortLights()
 			}
 			else
 			{
-				if( IS_NAN( SubFloat( needsFullscreen, i ) ) )
+				if ( IS_NAN( SubFloat( needsFullscreen, i ) ) )
 				{
 					m_hPreSortedLights[LSORT_POINT_FULLSCREEN].AddToTail( s.lights[i] );
 				}
@@ -597,7 +595,7 @@ void CLightingManager::SortLights()
 	FOR_EACH_VEC_FAST_END
 #endif
 
-	static CUtlVector< def_light_t* > hBatchFullscreen;
+	static CUtlVector<def_light_t*> hBatchFullscreen;
 
 	for ( int i = 0; i < 2; i++ )
 	{
@@ -606,11 +604,11 @@ void CLightingManager::SortLights()
 			if ( l->HasVolumetrics() )
 				continue;
 
-			const bool bSpot = l->IsSpot();
+			const bool  bSpot        = l->IsSpot();
 			const float flSizeFactor = bSpot ? 1.5f : 2.25f;
 
 			const Vector& viewVec = l->boundsCenter - m_vecViewOrigin;
-			const float flDot = DotProduct( m_vecForward, viewVec.Normalized() );
+			const float   flDot   = DotProduct( m_vecForward, viewVec.Normalized() );
 
 			const float flCoverageFactor = flSizeFactor * l->flRadius / l->flDistance_ViewOrigin * flDot;
 
@@ -626,9 +624,9 @@ void CLightingManager::SortLights()
 #if DEBUG
 				Assert( m_hPreSortedLights[ i * 2 ].FindAndRemove( l ) );
 #else
-				m_hPreSortedLights[ i * 2 ].FindAndRemove( l );
+				m_hPreSortedLights[i * 2].FindAndRemove( l );
 #endif
-				m_hPreSortedLights[ i * 2 + 1 ].AddToTail( l );
+				m_hPreSortedLights[i * 2 + 1].AddToTail( l );
 			}
 			FOR_EACH_VEC_FAST_END
 		}
@@ -637,7 +635,7 @@ void CLightingManager::SortLights()
 	}
 }
 
-FORCEINLINE float CLightingManager::DoLightStyle( def_light_t *l )
+FORCEINLINE float CLightingManager::DoLightStyle( def_light_t* l )
 {
 	if ( !l->HasLightstyle() )
 		return 1.0f;
@@ -653,7 +651,7 @@ FORCEINLINE float CLightingManager::DoLightStyle( def_light_t *l )
 	const float ran = l->flLastRandomValue;
 
 	float sine = FastCos( gpGlobals->curtime * l->flStyle_Speed + l->iStyleSeed ) * 0.5f + 0.5f;
-	sine = Bias( sine, l->flStyle_Smooth );
+	sine       = Bias( sine, l->flStyle_Smooth );
 
 	return Lerp( l->flStyle_Random, Lerp( l->flStyle_Amount, 1.0f, sine ), ran );
 }
@@ -700,7 +698,7 @@ FORCEINLINE float CLightingManager::DoLightStyle( def_light_t *l )
 						2 * 9				-- shadowed cookie
 	*/
 
-FORCEINLINE int CLightingManager::WriteLight( def_light_t *l, float *pfl4 )
+FORCEINLINE int CLightingManager::WriteLight( def_light_t* l, float* pfl4 )
 {
 	const bool bShadow = l->ShouldRenderShadow();
 	const bool bCookie = l->HasCookie();
@@ -710,7 +708,7 @@ FORCEINLINE int CLightingManager::WriteLight( def_light_t *l, float *pfl4 )
 	int numConsts = 0;
 
 	const float flLightstyle = DoLightStyle( l );
-	const float flDistance = l->flDistance_ViewOrigin;
+	const float flDistance   = l->flDistance_ViewOrigin;
 	const float flMasterFade = flLightstyle * ( 1.0f - SATURATE( ( flDistance - l->iVisible_Dist ) / l->iVisible_Range ) );
 
 	const int iFloatSize = sizeof( float );
@@ -798,9 +796,11 @@ FORCEINLINE int CLightingManager::WriteLight( def_light_t *l, float *pfl4 )
 	return numConsts;
 }
 
-FORCEINLINE bool SortLightsByComboType( CUtlVector<def_light_t*> &hLights,
-	CUtlVector<def_light_t*> &hLightsShadowedCookie, CUtlVector<def_light_t*> &hLightsShadowed,
-	CUtlVector<def_light_t*> &hLightsCookied, CUtlVector<def_light_t*> &hLightsSimple )
+FORCEINLINE bool SortLightsByComboType( CUtlVector<def_light_t*>& hLights,
+                                        CUtlVector<def_light_t*>& hLightsShadowedCookie,
+                                        CUtlVector<def_light_t*>& hLightsShadowed,
+                                        CUtlVector<def_light_t*>& hLightsCookied,
+                                        CUtlVector<def_light_t*>& hLightsSimple )
 {
 	hLightsShadowedCookie.RemoveAll();
 	hLightsShadowed.RemoveAll();
@@ -810,7 +810,7 @@ FORCEINLINE bool SortLightsByComboType( CUtlVector<def_light_t*> &hLights,
 	FOR_EACH_VEC_FAST( def_light_t*, hLights, l )
 	{
 		const bool bShadowed = l->ShouldRenderShadow();
-		const bool bCookie = l->HasCookie() && l->IsCookieReady();
+		const bool bCookie   = l->HasCookie() && l->IsCookieReady();
 
 		if ( bShadowed && bCookie )
 			hLightsShadowedCookie.AddToTail( l );
@@ -830,7 +830,7 @@ FORCEINLINE bool SortLightsByComboType( CUtlVector<def_light_t*> &hLights,
 	return hLights.Count() > 0;
 }
 
-FORCEINLINE void CLightingManager::DrawVolumePrepass( bool bDoModelTransform, const CViewSetup &view, def_light_t *l )
+FORCEINLINE void CLightingManager::DrawVolumePrepass( bool bDoModelTransform, const CViewSetup& view, def_light_t* l )
 {
 	if ( !l->IsSpot() )
 		return;
@@ -861,7 +861,7 @@ FORCEINLINE void CLightingManager::DrawVolumePrepass( bool bDoModelTransform, co
 	pRenderContext->PopRenderTargetAndViewport();
 }
 
-void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender *pCaller )
+void CLightingManager::RenderLights( const CViewSetup& view, CDeferredViewRender* pCaller )
 {
 	static CUtlVector<def_light_t*> lightsShadowedCookied;
 	static CUtlVector<def_light_t*> lightsShadowed;
@@ -904,42 +904,48 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 #else
 	struct Lightpass_t
 	{
-		CUtlVector<def_light_t*> *lightVecFullscreen;
-		CUtlVector<def_light_t*> *lightVecWorld;
-		IMaterial *pMatPassFullscreen;
-		IMaterial *pMatPassWorld;
-		IMaterial *pMatVolumeFullscreen;
-		IMaterial *pMatVolumeWorld;
-		int constCount_simple;
-		int constCount_advanced;
+		CUtlVector<def_light_t*>* lightVecFullscreen;
+		CUtlVector<def_light_t*>* lightVecWorld;
+		IMaterial*                pMatPassFullscreen;
+		IMaterial*                pMatPassWorld;
+		IMaterial*                pMatVolumeFullscreen;
+		IMaterial*                pMatVolumeWorld;
+		int                       constCount_simple;
+		int                       constCount_advanced;
 	};
 
 	Lightpass_t lightTypes[] =
 	{
-		{ &m_hPreSortedLights[ LSORT_POINT_FULLSCREEN ], &m_hPreSortedLights[ LSORT_POINT_WORLD ],	//JACK: Here we could be sorting into
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_POINT_FULLSCREEN ),				//		simple and advanced lights as
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_POINT_WORLD ),						//		simple lights only need  a single
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_POINT_FULLSCREEN ),			//		state change (model proj) to render
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_POINT_WORLD ),
-		NUM_CONSTS_POINT_SIMPLE, NUM_CONSTS_POINT_ADVANCED },
+		{
+			&m_hPreSortedLights[LSORT_POINT_FULLSCREEN], &m_hPreSortedLights[LSORT_POINT_WORLD],
+			//JACK: Here we could be sorting into
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_POINT_FULLSCREEN ), //		simple and advanced lights as
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_POINT_WORLD ),      //		simple lights only need  a single
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_POINT_FULLSCREEN ),
+			//		state change (model proj) to render
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_POINT_WORLD ),
+			NUM_CONSTS_POINT_SIMPLE, NUM_CONSTS_POINT_ADVANCED
+		},
 
-		{ &m_hPreSortedLights[ LSORT_SPOT_FULLSCREEN ], &m_hPreSortedLights[ LSORT_SPOT_WORLD ],
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_SPOT_FULLSCREEN ),
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_SPOT_WORLD ),
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_SPOT_FULLSCREEN ),
-		GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_SPOT_WORLD ),
-		NUM_CONSTS_SPOT_SIMPLE, NUM_CONSTS_SPOT_ADVANCED },
+		{
+			&m_hPreSortedLights[LSORT_SPOT_FULLSCREEN], &m_hPreSortedLights[LSORT_SPOT_WORLD],
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_SPOT_FULLSCREEN ),
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_SPOT_WORLD ),
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_SPOT_FULLSCREEN ),
+			GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_SPOT_WORLD ),
+			NUM_CONSTS_SPOT_SIMPLE, NUM_CONSTS_SPOT_ADVANCED
+		},
 	};
 #endif
 	const int iNumLightTypes = ARRAYSIZE( lightTypes );
 
 	int iPassesDrawnFullscreen[iNumLightTypes] = { 0 };
-	int iPassesVolumetrics[2] = { 0 };
-	int iDrawnShadowed = 0;
-	int iDrawnCookied = 0;
-	int iDrawnSimple = 0;
+	int iPassesVolumetrics[2]                  = { 0 };
+	int iDrawnShadowed                         = 0;
+	int iDrawnCookied                          = 0;
+	int iDrawnSimple                           = 0;
 
-	ITexture *pVolumBuffer0 = GetDefRT_VolumetricsBuffer( 0 );
+	ITexture* pVolumBuffer0 = GetDefRT_VolumetricsBuffer( 0 );
 
 	if ( m_bDrawVolumetrics )
 	{
@@ -950,70 +956,32 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 		pRenderContext->PopRenderTargetAndViewport();
 	}
 
-	struct defData_commitData
-	{
-	public:
-		float *pData;
-		int a,b,c,d,rows;
-
-		static void Fire( defData_commitData d )
-		{
-			float *pflTrash = GetDeferredExt()->CommitLightData_Common(
-				d.pData,
-				d.rows,
-				d.a, d.b,
-				d.c, d.d );
-			delete [] pflTrash;
-		};
-	};
-
-	struct defData_Cookie
-	{
-	public:
-		ITexture *pCookie;
-		int index;
-		static void Fire( defData_Cookie d )
-		{
-			GetDeferredExt()->CommitTexture_Cookie( d.index, d.pCookie );
-		}
-	};
-
-	struct defData_Volume
-	{
-	public:
-		volumeData_t mData;
-		static void Fire( defData_Volume d )
-		{
-			GetDeferredExt()->CommitVolumeData( d.mData );
-		}
-	};
-
 	struct queueVolume
 	{
-		queueVolume( def_light_t *l, int offset_data, int offset_sampler )
+		queueVolume( def_light_t* l, int offset_data, int offset_sampler )
 		{
-			dataoffset = offset_data;
+			dataoffset    = offset_data;
 			sampleroffset = offset_sampler;
-			pLight = l;
+			pLight        = l;
 		};
 
-		int dataoffset;
-		int sampleroffset;
-		def_light_t *pLight;
+		int          dataoffset;
+		int          sampleroffset;
+		def_light_t* pLight;
 	};
 
 	for ( int i = 0; i < iNumLightTypes; i++ )
 	{
-		if ( SortLightsByComboType( *(lightTypes[i].lightVecFullscreen),
-			lightsShadowedCookied, lightsShadowed, lightsCookied, lightsSimple ) )
+		if ( SortLightsByComboType( *( lightTypes[i].lightVecFullscreen ),
+		                            lightsShadowedCookied, lightsShadowed, lightsCookied, lightsSimple ) )
 		{
 			while ( lightsShadowedCookied.Count() > 0 || lightsShadowed.Count() > 0 ||
 				lightsCookied.Count() > 0 || lightsSimple.Count() > 0 )
 			{
 				int drawShadowedCookied = Min( MAX_LIGHTS_SHADOWEDCOOKIE, lightsShadowedCookied.Count() );
-				int drawShadowed = Min( MAX_LIGHTS_SHADOWED, lightsShadowed.Count() );
-				int drawCookied = Min( MAX_LIGHTS_COOKIE, lightsCookied.Count() );
-				int drawSimple = Min( MAX_LIGHTS_SIMPLE, lightsSimple.Count() );
+				int drawShadowed        = Min( MAX_LIGHTS_SHADOWED, lightsShadowed.Count() );
+				int drawCookied         = Min( MAX_LIGHTS_COOKIE, lightsCookied.Count() );
+				int drawSimple          = Min( MAX_LIGHTS_SIMPLE, lightsSimple.Count() );
 
 				int numRows = ( drawShadowedCookied * lightTypes[i].constCount_advanced +
 					drawShadowed * lightTypes[i].constCount_advanced +
@@ -1024,21 +992,21 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 
 				Assert( memToAlloc > 0 );
 
-				float *pFlLightDataBlock = new float[ memToAlloc ];
+				lightDataCommon_t* pFlLightDataBlock = new lightDataCommon_t( memToAlloc );
 
-				Assert( pFlLightDataBlock != NULL );
+				Assert( pFlLightDataBlock != NULL && pFlLightDataBlock->pFlData != NULL );
 
 				if ( pFlLightDataBlock != NULL )
 				{
-					static CUtlVector< def_light_t* > commitableLights;
-					static CUtlVector< queueVolume > volumeLights;
+					static CUtlVector<def_light_t*> commitableLights;
+					static CUtlVector<queueVolume>  volumeLights;
 
 					commitableLights.AddMultipleToTail( drawShadowedCookied, lightsShadowedCookied.Base() );
 					commitableLights.AddMultipleToTail( drawShadowed, lightsShadowed.Base() );
 					commitableLights.AddMultipleToTail( drawCookied, lightsCookied.Base() );
 					commitableLights.AddMultipleToTail( drawSimple, lightsSimple.Base() );
 
-					float *pFlWriter = pFlLightDataBlock;
+					float* pFlWriter = pFlLightDataBlock->pFlData;
 
 					FOR_EACH_VEC_FAST( def_light_t*, commitableLights, l )
 					{
@@ -1046,7 +1014,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 					}
 					FOR_EACH_VEC_FAST_END
 
-					Assert( pFlWriter - pFlLightDataBlock == memToAlloc );
+					Assert( pFlWriter - pFlLightDataBlock->pFlData == memToAlloc );
 
 					iPassesDrawnFullscreen[i]++;
 
@@ -1054,47 +1022,43 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 					//		and render multiple lower LOD lights to the same texture, will need to commit the
 					//		number of lights to draw, light sample lod, and texture id,
 
-					for ( int iShadowed = 0; iShadowed < (drawShadowedCookied+drawShadowed); iShadowed++ )
+					for ( int iShadowed = 0; iShadowed < ( drawShadowedCookied + drawShadowed ); iShadowed++ )
 					{
-						pCaller->DrawLightShadowView( view, iShadowed, commitableLights[ iShadowed ] );
+						pCaller->DrawLightShadowView( view, iShadowed, commitableLights[iShadowed] );
 
-						if ( commitableLights[ iShadowed ]->HasVolumetrics() )
+						if ( commitableLights[iShadowed]->HasVolumetrics() )
 						{
-							int iDataOffset = iShadowed * lightTypes[i].constCount_advanced * 4;
+							int iDataOffset    = iShadowed * lightTypes[i].constCount_advanced * 4;
 							int iSamplerOffset = iShadowed;
 
-							volumeLights.AddToTail( queueVolume( commitableLights[ iShadowed ], iDataOffset, iSamplerOffset ) );
+							volumeLights.AddToTail( queueVolume( commitableLights[iShadowed], iDataOffset, iSamplerOffset ) );
 						}
 					}
 
 					commitableLights.RemoveAll();
 
-					defData_commitData data;
-					data.pData = pFlLightDataBlock;
-					data.rows = numRows;
-					data.a = drawShadowedCookied;
-					data.b = drawShadowed;
-					data.c = drawCookied;
-					data.d = drawSimple;
-					QUEUE_FIRE( defData_commitData, Fire, data );
+					pFlLightDataBlock->numRows            = numRows;
+					pFlLightDataBlock->numShadowedCookied = drawShadowedCookied;
+					pFlLightDataBlock->numShadowed        = drawShadowed;
+					pFlLightDataBlock->numCookied         = drawCookied;
+					pFlLightDataBlock->numSimple          = drawSimple;
+					QUEUE_FIRE( CommitLightData_Common, pFlLightDataBlock );
 
 					iDrawnShadowed += drawShadowedCookied + drawShadowed;
 					iDrawnCookied += drawShadowedCookied + drawCookied;
 					iDrawnSimple += drawSimple;
 
-					static CUtlVector< def_light_t* > cookiedLights;
+					static CUtlVector<def_light_t*> cookiedLights;
 					cookiedLights.AddVectorToTail( lightsShadowedCookied );
 					cookiedLights.AddVectorToTail( lightsCookied );
 
-					for ( int iCookied = 0; iCookied < (drawShadowedCookied+drawCookied); iCookied++ )
+					for ( int iCookied = 0; iCookied < ( drawShadowedCookied + drawCookied ); iCookied++ )
 					{
-						defData_Cookie data;
-						data.index = iCookied;
-						data.pCookie = cookiedLights[iCookied]->GetCookieForDraw( iCookied );
+						ITexture* pCookie = cookiedLights[iCookied]->GetCookieForDraw( iCookied );
 
-						Assert( data.pCookie != NULL );
+						Assert( pCookie != NULL );
 
-						QUEUE_FIRE( defData_Cookie, Fire, data );
+						QUEUE_FIRE( CommitTexture_Cookie, iCookied, pCookie );
 					}
 
 					cookiedLights.RemoveAll();
@@ -1123,19 +1087,18 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 							iVolumeLOD = 3;
 						}
 #endif
-
-						defData_Volume data;
-						data.mData.iDataOffset = entry.dataoffset;
-						data.mData.iSamplerOffset = entry.sampleroffset;
-						data.mData.iNumRows = lightTypes[i].constCount_advanced;
-						data.mData.bHasCookie = entry.pLight->HasCookie();
+						volumeData_t data;
+						data.iDataOffset    = entry.dataoffset;
+						data.iSamplerOffset = entry.sampleroffset;
+						data.iNumRows       = lightTypes[i].constCount_advanced;
+						data.bHasCookie     = entry.pLight->HasCookie();
 #if DEFCFG_ADAPTIVE_VOLUMETRIC_LOD
-						data.mData.iLOD = iVolumeLOD;
+					data.iLOD = iVolumeLOD;
 #endif
 #if DEFCFG_CONFIGURABLE_VOLUMETRIC_LOD
-						data.mData.iSamples = entry.pLight->iVolumeSamples;
+						data.iSamples = entry.pLight->iVolumeSamples;
 #endif
-						QUEUE_FIRE( defData_Volume, Fire, data );
+						QUEUE_FIRE( CommitVolumeData, data );
 
 						DrawVolumePrepass( true, view, entry.pLight );
 
@@ -1143,7 +1106,7 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 						pRenderContext->PushRenderTargetAndViewport( pVolumBuffer0 );
 
 						DrawLightPassFullscreen( lightTypes[i].pMatVolumeFullscreen,
-							view.width / 4.0f, view.height / 4.0f );
+						                         view.width / 4.0f, view.height / 4.0f );
 
 						pRenderContext->PopRenderTargetAndViewport();
 
@@ -1182,18 +1145,16 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 
 			Assert( memToAlloc > 0 );
 
-			float *pFlLightDataBlock = new float[ memToAlloc ];
+			lightDataCommon_t *pFlLightDataBlock = new lightDataCommon_t( memToAlloc );
 
-			WriteLight( l, pFlLightDataBlock );
+			WriteLight( l, pFlLightDataBlock->pFlData );
 
-			defData_commitData data;
-			data.pData = pFlLightDataBlock;
-			data.rows = lightTypes[i].constCount_simple;
-			data.a = 0;
-			data.b = 0;
-			data.c = bCookie ? 1 : 0;
-			data.d = 0;
-			QUEUE_FIRE( defData_commitData, Fire, data );
+			pFlLightDataBlock->numRows = lightTypes[i].constCount_simple;
+			pFlLightDataBlock->numShadowedCookied = 0;
+			pFlLightDataBlock->numShadowed = 0;
+			pFlLightDataBlock->numCookied = bCookie ? 1 : 0;
+			pFlLightDataBlock->numSimple = 0;
+			QUEUE_FIRE( CommitLightData_Common, pFlLightDataBlock );
 
 			if ( !bCookie )
 				iDrawnSimple++;
@@ -1204,12 +1165,12 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 			pRenderContext->PopMatrix();
 
 			//ShaderStencilState_t stencilLightVolume;
-			//set to reference 1 where draw succeeds
-			//pRenderContext->Bind( lightTypes[i].pMatPassWorldStencilStage );
-			//pMatPassWorldStencilStage only draws the backface where depth test fails
-			//pRenderContext->SetStencilState( stencilLightVolume );
-			//l->pMesh_World->Draw();
-			//set to only draw where stencil is reference 1, set depth test to nearer
+		//set to reference 1 where draw succeeds
+		//pRenderContext->Bind( lightTypes[i].pMatPassWorldStencilStage );
+		//pMatPassWorldStencilStage only draws the backface where depth test fails
+		//pRenderContext->SetStencilState( stencilLightVolume );
+		//l->pMesh_World->Draw();
+		//set to only draw where stencil is reference 1, set depth test to nearer
 			//pRenderContext->SetStencilState( stencilLightVolume );
 		}
 		FOR_EACH_VEC_FAST_END
@@ -1230,9 +1191,9 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 
 			Assert( memToAlloc > 0 );
 
-			float *pFlLightDataBlock = new float[ memToAlloc ];
+			lightDataCommon_t *pFlLightDataBlock = new lightDataCommon_t( memToAlloc );
 
-			WriteLight( l, pFlLightDataBlock );
+			WriteLight( l, pFlLightDataBlock->pFlData );
 
 			if ( bShadow )
 			{
@@ -1241,22 +1202,18 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 				iDrawnShadowed++;
 			}
 
-			defData_commitData data;
-			data.pData = pFlLightDataBlock;
-			data.rows = numRows;
-			data.a = ( bShadow && bCookie ) ? 1 : 0;
-			data.b = ( bShadow && !bCookie ) ? 1 : 0;
-			data.c = ( !bShadow && bCookie ) ? 1 : 0;
-			data.d = bAdvanced ? 0 : 1;
-			QUEUE_FIRE( defData_commitData, Fire, data );
+			pFlLightDataBlock->numRows = numRows;
+			pFlLightDataBlock->numShadowedCookied = ( bShadow && bCookie ) ? 1 : 0;
+			pFlLightDataBlock->numShadowed = ( bShadow && !bCookie ) ? 1 : 0;
+			pFlLightDataBlock->numCookied = ( !bShadow && bCookie ) ? 1 : 0;
+			pFlLightDataBlock->numSimple = bAdvanced ? 0 : 1;
+			QUEUE_FIRE( CommitLightData_Common, pFlLightDataBlock );
 
 			if ( bCookie )
 			{
-				defData_Cookie data;
-				data.index = 0;
-				data.pCookie = l->GetCookieForDraw();
-				Assert( data.pCookie != NULL );
-				QUEUE_FIRE( defData_Cookie, Fire, data );
+				ITexture* pCookie = l->GetCookieForDraw();
+				Assert( pCookie != NULL );
+				QUEUE_FIRE( CommitTexture_Cookie, 0, pCookie );
 
 				iDrawnCookied++;
 			}
@@ -1270,12 +1227,12 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 			pRenderContext->Bind( lightTypes[i].pMatPassWorld );
 
 			//ShaderStencilState_t stencilLightVolume;
-			//set to reference 1 where draw succeeds
-			//pRenderContext->Bind( lightTypes[i].pMatPassWorldStencilStage );
-			//pMatPassWorldStencilStage only draws the backface where depth test fails
-			//pRenderContext->SetStencilState( stencilLightVolume );
-			//l->pMesh_World->Draw();
-			//set to only draw where stencil is reference 1, set depth test to nearer
+		//set to reference 1 where draw succeeds
+		//pRenderContext->Bind( lightTypes[i].pMatPassWorldStencilStage );
+		//pMatPassWorldStencilStage only draws the backface where depth test fails
+		//pRenderContext->SetStencilState( stencilLightVolume );
+		//l->pMesh_World->Draw();
+		//set to only draw where stencil is reference 1, set depth test to nearer
 			//pRenderContext->SetStencilState( stencilLightVolume );
 
 			l->pMesh_World->Draw();
@@ -1306,18 +1263,18 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 				}
 #endif
 
-				defData_Volume data;
-				data.mData.iDataOffset = 0;
-				data.mData.iSamplerOffset = 0;
-				data.mData.iNumRows = lightTypes[i].constCount_advanced;
-				data.mData.bHasCookie = bCookie;
+				volumeData_t data;
+				data.iDataOffset = 0;
+				data.iSamplerOffset = 0;
+				data.iNumRows = lightTypes[i].constCount_advanced;
+				data.bHasCookie = bCookie;
 #if DEFCFG_ADAPTIVE_VOLUMETRIC_LOD
-				data.mData.iLOD = iVolumeLOD;
+				data.iLOD = iVolumeLOD;
 #endif
 #if DEFCFG_CONFIGURABLE_VOLUMETRIC_LOD
-				data.mData.iSamples = l->iVolumeSamples;
+				data.iSamples = l->iVolumeSamples;
 #endif
-				QUEUE_FIRE( defData_Volume, Fire, data );
+				QUEUE_FIRE( CommitVolumeData, data );
 
 				DrawVolumePrepass( false, view, l );
 
@@ -1343,20 +1300,20 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 			if ( l->pMesh_World == NULL )
 				continue;
 
-			const bool bShadow = l->ShouldRenderShadow();
-			const bool bCookie = l->HasCookie() && l->IsCookieReady();
+			const bool bShadow      = l->ShouldRenderShadow();
+			const bool bCookie      = l->HasCookie() && l->IsCookieReady();
 			const bool bVolumetrics = l->HasVolumetrics() && bShadow;
 
 			const bool bAdvanced = ( bShadow || bCookie );
 
-			int numRows = bAdvanced ? lightTypes[i].constCount_advanced : lightTypes[i].constCount_simple;
+			int numRows    = bAdvanced ? lightTypes[i].constCount_advanced : lightTypes[i].constCount_simple;
 			int memToAlloc = 4 * numRows;
 
 			Assert( memToAlloc > 0 );
 
-			float *pFlLightDataBlock = new float[ memToAlloc ];
+			lightDataCommon_t* pFlLightDataBlock = new lightDataCommon_t( memToAlloc );
 
-			WriteLight( l, pFlLightDataBlock );
+			WriteLight( l, pFlLightDataBlock->pFlData );
 
 			if ( bShadow )
 			{
@@ -1365,22 +1322,18 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 				iDrawnShadowed++;
 			}
 
-			defData_commitData data;
-			data.pData = pFlLightDataBlock;
-			data.rows = numRows;
-			data.a = ( bShadow && bCookie ) ? 1 : 0;
-			data.b = ( bShadow && !bCookie ) ? 1 : 0;
-			data.c = ( !bShadow && bCookie ) ? 1 : 0;
-			data.d = bAdvanced ? 0 : 1;
-			QUEUE_FIRE( defData_commitData, Fire, data );
+			pFlLightDataBlock->numRows            = numRows;
+			pFlLightDataBlock->numShadowedCookied = ( bShadow && bCookie ) ? 1 : 0;
+			pFlLightDataBlock->numShadowed        = ( bShadow && !bCookie ) ? 1 : 0;
+			pFlLightDataBlock->numCookied         = ( !bShadow && bCookie ) ? 1 : 0;
+			pFlLightDataBlock->numSimple          = bAdvanced ? 0 : 1;
+			QUEUE_FIRE( CommitLightData_Common, pFlLightDataBlock );
 
 			if ( bCookie )
 			{
-				defData_Cookie data;
-				data.index = 0;
-				data.pCookie = l->GetCookieForDraw();
-				Assert( data.pCookie != NULL );
-				QUEUE_FIRE( defData_Cookie, Fire, data );
+				ITexture* pCookie = l->GetCookieForDraw();
+				Assert( pCookie != NULL );
+				QUEUE_FIRE( CommitTexture_Cookie, 0, pCookie );
 
 				iDrawnCookied++;
 			}
@@ -1411,38 +1364,38 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 				Assert( l->pMesh_Volumetrics != NULL );
 
 #if DEFCFG_ADAPTIVE_VOLUMETRIC_LOD
-				const float flCameraLightDelta = (view.origin).DistTo(l->pos);
-				int iVolumeLOD = 4;
-				if( flCameraLightDelta < l->flVolumeLOD0Dist )
-				{
-					iVolumeLOD = 0;
-				}
-				else if( flCameraLightDelta < l->flVolumeLOD1Dist )
-				{
-					iVolumeLOD = 1;
-				}
-				else if( flCameraLightDelta < l->flVolumeLOD2Dist )
-				{
-					iVolumeLOD = 2;
-				}
-				else if( flCameraLightDelta < l->flVolumeLOD3Dist )
-				{
-					iVolumeLOD = 3;
-				}
+			const float flCameraLightDelta = (view.origin).DistTo(l->pos);
+			int iVolumeLOD = 4;
+			if( flCameraLightDelta < l->flVolumeLOD0Dist )
+			{
+				iVolumeLOD = 0;
+			}
+			else if( flCameraLightDelta < l->flVolumeLOD1Dist )
+			{
+				iVolumeLOD = 1;
+			}
+			else if( flCameraLightDelta < l->flVolumeLOD2Dist )
+			{
+				iVolumeLOD = 2;
+			}
+			else if( flCameraLightDelta < l->flVolumeLOD3Dist )
+			{
+				iVolumeLOD = 3;
+			}
 #endif
 
-				defData_Volume data;
-				data.mData.iDataOffset = 0;
-				data.mData.iSamplerOffset = 0;
-				data.mData.iNumRows = lightTypes[i].constCount_advanced;
-				data.mData.bHasCookie = bCookie;
+				volumeData_t data;
+				data.iDataOffset    = 0;
+				data.iSamplerOffset = 0;
+				data.iNumRows       = lightTypes[i].constCount_advanced;
+				data.bHasCookie     = bCookie;
 #if DEFCFG_ADAPTIVE_VOLUMETRIC_LOD
-				data.mData.iLOD = iVolumeLOD;
+			data.iLOD = iVolumeLOD;
 #endif
 #if DEFCFG_CONFIGURABLE_VOLUMETRIC_LOD
-				data.mData.iSamples = l->iVolumeSamples;
+				data.iSamples = l->iVolumeSamples;
 #endif
-				QUEUE_FIRE( defData_Volume, Fire, data );
+				QUEUE_FIRE( CommitVolumeData, data );
 
 				DrawVolumePrepass( false, view, l );
 
@@ -1468,8 +1421,8 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 	{
 		Assert( iNumLightTypes == 2 );
 
-		const char *pszFilterName = "UNKNOWN FILTER";
-		const char *pszProfile = "HARDWARE";
+		const char* pszFilterName = "UNKNOWN FILTER";
+		const char* pszProfile    = "HARDWARE";
 
 #if SHADOWMAPPING_USE_COLOR
 		pszProfile = "SOFTWARE";
@@ -1500,46 +1453,45 @@ void CLightingManager::RenderLights( const CViewSetup &view, CDeferredViewRender
 
 		engine->Con_NPrintf( 17, "STATS - RENDERING" );
 		engine->Con_NPrintf( 18, "Fullscreen passes - point: %i, spot: %i, total: %i",
-			iPassesDrawnFullscreen[0], iPassesDrawnFullscreen[1],
-			iPassesDrawnFullscreen[0] + iPassesDrawnFullscreen[1] );
+		                     iPassesDrawnFullscreen[0], iPassesDrawnFullscreen[1],
+		                     iPassesDrawnFullscreen[0] + iPassesDrawnFullscreen[1] );
 		engine->Con_NPrintf( 19, "Volumetric passes - world: %i, fullscreen: %i",
-			iPassesVolumetrics[0], iPassesVolumetrics[1] );
-		engine->Con_NPrintf( 20, "Stats drawn - simple: %i, shadows: %i, cookies: %i", iDrawnSimple, iDrawnShadowed, iDrawnCookied );
+		                     iPassesVolumetrics[0], iPassesVolumetrics[1] );
+		engine->Con_NPrintf( 20, "Stats drawn - simple: %i, shadows: %i, cookies: %i", iDrawnSimple, iDrawnShadowed,
+		                     iDrawnCookied );
 		engine->Con_NPrintf( 22, "Shadow mapping filter profile: %s - %s", pszProfile, pszFilterName );
 	}
 }
 
-void CLightingManager::RenderVolumetrics( const CViewSetup &view )
+void CLightingManager::RenderVolumetrics( const CViewSetup& view )
 {
 	if ( !m_bDrawVolumetrics )
 		return;
 
-	ITexture *pVolumBuffer0 = GetDefRT_VolumetricsBuffer( 0 );
-	ITexture *pVolumBuffer1 = GetDefRT_VolumetricsBuffer( 1 );
+	ITexture* pVolumBuffer0 = GetDefRT_VolumetricsBuffer( 0 );
+	ITexture* pVolumBuffer1 = GetDefRT_VolumetricsBuffer( 1 );
 
 	CMatRenderContextPtr pRenderContext( materials );
 
 	pRenderContext->PushRenderTargetAndViewport( pVolumBuffer1 );
 	pRenderContext->DrawScreenSpaceRectangle( GetDeferredManager()->GetDeferredMaterial( DEF_MAT_BLUR_G6_X ),
-		0, 0, view.width / 4, view.height / 4,
-		0, 0, view.width / 4 - 1, view.height / 4 - 1,
-		view.width / 4, view.height / 4 );
+	                                          0, 0, view.width / 4, view.height / 4,
+	                                          0, 0, view.width / 4 - 1, view.height / 4 - 1,
+	                                          view.width / 4, view.height / 4 );
 	pRenderContext->PopRenderTargetAndViewport();
 
 	pRenderContext->PushRenderTargetAndViewport( pVolumBuffer0 );
 	pRenderContext->DrawScreenSpaceRectangle( GetDeferredManager()->GetDeferredMaterial( DEF_MAT_BLUR_G6_Y ),
-		0, 0, view.width / 4, view.height / 4,
-		0, 0, view.width / 4 - 1, view.height / 4 - 1,
-		view.width / 4, view.height / 4 );
+	                                          0, 0, view.width / 4, view.height / 4,
+	                                          0, 0, view.width / 4 - 1, view.height / 4 - 1,
+	                                          view.width / 4, view.height / 4 );
 	pRenderContext->PopRenderTargetAndViewport();
 
 	pRenderContext->DrawScreenSpaceRectangle( GetDeferredManager()->GetDeferredMaterial( DEF_MAT_LIGHT_VOLUME_BLEND ),
-		0, 0, view.width, view.height,
-		0, 0, view.width - 1, view.height - 1,
-		view.width, view.height );
+	                                          0, 0, view.width, view.height,
+	                                          0, 0, view.width - 1, view.height - 1,
+	                                          view.width, view.height );
 }
-
-#include "deferred/vgui/vgui_deferred.h"
 
 void CLightingManager::DoSceneDebug()
 {
@@ -1560,9 +1512,10 @@ void CLightingManager::DoSceneDebug()
 	engine->Con_NPrintf( 11, "lights rendered: %i", m_hRenderLights.Count() );
 	engine->Con_NPrintf( 13, "STATS - SORTING" );
 	engine->Con_NPrintf( 14, "lights point - world: %i, fullscreen: %i",
-		m_hPreSortedLights[ LSORT_POINT_WORLD ].Count(), m_hPreSortedLights[ LSORT_POINT_FULLSCREEN ].Count() );
+	                     m_hPreSortedLights[LSORT_POINT_WORLD].Count(),
+	                     m_hPreSortedLights[LSORT_POINT_FULLSCREEN].Count() );
 	engine->Con_NPrintf( 15, "lights spot - world: %i, fullscreen: %i",
-		m_hPreSortedLights[ LSORT_SPOT_WORLD ].Count(), m_hPreSortedLights[ LSORT_SPOT_FULLSCREEN ].Count() );
+	                     m_hPreSortedLights[LSORT_SPOT_WORLD].Count(), m_hPreSortedLights[LSORT_SPOT_FULLSCREEN].Count() );
 }
 
 void CLightingManager::DebugLights_Draw_Boundingboxes()
@@ -1575,17 +1528,17 @@ void CLightingManager::DebugLights_Draw_Boundingboxes()
 		Color cEdge = Color( cFace[0] * 0.5f, cFace[1] * 0.5f, cFace[2] * 0.5f, 255.0f );
 
 		debugoverlay->AddBoxOverlay2( vec3_origin,
-			l->bounds_min,
-			l->bounds_max,
-			vec3_angle,
-			cFace, cEdge, -1.0f );
+		                              l->bounds_min,
+		                              l->bounds_max,
+		                              vec3_angle,
+		                              cFace, cEdge, -1.0f );
 
 		debugoverlay->AddBoxOverlay2( vec3_origin,
-			l->bounds_min_naive,
-			l->bounds_max_naive,
-			vec3_angle,
-			Color( 32, 64, 96, 16 ),
-			Color( 32, 64, 96, 255 ), -1.0f );
+		                              l->bounds_min_naive,
+		                              l->bounds_max_naive,
+		                              vec3_angle,
+		                              Color( 32, 64, 96, 16 ),
+		                              Color( 32, 64, 96, 255 ), -1.0f );
 	}
 	FOR_EACH_VEC_FAST_END
 }

@@ -27,7 +27,7 @@ void ShutdownDeferredExt()
 	if ( !__g_defExt )
 		return;
 
-	delete [] __g_defExt->CommitLightData_Common( NULL, 0, 0, 0, 0, 0 );
+	__g_defExt->CommitLightData_Common( NULL );
 
 	__g_defExt = NULL;
 

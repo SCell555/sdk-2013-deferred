@@ -64,43 +64,42 @@ bool CDeferredExtension::IsRadiosityEnabled() const
 	return refRadiosity.GetBool();
 }
 
-void CDeferredExtension::CommitOrigin( const Vector &origin )
+void CDeferredExtension::CommitCommonData( const Vector& origin,
+										   const Vector& fwd,
+										   const float& zNear, const float& zFar,
+										   const VMatrix& matTFrustum
+#if DEFCFG_BILATERAL_DEPTH_TEST
+										   , const VMatrix &matWorldCameraDepthTex
+#endif
+																							)
 {
-	VectorCopy( origin.Base(), m_vecOrigin.Base() );
-}
-void CDeferredExtension::CommitViewForward( const Vector &fwd )
-{
-	VectorCopy( fwd.Base(), m_vecForward.Base() );
-}
-void CDeferredExtension::CommitZDists( const float &zNear, const float &zFar )
-{
+	m_vecOrigin = origin;
+	m_vecForward = fwd;
 	m_flZDists[0] = zNear;
 	m_flZDists[1] = zFar;
+	m_matTFrustumD = matTFrustum;
+#if DEFCFG_BILATERAL_DEPTH_TEST
+	m_matWorldCameraDepthTex = matWorldCameraDepthTex;
+#endif
 }
+
 void CDeferredExtension::CommitZScale( const float &zFar )
 {
 	m_flZDists[2] = zFar;
 }
-void CDeferredExtension::CommitFrustumDeltas( const VMatrix &matTFrustum )
-{
-	m_matTFrustumD = matTFrustum;
-}
-#if DEFCFG_BILATERAL_DEPTH_TEST
-void CDeferredExtension::CommitWorldToCameraDepthTex( const VMatrix &matWorldCameraDepthTex )
-{
-	m_matWorldCameraDepthTex = matWorldCameraDepthTex;
-}
-#endif
+
 void CDeferredExtension::CommitShadowData_Ortho( const int &index, const shadowData_ortho_t &data )
 {
 	Assert( index >= 0 && index < SHADOW_NUM_CASCADES );
 	m_dataOrtho[ index ] = data;
 }
+
 void CDeferredExtension::CommitShadowData_Proj( const int &index, const shadowData_proj_t &data )
 {
 	Assert( index >= 0 && index < MAX_SHADOW_PROJ );
 	m_dataProj[ index ] = data;
 }
+
 void CDeferredExtension::CommitShadowData_General( const shadowData_general_t &data )
 {
 	m_dataGeneral = data;
@@ -121,20 +120,28 @@ void CDeferredExtension::CommitLightData_Global( const lightData_Global_t &data 
 	m_globalLight = data;
 }
 
-float *CDeferredExtension::CommitLightData_Common( float *pFlData, int numRows,
-		int numShadowedCookied, int numShadowed,
-		int numCookied, int numSimple )
+void CDeferredExtension::CommitLightData_Common( lightDataCommon_t* pData )
 {
-	float *pReturn = m_pflCommonLightData;
+	if ( m_pflCommonLightData )
+		m_pflCommonLightData->DeleteThis();
 
-	m_pflCommonLightData = pFlData;
-	m_iCommon_NumRows = numRows;
-	m_iNumCommon_ShadowedCookied = numShadowedCookied;
-	m_iNumCommon_Shadowed = numShadowed;
-	m_iNumCommon_Cookied = numCookied;
-	m_iNumCommon_Simple = numSimple;
-
-	return pReturn;
+	m_pflCommonLightData = pData;
+	if ( pData )
+	{
+		m_iCommon_NumRows = pData->numRows;
+		m_iNumCommon_ShadowedCookied = pData->numShadowedCookied;
+		m_iNumCommon_Shadowed = pData->numShadowed;
+		m_iNumCommon_Cookied = pData->numCookied;
+		m_iNumCommon_Simple = pData->numSimple;
+	}
+	else
+	{
+		m_iCommon_NumRows = 0;
+		m_iNumCommon_ShadowedCookied = 0;
+		m_iNumCommon_Shadowed = 0;
+		m_iNumCommon_Cookied = 0;
+		m_iNumCommon_Simple = 0;
+	}
 }
 
 void CDeferredExtension::CommitTexture_General( ITexture *pTexNormals, ITexture *pTexDepth,
@@ -161,30 +168,36 @@ void CDeferredExtension::CommitTexture_CascadedDepth( const int &index, ITexture
 	Assert( index >= 0 && index < MAX_SHADOW_ORTHO );
 	m_pTexShadowDepth_Ortho[ index ] = pTexShadowDepth;
 }
+
 void CDeferredExtension::CommitTexture_DualParaboloidDepth( const int &index, ITexture *pTexShadowDepth )
 {
 	Assert( index >= 0 && index < MAX_SHADOW_DP );
 	m_pTexShadowDepth_DP[ index ] = pTexShadowDepth;
 }
+
 void CDeferredExtension::CommitTexture_ProjectedDepth( const int &index, ITexture *pTexShadowDepth )
 {
 	Assert( index >= 0 && index < MAX_SHADOW_PROJ );
 	m_pTexShadowDepth_Proj[ index ] = pTexShadowDepth;
 }
+
 void CDeferredExtension::CommitTexture_Cookie( const int &index, ITexture *pTexCookie )
 {
 	Assert( index >= 0 && index < NUM_COOKIE_SLOTS );
 	m_pTexCookie[ index ] = pTexCookie;
 }
+
 void CDeferredExtension::CommitTexture_VolumePrePass( ITexture *pTexVolumePrePass )
 {
 	m_pTexVolumePrePass = pTexVolumePrePass;
 }
+
 void CDeferredExtension::CommitTexture_ShadowRadOutput_Ortho( ITexture *pAlbedo, ITexture *pNormal )
 {
 	m_pTexShadowRad_Ortho[0] = pAlbedo;
 	m_pTexShadowRad_Ortho[1] = pNormal;
 }
+
 void CDeferredExtension::CommitTexture_Radiosity( ITexture *pTexRadBuffer0, ITexture *pTexRadBuffer1,
 		ITexture *pTexRadNormal0, ITexture *pTexRadNormal1 )
 {
