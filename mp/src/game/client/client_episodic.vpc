@@ -60,15 +60,13 @@ $Project "Client (Episodic)"
 				
 				$Folder	"Hooking"
 				{
-					$File	"$SRCDIR\thirdparty\minhook\src\buffer.c"		\
-							"$SRCDIR\thirdparty\minhook\src\hook.c"			\
-							"$SRCDIR\thirdparty\minhook\src\trampoline.c"	\
-							"$SRCDIR\thirdparty\minhook\src\hde\hde32.c"
+					$File	"$SRCDIR\thirdparty\subhook\subhook.c"
 					{
 						$Configuration
 						{
 							$Compiler
 							{
+								$PreprocessorDefinitions		"$BASE;SUBHOOK_STATIC"
 								$Create/UsePrecompiledHeader	"Not Using Precompiled Headers"
 								$DisableSpecificWarnings		"4316;4100;4244;4701;4310"
 							}
@@ -106,7 +104,7 @@ $Project "Client (Episodic)"
 					{
 						$Compiler
 						{
-							$AdditionalIncludeDirectories	"$BASE;$SRCDIR\thirdparty\minhook\include"
+							$AdditionalIncludeDirectories	"$BASE;$SRCDIR\thirdparty\subhook"
 						}
 					}
 				}

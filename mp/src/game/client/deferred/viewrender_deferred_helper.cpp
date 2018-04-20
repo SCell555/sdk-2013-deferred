@@ -4,7 +4,8 @@
 #include <vector>
 #include "winlite.h"
 #undef GetObject
-#include "MinHook.h"
+#define SUBHOOK_STATIC
+#include "subhook.h"
 
 #ifdef __linux__
 #include <dlfcn.h>
@@ -125,7 +126,7 @@ int GetModuleInformation( const char *name, void **base, size_t *length )
 		char perm[5];
 		unsigned long begin, end;
 		sscanf( buf, "%lx-%lx %4s", &begin, &end, perm );
-		
+
 		if ( strcmp( basename( mapname ), name ) == 0 && perm[0] == 'r' && perm[2] == 'x' )
 		{
 			*base = (void*)begin;
@@ -145,6 +146,7 @@ namespace helper
 	bool bDisableDecalRendering = false;
 }
 
+static subhook::Hook* DecalSurfaceDrawHook = NULL;
 void( *DecalSurfaceDrawOriginal )( IMatRenderContext* pRenderContext, int renderGroup, float a3 );
 void DecalSurfaceDraw( IMatRenderContext *pRenderContext, int renderGroup, float a3 )
 {
@@ -153,6 +155,7 @@ void DecalSurfaceDraw( IMatRenderContext *pRenderContext, int renderGroup, float
 	return DecalSurfaceDrawOriginal( pRenderContext, renderGroup, a3 );
 }
 
+static subhook::Hook* DispInfo_DrawDecalsGroupHook = NULL;
 void (*DispInfo_DrawDecalsGroupOriginal)( int iGroup, int iTreeType );
 void DispInfo_DrawDecalsGroup( int iGroup, int iTreeType )
 {
@@ -162,7 +165,7 @@ void DispInfo_DrawDecalsGroup( int iGroup, int iTreeType )
 }
 
 
-static class MinHookTest : public CAutoGameSystem
+static class AutoHook : public CAutoGameSystem
 {
 public:
 	bool Init() OVERRIDE
@@ -191,16 +194,12 @@ public:
 
 #undef FUNC_FROM_PATTERN
 
-		MH_STATUS result = MH_Initialize();
-
-#define HOOK_FUNC( funcAddr, funcRepl )		result = MH_CreateHook( funcAddr##Func, reinterpret_cast<void*>( &funcRepl ), reinterpret_cast<void**>( &funcRepl##Original ) )
+#define HOOK_FUNC( funcAddr, funcRepl ) { funcRepl##Hook = new subhook::Hook( funcAddr##Func, reinterpret_cast<void*>( &funcRepl ) ); Msg("Hooking " V_STRINGIFY( funcRepl ) " %ssuccessful\n", funcRepl##Hook->Install() ? "" : "un" ); *reinterpret_cast<void**>( &funcRepl##Original ) = funcRepl##Hook->GetTrampoline(); }
 
 		HOOK_FUNC( decalSurfaceDraw, DecalSurfaceDraw );
 		HOOK_FUNC( dispInfo_DrawDecalsGroup, DispInfo_DrawDecalsGroup );
 
 #undef HOOK_FUNC
-
-		result = MH_EnableHook( MH_ALL_HOOKS );
 
 		//g_WorldStaticMeshes = reinterpret_cast<CUtlVector<IMesh*>*>(reinterpret_cast<byte*>( engineDll ) + 0x5AD2A8);
 
@@ -209,6 +208,7 @@ public:
 
 	void Shutdown() OVERRIDE
 	{
-		MH_Uninitialize();
+		delete DecalSurfaceDrawHook;
+		delete DispInfo_DrawDecalsGroupHook;
 	}
-} mh_test;
+} autoHook;
