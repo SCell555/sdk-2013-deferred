@@ -129,7 +129,7 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 	const bool bSelfillum = pMat->GetMaterialVarFlag( MATERIAL_VAR_SELFILLUM );
 
 	const bool bDecal = ( pszOldShadername != NULL && V_stristr( pszOldShadername, "decal" ) != NULL ) ||
-		( pszMatname != NULL && V_stristr( pszMatname, "decal" ) != NULL ) ||
+		/*( pszMatname != NULL && V_stristr( pszMatname, "decal" ) != NULL ) ||*/
 		pMat->GetMaterialVarFlag( MATERIAL_VAR_DECAL );
 
 	if ( bDecal )
@@ -145,7 +145,7 @@ static void ShaderReplaceReplMat( const char *szNewShadername, IMaterial *pMat )
 	}
 
 	// Find a better solution to this...
-	if ( pMat->IsTwoSided() || FStrEq( pszOldShadername, "LightmappedGeneric" ) || FStrEq( pszOldShadername, "WorldVertexTransition" ) )
+	if ( pMat->IsTwoSided() || ( FStrEq( pszOldShadername, "LightmappedGeneric" ) || FStrEq( pszOldShadername, "WorldVertexTransition" ) ) && !( V_stristr( pszMatname, "glass" ) || V_stristr( pszMatname, "window" ) ) )
 	{
 		msg->SetInt( "$nocull", 1 );
 	}
