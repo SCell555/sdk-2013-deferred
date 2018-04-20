@@ -229,7 +229,7 @@ void CLightingManager::AllocateSortDataBuffer()
 		                                ? count / 4
 		                                : ( ( count - ( count % 4 ) ) / 4 ) + 1;
 
-	if ( m_SortBufferDataSize > iSortBufferDataSize )
+	if ( m_SortBufferDataSize >= iSortBufferDataSize )
 		return;
 
 	m_SortBufferDataSize = iSortBufferDataSize;
@@ -796,7 +796,7 @@ FORCEINLINE int CLightingManager::WriteLight( def_light_t* l, float* pfl4 )
 	return numConsts;
 }
 
-FORCEINLINE bool SortLightsByComboType( CUtlVector<def_light_t*>& hLights,
+FORCEINLINE bool SortLightsByComboType( const CUtlVector<def_light_t*>& hLights,
                                         CUtlVector<def_light_t*>& hLightsShadowedCookie,
                                         CUtlVector<def_light_t*>& hLightsShadowed,
                                         CUtlVector<def_light_t*>& hLightsCookied,
@@ -807,7 +807,7 @@ FORCEINLINE bool SortLightsByComboType( CUtlVector<def_light_t*>& hLights,
 	hLightsCookied.RemoveAll();
 	hLightsSimple.RemoveAll();
 
-	FOR_EACH_VEC_FAST( def_light_t*, hLights, l )
+	FOR_EACH_VEC_FAST( def_light_t* const, hLights, l )
 	{
 		const bool bShadowed = l->ShouldRenderShadow();
 		const bool bCookie   = l->HasCookie() && l->IsCookieReady();
@@ -1024,14 +1024,15 @@ void CLightingManager::RenderLights( const CViewSetup& view, CDeferredViewRender
 
 					for ( int iShadowed = 0; iShadowed < ( drawShadowedCookied + drawShadowed ); iShadowed++ )
 					{
-						pCaller->DrawLightShadowView( view, iShadowed, commitableLights[iShadowed] );
+						def_light_t* pLight = commitableLights[iShadowed];
+						pCaller->DrawLightShadowView( view, iShadowed, pLight );
 
-						if ( commitableLights[iShadowed]->HasVolumetrics() )
+						if ( pLight->HasVolumetrics() )
 						{
-							int iDataOffset    = iShadowed * lightTypes[i].constCount_advanced * 4;
-							int iSamplerOffset = iShadowed;
+							const int iDataOffset	 = iShadowed * lightTypes[i].constCount_advanced * 4;
+							const int iSamplerOffset = iShadowed;
 
-							volumeLights.AddToTail( queueVolume( commitableLights[iShadowed], iDataOffset, iSamplerOffset ) );
+							volumeLights.AddToTail( queueVolume( pLight, iDataOffset, iSamplerOffset ) );
 						}
 					}
 
