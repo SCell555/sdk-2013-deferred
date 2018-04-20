@@ -2588,7 +2588,6 @@ void CViewRender::DrawWorldAndEntities( bool bDrawSkybox, const CViewSetup &view
 	}
 }
 
-
 //-----------------------------------------------------------------------------
 // Pushes a water render target
 //-----------------------------------------------------------------------------

@@ -1812,7 +1812,7 @@ void CDeferredViewRender::DrawSkyboxComposite( const CViewSetup &view, const boo
 
 void CDeferredViewRender::DrawWorldComposite( const CViewSetup &view, int nClearFlags, bool bDrawSkybox )
 {
-#if 1
+#if 0
 	MDLCACHE_CRITICAL_SECTION();
 
 	VisibleFogVolumeInfo_t fogVolumeInfo;
@@ -1864,6 +1864,7 @@ void CDeferredViewRender::DrawWorldComposite( const CViewSetup &view, int nClear
 		AddViewToScene( pUnderWaterView );
 	}
 #else
+	MDLCACHE_CRITICAL_SECTION();
 	VisibleFogVolumeInfo_t fogVolumeInfo;
 	render->GetVisibleFogVolume( view.origin, &fogVolumeInfo );
 
