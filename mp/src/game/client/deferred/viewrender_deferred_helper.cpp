@@ -7,12 +7,13 @@
 #include "winlite.h"
 #undef GetObject
 #define SUBHOOK_STATIC
-#include "../subhook/subhook/subhook.h"
 
 #ifdef __linux__
+#include "../subhook/subhook/subhook.h"
 #include <dlfcn.h>
 #include <libgen.h>
 #else
+#include "subhook.h"
 #include "Psapi.h"
 #pragma comment(lib, "Psapi.lib")
 #endif
