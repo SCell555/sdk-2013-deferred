@@ -1,11 +1,13 @@
-﻿#include "cbase.h"
+#include "cbase.h"
 #include "viewrender_deferred_helper.h"
 
+#include "tier0/valve_minmax_off.h"
 #include <vector>
+#include "tier0/valve_minmax_on.h"
 #include "winlite.h"
 #undef GetObject
 #define SUBHOOK_STATIC
-#include "subhook.h"
+#include "../subhook/subhook/subhook.h"
 
 #ifdef __linux__
 #include <dlfcn.h>
