@@ -565,21 +565,21 @@ public:
 				}
 
 				int imageWide = 0, tall = 0;
-				int wide;
+				int contentWide;
 				if (image)
 				{
 					image->GetContentSize(imageWide, tall);
 				}
 				if (maxWidth >= 0)
 				{
-					wide = maxWidth;
+					contentWide = maxWidth;
 				}
 				else
 				{
-					wide = imageWide;
+					contentWide = imageWide;
 				}
 
-				xpos += wide;//max(maxWidth,wide);
+				xpos += contentWide;//max(maxWidth,wide);
 				surface()->DrawOutlinedRect( xpos, 0, xpos, GetTall() );
 			}
 		}
@@ -608,10 +608,11 @@ public:
 	{
 		if (m_bSelected != state)
 		{
-            if (state)
+			// Don't need focus.
+           /*if (state)
             {
                 RequestFocus();
-            }
+            }*/
 			m_bSelected = state;
 			SetPaintBackgroundEnabled( state );
 			InvalidateLayout();

@@ -247,13 +247,14 @@ DBG_INTERFACE struct SDL_Window * GetAssertDialogParent();
 #else
 	#define  _AssertMsg( _exp, _msg, _executeExp, _bFatal )	\
 		do {																\
-			if (!(_exp)) 													\
+			static const bool hush = HushAsserts();							\
+			if (!(_exp) && !hush) 											\
 			{ 																\
 				_SpewInfo( SPEW_ASSERT, __TFILE__, __LINE__ );				\
 				SpewRetval_t ret = _SpewMessage("%s", static_cast<const char*>( _msg ));	\
 				CallAssertFailedNotifyFunc( __TFILE__, __LINE__, _msg );					\
 				_executeExp; 												\
-				if ( ret == SPEW_DEBUGGER)									\
+				if ( ret == SPEW_DEBUGGER && (Plat_IsInDebugSession() || _bFatal))	\
 				{															\
 					if ( !ShouldUseNewAssertDialog() || DoNewAssertDialog( __TFILE__, __LINE__, _msg ) ) \
 					{														\

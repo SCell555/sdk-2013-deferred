@@ -47,6 +47,8 @@ public:
 		SetBlockDragChaining( true );
 	}
 
+	virtual ~ContextLabel() {}
+
 	virtual void OnMousePressed( MouseCode code )
 	{
 		if ( m_pTabButton )

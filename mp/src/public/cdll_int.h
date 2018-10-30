@@ -42,7 +42,7 @@ class IMaterialSystem;
 class VMatrix;
 struct ScreenFade_t;
 struct ScreenShake_t;
-class CViewSetup;
+class CViewSetupEngine;
 class CEngineSprite;
 class CGlobalVarsBase;
 class CPhysCollide;
@@ -658,7 +658,7 @@ public:
 
 	// Allow engine to expressly render a view (e.g., during timerefresh)
 	// See IVRenderView.h, PushViewFlags_t for nFlags values
-	virtual void			RenderView( const CViewSetup &view, int nClearFlags, int whatToDraw ) = 0;
+	virtual void			RenderView( const CViewSetupEngine &view, int nClearFlags, int whatToDraw ) = 0;
 
 	// Apply screen fade directly from engine
 	virtual void			View_Fade( ScreenFade_t *pSF ) = 0;
@@ -736,7 +736,7 @@ public:
 	virtual void			WriteSaveGameScreenshotOfSize( const char *pFilename, int width, int height, bool bCreatePowerOf2Padded = false, bool bWriteVTF = false ) = 0;
 
 	// Gets the current view
-	virtual bool			GetPlayerView( CViewSetup &playerView ) = 0;
+	virtual bool			GetPlayerView( CViewSetupEngine &playerView ) = 0;
 
 	// Matchmaking
 	virtual void			SetupGameProperties( CUtlVector< XUSER_CONTEXT > &contexts, CUtlVector< XUSER_PROPERTY > &properties ) = 0;

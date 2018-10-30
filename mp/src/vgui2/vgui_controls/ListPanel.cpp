@@ -64,6 +64,7 @@ class ColumnButton : public Button
 {
 public:
 	ColumnButton(vgui::Panel *parent, const char *name, const char *text);
+	virtual ~ColumnButton() {}
 
 	// Inherited from Button
 	virtual void ApplySchemeSettings(IScheme *pScheme);
@@ -128,6 +129,7 @@ class Dragger : public Panel
 {
 public:
 	Dragger(int column);
+	virtual ~Dragger() {}
 
 	// Inherited from Panel
 	virtual void OnMousePressed(MouseCode code);
@@ -1901,19 +1903,19 @@ void ListPanel::PerformLayout()
 				if (!header->IsVisible())
 					continue;
 
-				int wide = header->GetWide();
+				int headerWide = header->GetWide();
 
 				if ( itemID == m_iEditModeItemID &&
 					 j == m_iEditModeColumn )
 				{
 
 					m_hEditModePanel->SetPos( x + m_iTableStartX + 2, (drawcount * m_iRowHeight) + m_iTableStartY);
-					m_hEditModePanel->SetSize( wide, m_iRowHeight - 1 );
+					m_hEditModePanel->SetSize( headerWide, m_iRowHeight - 1 );
 
 					bDone = true;
 				}
 
-				x += wide;
+				x += headerWide;
 			}
 
 			drawcount++;
@@ -1988,7 +1990,7 @@ void ListPanel::Paint()
 			if (!header->IsVisible())
 				continue;
 
-			int wide = header->GetWide();
+			int headerWide = header->GetWide();
 
 			if (render)
 			{
@@ -2005,7 +2007,7 @@ void ListPanel::Paint()
 
 				render->SetPos( xpos, (drawcount * m_iRowHeight) + m_iTableStartY);
 
-				int right = min( xpos + wide, maxw );
+				int right = min( xpos + headerWide, maxw );
 				int usew = right - xpos;
 				render->SetSize( usew, m_iRowHeight - 1 );
 
@@ -2038,7 +2040,7 @@ void ListPanel::Paint()
 			}
 			*/
 
-			x += wide;
+			x += headerWide;
 		}
 
 		drawcount++;

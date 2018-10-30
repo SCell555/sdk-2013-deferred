@@ -41,6 +41,8 @@
 #include "inetchannelinfo.h"
 #include "proto_version.h"
 
+#include "deferred/deferred_shared_common.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -1925,6 +1927,61 @@ float *C_BaseEntity::GetRenderClipPlane( void )
 		return NULL;
 }
 
+void C_BaseEntity::InstallBrushSurfaceRenderer( IBrushRenderer* renderer )
+{
+	m_bHasSpecialRenderer = renderer != NULL;
+	render->InstallBrushSurfaceRenderer( renderer );
+}
+
+static class CDefaultBrushRenderer : public IBrushRenderer
+{
+public:
+	bool RenderBrushModelSurface( IClientEntity* pBaseEntity, IBrushSurface* pBrushSurface ) OVERRIDE
+	{
+		const uint32 numVertices = pBrushSurface->GetVertexCount();
+		if ( vertexBufferSize < numVertices )
+		{
+			MEM_ALLOC_CREDIT_CLASS();
+			if ( vertices )
+				MemAlloc_FreeAligned( vertices );
+			vertexBufferSize = numVertices;
+			vertices = static_cast<BrushVertex_t*>( MemAlloc_AllocAligned( numVertices * sizeof( BrushVertex_t ), sizeof( BrushVertex_t ) ) );
+		}
+		pBrushSurface->GetVertexData( vertices );
+		CMatRenderContextPtr pRenderContext( materials );
+		CMeshBuilder builder;
+		builder.Begin( pRenderContext->GetDynamicMesh( true, 0, 0, pBrushSurface->GetMaterial() ), MATERIAL_POLYGON, numVertices );
+		for ( uint32 i = 0; i < numVertices; ++i )
+		{
+			BrushVertex_t& vertex = vertices[i];
+			builder.Position3fv( vertex.m_Pos.Base() );
+			builder.Normal3fv( vertex.m_Normal.Base() );
+			if ( vertex.m_TangentS.IsValid() )
+				builder.TangentS3fv( vertex.m_TangentS.Base() );
+			if ( vertex.m_TangentT.IsValid() )
+				builder.TangentT3fv( vertex.m_TangentT.Base() );
+			builder.TexCoord2fv( 0, vertex.m_TexCoord.Base() );
+			builder.TexCoord2fv( 1, vertex.m_LightmapCoord.Base() );
+			builder.AdvanceVertex();
+		}
+
+		builder.End( false, true );
+
+		return true;
+	}
+
+	CDefaultBrushRenderer() : vertices( NULL ), vertexBufferSize( 0 ) {}
+
+	~CDefaultBrushRenderer()
+	{
+		if ( vertices )
+			MemAlloc_FreeAligned( vertices );
+	}
+
+private:
+	BrushVertex_t* vertices;
+	uint32 vertexBufferSize;
+} defaultRenderer;
 
 //-----------------------------------------------------------------------------
 // Purpose: 
@@ -1945,6 +2002,9 @@ int C_BaseEntity::DrawBrushModel( bool bDrawingTranslucency, int nFlags, bool bT
 		DepthMode = DEPTH_MODE_SHADOW;
 	}
 
+	//if ( !m_bHasSpecialRenderer )
+	//	render->InstallBrushSurfaceRenderer( &defaultRenderer );
+
 	if ( DepthMode != DEPTH_MODE_NORMAL )
 	{
 		render->DrawBrushModelShadowDepth( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), DepthMode );
@@ -1958,6 +2018,9 @@ int C_BaseEntity::DrawBrushModel( bool bDrawingTranslucency, int nFlags, bool bT
 		}
 		render->DrawBrushModelEx( this, (model_t *)model, GetAbsOrigin(), GetAbsAngles(), mode );
 	}
+
+	//if ( !m_bHasSpecialRenderer )
+	//	render->InstallBrushSurfaceRenderer( NULL );
 
 	return 1;
 }
@@ -3524,7 +3587,7 @@ void C_BaseEntity::ComputeFxBlend( void )
 //-----------------------------------------------------------------------------
 int C_BaseEntity::GetFxBlend( void )
 {
-	Assert( m_nFXComputeFrame == gpGlobals->framecount );
+	//Assert( m_nFXComputeFrame == gpGlobals->framecount );
 	return m_nRenderFXBlend;
 }
 
@@ -4823,25 +4886,46 @@ CON_COMMAND( cl_sizeof, "Determines the size of the specified client class." )
 
 CON_COMMAND_F( dlight_debug, "Creates a dlight in front of the player", FCVAR_CHEAT )
 {
-	dlight_t *el = effects->CL_AllocDlight( 1 );
+	//dlight_t *el = effects->CL_AllocDlight( 1 );
 	C_BasePlayer *player = C_BasePlayer::GetLocalPlayer();
 	if ( !player )
 		return;
 	Vector start = player->EyePosition();
 	Vector forward;
 	player->EyeVectors( &forward );
-	Vector end = start + forward * MAX_TRACE_LENGTH;
+	const Vector& end = start + forward * MAX_TRACE_LENGTH;
 	trace_t tr;
 	UTIL_TraceLine( start, end, MASK_SHOT_HULL & (~CONTENTS_GRATE), player, COLLISION_GROUP_NONE, &tr );
-	el->origin = tr.endpos - forward * 12.0f;
+	/*el->origin = tr.endpos - forward * 12.0f;
 	el->radius = 200; 
 	el->decay = el->radius / 5.0f;
 	el->die = gpGlobals->curtime + 5.0f;
 	el->color.r = 255;
 	el->color.g = 192;
 	el->color.b = 64;
-	el->color.exponent = 5;
+	el->color.exponent = 5;*/
 
+	def_light_temp_t *l = new def_light_temp_t( 0.1f );
+
+	l->ang = vec3_angle;
+	l->pos = tr.endpos - forward * 12.0f;
+
+	l->col_diffuse = Vector( 0.964705882f, 0.82745098f, 0.403921569f );
+	//l->col_ambient = Vector(20, 20, 20); //GetColor_Ambient();
+
+	l->flRadius = 256.f;
+	l->flFalloffPower = 3.0f;
+
+	l->iVisible_Dist = l->flRadius * 2;
+	l->iVisible_Range = l->flRadius * 2;
+	l->iShadow_Dist = l->flRadius;
+	l->iShadow_Range = l->flRadius;
+
+	l->iFlags >>= DEFLIGHTGLOBAL_FLAGS_MAX_SHARED_BITS;
+	l->iFlags <<= DEFLIGHTGLOBAL_FLAGS_MAX_SHARED_BITS;
+	l->iFlags |= DEFLIGHT_SHADOW_ENABLED;
+
+	GetLightingManager()->AddTempLight( l );
 }
 //-----------------------------------------------------------------------------
 // Purpose: 

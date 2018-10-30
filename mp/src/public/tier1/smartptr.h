@@ -11,6 +11,7 @@
 #pragma once
 #endif
 
+#include "utlcommon.h"
 
 class CRefCountAccessor
 {
@@ -253,26 +254,49 @@ inline T* CSmartPtr<T,RefCountAccessor>::GetObject() const
 //		CAutoPushPop x( myvar, newvalue, restorevalue )
 //			assigns new value upon construction, assignes restorevalue upon destruction.
 //
-template < typename T >
+
 class CAutoPushPop
 {
 public:
-	explicit CAutoPushPop( T& var ) : m_rVar( var ), m_valPop( var ) {}
-	CAutoPushPop( T& var, T const &valPush ) : m_rVar( var ), m_valPop( var ) { m_rVar = valPush; }
-	CAutoPushPop( T& var, T const &valPush, T const &valPop ) : m_rVar( var ), m_valPop( var ) { m_rVar = valPush; }
+	template < typename T > CAutoPushPop( T& var ) : m_popInternal( new CAutoPushPopInternal<T>( var ) ) {}
+	template < typename T > CAutoPushPop( T& var, T const &valPush ) : m_popInternal( new CAutoPushPopInternal<T>( var, valPush ) ) {}
+	template < typename T > CAutoPushPop( T& var, T const &valPush, T const &valPop ) : m_popInternal( new CAutoPushPopInternal<T>( var, valPush, valPop ) ) {}
 
-	~CAutoPushPop() { m_rVar = m_valPop; }
+	~CAutoPushPop() { delete m_popInternal; }
 
 private:	// forbid copying
 	CAutoPushPop( CAutoPushPop const &x );
 	CAutoPushPop & operator = ( CAutoPushPop const &x );
 
 public:
-	T & Get() { return m_rVar; }
+	template < typename T > T & Get()
+	{
+		Assert( typeid( *m_popInternal ) == typeid( CAutoPushPopInternal<T> ) );
+		return ( ( CAutoPushPopInternal<T>* )m_popInternal )->Get();
+	}
 
 private:
+	class IAutoPushPopInternal
+	{
+	public:
+		virtual ~IAutoPushPopInternal() {}
+	};
+	template < typename T >
+	class CAutoPushPopInternal : public IAutoPushPopInternal
+	{
+	public:
+		CAutoPushPopInternal( T& var ) : m_rVar( var ), m_valPop( var ) {}
+		CAutoPushPopInternal( T& var, T const &valPush ) : m_rVar( var ), m_valPop( var ) { m_rVar = valPush; }
+		CAutoPushPopInternal( T& var, T const &valPush, T const &valPop ) : m_rVar( var ), m_valPop( valPop ) { m_rVar = valPush; }
+
+		~CAutoPushPopInternal() { m_rVar = m_valPop; }
+
+	T & Get() { return m_rVar; }
+
 	T &m_rVar;
 	T m_valPop;
+	};
+	IAutoPushPopInternal *m_popInternal;
 };
 
 

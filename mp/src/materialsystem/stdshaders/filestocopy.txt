@@ -1,0 +1,38 @@
+volumpass_point_ps30.fxc
+common_pragmas.h
+common_lighting_fxc.h
+common_ps_fxc.h
+deferred_global_common.h
+common_hlsl_cpp_consts.h
+common_shadowmapping_fxc.h
+common_fxc.h
+volumpass_point_ps30.fxc
+common_pragmas.h
+common_lighting_fxc.h
+common_ps_fxc.h
+deferred_global_common.h
+common_hlsl_cpp_consts.h
+common_shadowmapping_fxc.h
+common_fxc.h
+volumpass_spot_ps30.fxc
+common_ps_fxc.h
+common_lighting_fxc.h
+deferred_global_common.h
+common_pragmas.h
+common_shadowmapping_fxc.h
+common_fxc.h
+common_hlsl_cpp_consts.h
+volumpass_spot_ps30.fxc
+common_ps_fxc.h
+common_lighting_fxc.h
+deferred_global_common.h
+common_pragmas.h
+common_shadowmapping_fxc.h
+common_fxc.h
+common_hlsl_cpp_consts.h
+..\..\devtools\bin\d3dx9_33.dll 
+..\..\dx10sdk\utilities\dx9_30\dx_proxy.dll 
+D:\Steam\SteamApps\common\Source SDK Base 2013 Multiplayer\bin\shadercompile.exe 
+D:\Steam\SteamApps\common\Source SDK Base 2013 Multiplayer\bin\shadercompile_dll.dll 
+D:\Steam\SteamApps\common\Source SDK Base 2013 Multiplayer\bin\vstdlib.dll 
+D:\Steam\SteamApps\common\Source SDK Base 2013 Multiplayer\bin\tier0.dll 

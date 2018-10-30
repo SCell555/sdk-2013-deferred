@@ -146,6 +146,7 @@ class CParticleSystemDefinition;
 class CParticleMgr;
 class CNewParticleEffect;
 class CParticleCollection;
+class CViewSetup;
 
 #define INVALID_MATERIAL_HANDLE	NULL
 

@@ -16,6 +16,7 @@
 #include "view_shared.h"
 #include "replay/ireplayscreenshotsystem.h"
 
+#include "../../materialsystem/stdshaders/deferred_global_common.h"
 
 //-----------------------------------------------------------------------------
 // Forward declarations
@@ -36,6 +37,8 @@ class CReplayScreenshotTaker;
 #ifdef HL2_EPISODIC
 	class CStunEffect;
 #endif // HL2_EPISODIC
+
+struct def_light_t;
 
 //-----------------------------------------------------------------------------
 // Data specific to intro mode to control rendering.
@@ -78,6 +81,8 @@ enum view_id_t
 	VIEW_INTRO_CAMERA = 6,
 	VIEW_SHADOW_DEPTH_TEXTURE = 7,
 	VIEW_SSAO = 8,
+	VIEW_DEFERRED_GBUFFER = 9,
+	VIEW_DEFERRED_SHADOW = 10,
 	VIEW_ID_COUNT
 };
 view_id_t CurrentViewID();
@@ -246,6 +251,13 @@ protected:
 	virtual bool	ShouldDrawPortals() { return true; }
 #endif
 
+public:
+	static void		PushComposite();
+	static void		PopComposite();
+
+	static void		PushGBuffer( bool bInitial, float zScale = 1.0f, bool bClearDepth = true );
+	static void		PopGBuffer();
+protected:
 	void ReleaseLists();
 
 	//-----------------------------------------------
@@ -438,7 +450,7 @@ private:
 
 	// Drawing primitives
 	bool			ShouldDrawViewModel( bool drawViewmodel );
-	void			DrawViewModels( const CViewSetup &view, bool drawViewmodel );
+	void			DrawViewModels( const CViewSetup &view, bool drawViewmodel, bool bGBuffer );
 
 	void			PerformScreenSpaceEffects( int x, int y, int w, int h );
 
@@ -470,6 +482,31 @@ private:
 	void			SetupMain3DView( const CViewSetup &view, int &nClearFlags );
 	void			CleanupMain3DView( const CViewSetup &view );
 
+	void			ProcessDeferredGlobals( const CViewSetup &view );
+
+	void			ViewDrawGBuffer( const CViewSetup &view, bool &bDrew3dSkybox, SkyboxVisibility_t &nSkyboxVisible,
+									 bool bDrawViewModel );
+
+	void BeginRadiosity( const CViewSetup &view );
+	void UpdateRadiosityPosition();
+	void PerformRadiosityGlobal( const int iRadiosityCascade, const CViewSetup &view );
+	void EndRadiosity( const CViewSetup &view );
+	void DebugRadiosity( const CViewSetup &view );
+
+	IMesh *GetRadiosityScreenGrid( const int iCascade );
+	IMesh *CreateRadiosityScreenGrid( const Vector2D &vecViewportBase, const float flWorldStepSize );
+
+	void			PerformLighting( const CViewSetup &view );
+
+	void			RenderCascadedShadows( const CViewSetup &view, const bool bEnableRadiosity );
+
+public:
+	virtual void	DrawLightShadowView( const CViewSetup &view, int iDesiredShadowmap, def_light_t *l );
+
+protected:
+	Vector m_vecRadiosityOrigin[2];
+	IMesh *m_pMesh_RadiosityScreenGrid[2];
+	CUtlVector< IMesh* > m_hRadiosityDebugMeshList[2];
 
 	// This stores the current view
  	CViewSetup		m_CurrentView;

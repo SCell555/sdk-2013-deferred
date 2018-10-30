@@ -82,6 +82,11 @@
 #include "weapon_physcannon.h"
 #endif
 
+#include "deferred/deferred_shared_common.h"
+
+// memdbgon must be the last include file in a .cpp file!!!
+#include "tier0/memdbgon.h"
+
 ConVar autoaim_max_dist( "autoaim_max_dist", "2160" ); // 2160 = 180 feet
 ConVar autoaim_max_deflect( "autoaim_max_deflect", "0.99" );
 
@@ -96,9 +101,6 @@ ConVar	spec_freeze_traveltime( "spec_freeze_traveltime", "0.4", FCVAR_CHEAT | FC
 ConVar sv_bonus_challenge( "sv_bonus_challenge", "0", FCVAR_REPLICATED, "Set to values other than 0 to select a bonus map challenge type." );
 
 static ConVar sv_maxusrcmdprocessticks( "sv_maxusrcmdprocessticks", "24", FCVAR_NOTIFY, "Maximum number of client-issued usrcmd ticks that can be replayed in packet loss conditions, 0 to allow no restrictions" );
-
-// memdbgon must be the last include file in a .cpp file!!!
-#include "tier0/memdbgon.h"
 
 static ConVar old_armor( "player_old_armor", "0" );
 
@@ -665,6 +667,8 @@ void CBasePlayer::UpdateOnRemove( void )
 	BaseClass::UpdateOnRemove();
 }
 
+static ConVar debug_light_visibility( "debug_light_visibility", "0" );
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : **pvs - 
@@ -672,6 +676,15 @@ void CBasePlayer::UpdateOnRemove( void )
 //-----------------------------------------------------------------------------
 void CBasePlayer::SetupVisibility( CBaseEntity *pViewEntity, unsigned char *pvs, int pvssize )
 {
+	if ( CDeferredLightGlobal* pLight = GetGlobalLight() )
+	{
+		Vector reverseDir;
+		AngleVectors( pLight->GetAbsAngles(), &reverseDir );
+		engine->AddOriginToPVS( GetAbsOrigin() + reverseDir * -8192 );
+		if ( debug_light_visibility.GetBool() )
+			NDebugOverlay::Cross3D( GetAbsOrigin() + reverseDir * -8192, 48, 255, 0, 0, false, 5.f );
+	}
+
 	// If we have a viewentity, we don't add the player's origin.
 	if ( pViewEntity )
 		return;

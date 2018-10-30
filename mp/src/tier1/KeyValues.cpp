@@ -1573,6 +1573,40 @@ Color KeyValues::GetColor( const char *keyName )
 	return color;
 }
 
+Color KeyValues::GetColor( const char *keyName, Color color )
+{
+	KeyValues *dat = FindKey( keyName, false );
+	if ( dat )
+	{
+		if ( dat->m_iDataType == TYPE_COLOR )
+		{
+			color[0] = dat->m_Color[0];
+			color[1] = dat->m_Color[1];
+			color[2] = dat->m_Color[2];
+			color[3] = dat->m_Color[3];
+		}
+		else if ( dat->m_iDataType == TYPE_FLOAT )
+		{
+			color[0] = dat->m_flValue;
+		}
+		else if ( dat->m_iDataType == TYPE_INT )
+		{
+			color[0] = dat->m_iValue;
+		}
+		else if ( dat->m_iDataType == TYPE_STRING )
+		{
+			// parse the colors out of the string
+			float a = 0.0f, b = 0.0f, c = 0.0f, d = 0.0f;
+			sscanf( dat->m_sValue, "%f %f %f %f", &a, &b, &c, &d );
+			color[0] = ( unsigned char )a;
+			color[1] = ( unsigned char )b;
+			color[2] = ( unsigned char )c;
+			color[3] = ( unsigned char )d;
+		}
+	}
+	return color;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Sets a color
 //-----------------------------------------------------------------------------

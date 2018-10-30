@@ -24,6 +24,8 @@ ipch
 *.mak
 *.mak.vpc_crc
 *.xcodeproj/
+*.project
+*.a
 obj*/
 !devtools/*.mak
 !utils/smdlexp/smdlexp.mak
@@ -36,12 +38,29 @@ server.pdb
 server.dll
 server.lib
 
+mathlib.lib
+tier1.lib
+vgui_controls.lib
+raytrace.lib
+
+mathlib.a
+tier1.a
+vgui_controls.a
+raytrace.a
+
 client.so
 client.so.dbg
 server.so
 server.so.dbg
+game_shader_dx9.so
+game_shader_dx9.so.dbg
+client_srv.so
+client_srv.so.dbg
 server_srv.so
 server_srv.so.dbg
+game_shader_dx9_srv.so
+game_shader_dx9_srv.so.dbg
+
 
 client.dylib
 client.dylib.dSYM/

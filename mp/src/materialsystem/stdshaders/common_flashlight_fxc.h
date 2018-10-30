@@ -659,36 +659,11 @@ void DoSpecularFlashlight( float3 flashlightPos, float3 worldPos, float4 flashli
 					out float3 diffuseLighting, out float3 specularLighting )
 {
 	float3 vProjCoords = flashlightSpacePosition.xyz / flashlightSpacePosition.w;
-	float3 flashlightColor = float3(1,1,1);
-
-#if ( defined( _X360 ) )
-
-	float3 ltz = vProjCoords.xyz < float3( 0.0f, 0.0f, 0.0f );
-	float3 gto = vProjCoords.xyz > float3( 1.0f, 1.0f, 1.0f );
-
-	[branch]
-	if ( dot(ltz + gto, float3(1,1,1)) > 0 )
-	{
-		clip(-1);
-		diffuseLighting = specularLighting = float3(0,0,0);
-		return;
-	}
-	else
-	{
-		flashlightColor = tex2D( FlashlightSampler, vProjCoords );
-
-		[branch]
-		if ( dot(flashlightColor.xyz, float3(1,1,1)) <= 0 )
-		{
-			clip(-1);
-			diffuseLighting = specularLighting = float3(0,0,0);
-			return;
-		}
-	}
-#else
-	flashlightColor = tex2D( FlashlightSampler, vProjCoords );
+	float3 flashlightColor = tex2D( FlashlightSampler, vProjCoords );
+	
+#if defined(SHADER_MODEL_PS_2_B) || defined(SHADER_MODEL_PS_3_0)
+	flashlightColor *= flashlightSpacePosition.w > 0;	// Catch back projection (PC-only, ps2b and up)
 #endif
-
 
 #if defined(SHADER_MODEL_PS_2_0) || defined(SHADER_MODEL_PS_2_B) || defined(SHADER_MODEL_PS_3_0)
 	flashlightColor *= cFlashlightColor.xyz;						// Flashlight color
@@ -734,40 +709,14 @@ float3 DoFlashlight( float3 flashlightPos, float3 worldPos, float4 flashlightSpa
 					sampler RandomRotationSampler, int nShadowLevel, bool bDoShadows, bool bAllowHighQuality,
 					const float2 vScreenPos, bool bClip, float4 vShadowTweaks = float4(3/1024.0f, 0.0005f, 0.0f, 0.0f), bool bHasNormal = true )
 {
-	float3 vProjCoords = flashlightSpacePosition.xyz / flashlightSpacePosition.w;
-	float3 flashlightColor = float3(1,1,1);
-
-#if ( defined( _X360 ) )
-
-	float3 ltz = vProjCoords.xyz < float3( 0.0f, 0.0f, 0.0f );
-	float3 gto = vProjCoords.xyz > float3( 1.0f, 1.0f, 1.0f );
-
-	[branch]
-	if ( dot(ltz + gto, float3(1,1,1)) > 0 )
+	if ( flashlightSpacePosition.w < 0 )
 	{
-		if ( bClip )
-		{
-			clip(-1);
-		}
 		return float3(0,0,0);
 	}
 	else
 	{
-		flashlightColor = tex2D( FlashlightSampler, vProjCoords );
-
-		[branch]
-		if ( dot(flashlightColor.xyz, float3(1,1,1)) <= 0 )
-		{
-			if ( bClip )
-			{
-				clip(-1);
-			}
-			return float3(0,0,0);
-		}
-	}
-#else
-	flashlightColor = tex2D( FlashlightSampler, vProjCoords );
-#endif
+	float3 vProjCoords = flashlightSpacePosition.xyz / flashlightSpacePosition.w;
+	float3 flashlightColor = tex2D( FlashlightSampler, vProjCoords );
 
 #if defined(SHADER_MODEL_PS_2_0) || defined(SHADER_MODEL_PS_2_B) || defined(SHADER_MODEL_PS_3_0)
 	flashlightColor *= cFlashlightColor.xyz;						// Flashlight color
@@ -788,7 +737,7 @@ float3 DoFlashlight( float3 flashlightPos, float3 worldPos, float4 flashlightSpa
 	if ( bDoShadows )
 	{
 		float flShadow = DoFlashlightShadow( FlashlightDepthSampler, RandomRotationSampler, vProjCoords, vScreenPos, nShadowLevel, vShadowTweaks, bAllowHighQuality );
-		float flAttenuated = lerp( flShadow, 1.0f, vShadowTweaks.y );	// Blend between fully attenuated and not attenuated
+		float flAttenuated = lerp( saturate( flShadow ), 1.0f, vShadowTweaks.y );	// Blend between fully attenuated and not attenuated
 		flShadow = saturate( lerp( flAttenuated, flShadow, fAtten ) );	// Blend between shadow and above, according to light attenuation
 		flashlightColor *= flShadow;									// Shadow term
 	}
@@ -816,6 +765,7 @@ float3 DoFlashlight( float3 flashlightPos, float3 worldPos, float4 flashlightSpa
 	diffuseLighting *= endFalloffFactor;
 
 	return diffuseLighting;
+	}
 }
 
 #endif //#ifndef COMMON_FLASHLIGHT_FXC_H_

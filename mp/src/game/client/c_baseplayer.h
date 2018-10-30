@@ -37,6 +37,7 @@ class C_BaseViewModel;
 class C_FuncLadder;
 class CFlashlightEffect;
 class C_EconWearable;
+class CViewSetup;
 
 extern int g_nKillCamMode;
 extern int g_nKillCamTarget1;

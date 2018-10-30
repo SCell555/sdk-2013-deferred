@@ -5,8 +5,6 @@
 // $NoKeywords: $
 //=============================================================================//
 
-#include <assert.h>
-
 #include <vgui/ISurface.h>
 #include <vgui/IVGui.h>
 #include <vgui/IPanel.h>

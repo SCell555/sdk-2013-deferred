@@ -157,8 +157,9 @@ public:
 	{
 		m_nCurrentStack = 0;
 		MEM_ALLOC_CREDIT();
-		m_QueuedRopeMemory[0].Init( 131072, 0, 16384 );
-		m_QueuedRopeMemory[1].Init( 131072, 0, 16384 );
+		const int stackSize = 1048576;
+		m_QueuedRopeMemory[0].Init( stackSize, 0, 16384 );
+		m_QueuedRopeMemory[1].Init( stackSize, 0, 16384 );
 	}
 	~CQueuedRopeMemoryManager( void )
 	{

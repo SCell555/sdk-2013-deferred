@@ -53,6 +53,7 @@ protected:
 	Vector	m_vecOrigin;
 	Vector	m_vecDirection;
 	float	m_flForce;
+	float	m_flScale;
 	int		m_fFlags;
 
 	PMaterialHandle	m_Material_Smoke;

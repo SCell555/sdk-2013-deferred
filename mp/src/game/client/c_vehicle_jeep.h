@@ -59,7 +59,7 @@ private:
 	float		m_flViewAngleDeltaTime;
 
 	float		m_flJeepFOV;
-	CHeadlightEffect *m_pHeadlight;
+	CFlashlightEffect *m_pHeadlight;
 	bool		m_bHeadlightIsOn;
 };
 

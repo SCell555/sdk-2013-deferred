@@ -13,6 +13,8 @@
 #include "c_te_effect_dispatch.h"
 #include "fx.h"
 
+#include "deferred/deferred_shared_common.h"
+
 // memdbgon must be the last include file in a .cpp file!!!
 #include "tier0/memdbgon.h"
 
@@ -62,7 +64,10 @@ void C_PropJeep::Simulate( void )
 		if ( m_pHeadlight == NULL )
 		{
 			// Turned on the headlight; create it.
-			m_pHeadlight = new CHeadlightEffect;
+			if ( GetDeferredManager()->IsDeferredRenderingEnabled() )
+				m_pHeadlight = new CHeadlightEffect<CFlashlightEffectDeferred>();
+			else
+				m_pHeadlight = new CHeadlightEffect<CFlashlightEffect>();
 
 			if ( m_pHeadlight == NULL )
 				return;

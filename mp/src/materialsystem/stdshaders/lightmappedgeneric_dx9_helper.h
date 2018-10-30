@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 //=============================================================================
@@ -10,6 +10,8 @@
 
 #include <string.h>
 #include "BaseVSShader.h"
+
+#include "deferred_includes.h"
 
 
 //-----------------------------------------------------------------------------
@@ -87,13 +89,51 @@ struct LightmappedGeneric_DX9_Vars_t
 	int m_nOutlineEnd0;
 	int m_nOutlineEnd1;
 
+	int m_nPhong;
+	int m_nPhongBoost;
+	int m_nPhongFresnelRanges;
+	int m_nPhongExponent;
 };
 
 void InitParamsLightmappedGeneric_DX9( CBaseVSShader *pShader, IMaterialVar** params, const char *pMaterialName, LightmappedGeneric_DX9_Vars_t &info );
 void InitLightmappedGeneric_DX9( CBaseVSShader *pShader, IMaterialVar** params, LightmappedGeneric_DX9_Vars_t &info );
-void DrawLightmappedGeneric_DX9( CBaseVSShader *pShader, IMaterialVar** params, 
-								 IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, 
-								 LightmappedGeneric_DX9_Vars_t &info, CBasePerMaterialContextData **pContextDataPtr	 );
+void DrawLightmappedGeneric_DX9( CBaseVSShader *pShader, IMaterialVar** params,
+								 IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow,
+								 LightmappedGeneric_DX9_Vars_t &info, CBasePerMaterialContextData **pContextDataPtr, bool bHasDeferred );
 
+class CLightmappedGeneric_DX9_Context : public CDeferredPerMaterialContextData
+{
+public:
+	uint8 * m_pStaticCmds;
+	CCommandBufferBuilder<CFixedCommandStorageBuffer<1000>> m_SemiStaticCmdsOut;
+
+	bool m_bVertexShaderFastPath;
+	bool m_bPixelShaderFastPath;
+	bool m_bPixelShaderForceFastPathBecauseOutline;
+	bool m_bFullyOpaque;
+	bool m_bFullyOpaqueWithoutAlphaTest;
+	bool m_bNeedsCmdRegen;
+
+	void ResetStaticCmds( void )
+	{
+		if ( m_pStaticCmds )
+		{
+			delete[] m_pStaticCmds;
+			m_pStaticCmds = NULL;
+		}
+	}
+
+	CLightmappedGeneric_DX9_Context( void )
+	{
+		m_pStaticCmds = NULL;
+		m_bNeedsCmdRegen = true;
+	}
+
+	~CLightmappedGeneric_DX9_Context( void )
+	{
+		ResetStaticCmds();
+	}
+
+};
 
 #endif // LIGHTMAPPEDGENERIC_DX9_HELPER_H

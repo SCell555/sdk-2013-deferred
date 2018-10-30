@@ -7,7 +7,6 @@
 
 
 #include <stdio.h>
-#include <assert.h>
 #include <utlvector.h>
 #include <vstdlib/IKeyValuesSystem.h>
 #include <ctype.h>	// isdigit()
@@ -159,6 +158,7 @@ class CDragDropHelperPanel : public Panel
 	DECLARE_CLASS_SIMPLE( CDragDropHelperPanel, Panel );
 public:
 	CDragDropHelperPanel();
+	virtual ~CDragDropHelperPanel() {}
 
 	virtual VPANEL IsWithinTraverse(int x, int y, bool traversePopups);
 	virtual void PostChildPaint();

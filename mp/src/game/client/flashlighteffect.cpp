@@ -72,7 +72,6 @@ CFlashlightEffect::CFlashlightEffect(int nEntIndex)
 	m_nEntIndex = nEntIndex;
 
 	m_bIsOn = false;
-	m_pPointLight = NULL;
 	if( engine->GetDXSupportLevel() < 70 )
 	{
 		r_newflashlight.SetValue( 0 );
@@ -337,22 +336,10 @@ void CFlashlightEffect::UpdateLightNew(const Vector &vecPos, const Vector &vecFo
 	state.m_flShadowSlopeScaleDepthBias = mat_slopescaledepthbias_shadowmap.GetFloat();
 	state.m_flShadowDepthBias = mat_depthbias_shadowmap.GetFloat();
 
-	if( m_FlashlightHandle == CLIENTSHADOW_INVALID_HANDLE )
-	{
-		m_FlashlightHandle = g_pClientShadowMgr->CreateFlashlight( state );
-	}
-	else
-	{
-		if( !r_flashlightlockposition.GetBool() )
-		{
-			g_pClientShadowMgr->UpdateFlashlightState( m_FlashlightHandle, state );
-		}
-	}
-	
-	g_pClientShadowMgr->UpdateProjectedTexture( m_FlashlightHandle, true );
+	UpdateLightProjection(state);
 	
 	// Kill the old flashlight method if we have one.
-	LightOffOld();
+	//LightOffOld();
 
 #ifndef NO_TOOLFRAMEWORK
 	if ( clienttools->IsInRecordingMode() )
@@ -367,55 +354,6 @@ void CFlashlightEffect::UpdateLightNew(const Vector &vecPos, const Vector &vecFo
 	}
 #endif
 }
-
-//-----------------------------------------------------------------------------
-// Purpose: Do the headlight
-//-----------------------------------------------------------------------------
-void CFlashlightEffect::UpdateLightOld(const Vector &vecPos, const Vector &vecDir, int nDistance)
-{
-	if ( !m_pPointLight || ( m_pPointLight->key != m_nEntIndex ))
-	{
-		// Set up the environment light
-		m_pPointLight = effects->CL_AllocDlight(m_nEntIndex);
-		m_pPointLight->flags = 0.0f;
-		m_pPointLight->radius = 80;
-	}
-	
-	// For bumped lighting
-	VectorCopy(vecDir, m_pPointLight->m_Direction);
-	
-	Vector end;
-	end = vecPos + nDistance * vecDir;
-	
-	// Trace a line outward, skipping the player model and the view model.
-	trace_t pm;
-	CTraceFilterSkipPlayerAndViewModel traceFilter;
-	UTIL_TraceLine( vecPos, end, MASK_ALL, &traceFilter, &pm );
-	VectorCopy( pm.endpos, m_pPointLight->origin );
-	
-	float falloff = pm.fraction * nDistance;
-	
-	if ( falloff < 500 )
-		falloff = 1.0;
-	else
-		falloff = 500.0 / falloff;
-	
-	falloff *= falloff;
-	
-	m_pPointLight->radius = 80;
-	m_pPointLight->color.r = m_pPointLight->color.g = m_pPointLight->color.b = 255 * falloff;
-	m_pPointLight->color.exponent = 0;
-	
-	// Make it live for a bit
-	m_pPointLight->die = gpGlobals->curtime + 0.2f;
-	
-	// Update list of surfaces we influence
-	render->TouchLight( m_pPointLight );
-	
-	// kill the new flashlight if we have one
-	LightOffNew();
-}
-
 //-----------------------------------------------------------------------------
 // Purpose: Do the headlight
 //-----------------------------------------------------------------------------
@@ -425,14 +363,8 @@ void CFlashlightEffect::UpdateLight(const Vector &vecPos, const Vector &vecDir, 
 	{
 		return;
 	}
-	if( r_newflashlight.GetBool() )
-	{
+
 		UpdateLightNew( vecPos, vecDir, vecRight, vecUp );
-	}
-	else
-	{
-		UpdateLightOld( vecPos, vecDir, nDistance );
-	}
 }
 
 
@@ -462,16 +394,21 @@ void CFlashlightEffect::LightOffNew()
 	}
 }
 
-//-----------------------------------------------------------------------------
-// Purpose: 
-//-----------------------------------------------------------------------------
-void CFlashlightEffect::LightOffOld()
+void CFlashlightEffect::UpdateLightProjection( FlashlightState_t& state )
 {	
-	if ( m_pPointLight && ( m_pPointLight->key == m_nEntIndex ) )
+	if( m_FlashlightHandle == CLIENTSHADOW_INVALID_HANDLE )
 	{
-		m_pPointLight->die = gpGlobals->curtime;
-		m_pPointLight = NULL;
+		m_FlashlightHandle = g_pClientShadowMgr->CreateFlashlight( state );
 	}
+	else
+	{
+		if( !r_flashlightlockposition.GetBool() )
+		{
+			g_pClientShadowMgr->UpdateFlashlightState( m_FlashlightHandle, state );
+		}
+	}
+
+	g_pClientShadowMgr->UpdateProjectedTexture( m_FlashlightHandle, true );
 }
 
 //-----------------------------------------------------------------------------
@@ -479,62 +416,5 @@ void CFlashlightEffect::LightOffOld()
 //-----------------------------------------------------------------------------
 void CFlashlightEffect::LightOff()
 {	
-	LightOffOld();
 	LightOffNew();
 }
-
-CHeadlightEffect::CHeadlightEffect() 
-{
-
-}
-
-CHeadlightEffect::~CHeadlightEffect()
-{
-	
-}
-
-void CHeadlightEffect::UpdateLight( const Vector &vecPos, const Vector &vecDir, const Vector &vecRight, const Vector &vecUp, int nDistance )
-{
-	if ( IsOn() == false )
-		 return;
-
-	FlashlightState_t state;
-	Vector basisX, basisY, basisZ;
-	basisX = vecDir;
-	basisY = vecRight;
-	basisZ = vecUp;
-	VectorNormalize(basisX);
-	VectorNormalize(basisY);
-	VectorNormalize(basisZ);
-
-	BasisToQuaternion( basisX, basisY, basisZ, state.m_quatOrientation );
-		
-	state.m_vecLightOrigin = vecPos;
-
-	state.m_fHorizontalFOVDegrees = 45.0f;
-	state.m_fVerticalFOVDegrees = 30.0f;
-	state.m_fQuadraticAtten = r_flashlightquadratic.GetFloat();
-	state.m_fLinearAtten = r_flashlightlinear.GetFloat();
-	state.m_fConstantAtten = r_flashlightconstant.GetFloat();
-	state.m_Color[0] = 1.0f;
-	state.m_Color[1] = 1.0f;
-	state.m_Color[2] = 1.0f;
-	state.m_Color[3] = r_flashlightambient.GetFloat();
-	state.m_NearZ = r_flashlightnear.GetFloat();
-	state.m_FarZ = r_flashlightfar.GetFloat();
-	state.m_bEnableShadows = true;
-	state.m_pSpotlightTexture = m_FlashlightTexture;
-	state.m_nSpotlightTextureFrame = 0;
-	
-	if( GetFlashlightHandle() == CLIENTSHADOW_INVALID_HANDLE )
-	{
-		SetFlashlightHandle( g_pClientShadowMgr->CreateFlashlight( state ) );
-	}
-	else
-	{
-		g_pClientShadowMgr->UpdateFlashlightState( GetFlashlightHandle(), state );
-	}
-	
-	g_pClientShadowMgr->UpdateProjectedTexture( GetFlashlightHandle(), true );
-}
-

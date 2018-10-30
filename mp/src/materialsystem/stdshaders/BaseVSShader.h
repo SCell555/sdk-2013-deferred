@@ -1,6 +1,6 @@
 //========= Copyright Valve Corporation, All rights reserved. ============//
 //
-// Purpose: 
+// Purpose:
 //
 // $NoKeywords: $
 // This is what all vs/ps (dx8+) shaders inherit from.
@@ -9,7 +9,7 @@
 #ifndef BASEVSSHADER_H
 #define BASEVSSHADER_H
 
-#ifdef _WIN32		   
+#ifdef _WIN32
 #pragma once
 #endif
 
@@ -107,17 +107,17 @@ public:
 	void SetVertexShaderTextureTranslation( int vertexReg, int translationVar );
 	void SetVertexShaderTextureScale( int vertexReg, int scaleVar );
  	void SetVertexShaderTextureTransform( int vertexReg, int transformVar );
-	void SetVertexShaderTextureScaledTransform( int vertexReg, 
+	void SetVertexShaderTextureScaledTransform( int vertexReg,
 											int transformVar, int scaleVar );
 
 	// Set pixel shader texture transforms
 	void SetPixelShaderTextureTranslation( int pixelReg, int translationVar );
 	void SetPixelShaderTextureScale( int pixelReg, int scaleVar );
  	void SetPixelShaderTextureTransform( int pixelReg, int transformVar );
-	void SetPixelShaderTextureScaledTransform( int pixelReg, 
+	void SetPixelShaderTextureScaledTransform( int pixelReg,
 											int transformVar, int scaleVar );
 
-	// Moves a matrix into vertex shader constants 
+	// Moves a matrix into vertex shader constants
 	void SetVertexShaderMatrix2x4( int vertexReg, int matrixVar );
 	void SetVertexShaderMatrix3x4( int vertexReg, int matrixVar );
 	void SetVertexShaderMatrix4x4( int vertexReg, int matrixVar );
@@ -140,7 +140,7 @@ public:
 
 	// Helpers for dealing with envmaptint
 	void SetEnvMapTintPixelShaderDynamicState( int pixelReg, int tintVar, int alphaVar, bool bConvertFromGammaToLinear = false );
-	
+
 	// Helper methods for pixel shader overbrighting
 	void EnablePixelShaderOverbright( int reg, bool bEnable, bool bDivideByTwo );
 
@@ -160,25 +160,25 @@ public:
 	// Standard shader passes!
 	//
 
-	void InitParamsUnlitGeneric_DX8( 
+	void InitParamsUnlitGeneric_DX8(
 		int baseTextureVar,
 		int detailScaleVar,
 		int envmapOptionalVar,
 		int envmapVar,
-		int envmapTintVar, 
+		int envmapTintVar,
 		int envmapMaskScaleVar,
 		int nDetailBlendMode );
 
-	void InitUnlitGeneric_DX8( 
+	void InitUnlitGeneric_DX8(
 		int baseTextureVar,
 		int detailVar,
 		int envmapVar,
 		int envmapMaskVar );
 
 	// Dx8 Unlit Generic pass
-	void VertexShaderUnlitGenericPass( int baseTextureVar, int frameVar, 
-									   int baseTextureTransformVar, 
-									   int detailVar, int detailTransform, bool bDetailTransformIsScale, 
+	void VertexShaderUnlitGenericPass( int baseTextureVar, int frameVar,
+									   int baseTextureTransformVar,
+									   int detailVar, int detailTransform, bool bDetailTransformIsScale,
 									   int envmapVar, int envMapFrameVar, int envmapMaskVar,
 									   int envmapMaskFrameVar, int envmapMaskScaleVar, int envmapTintVar,
 									   int alphaTestReferenceVar,
@@ -231,20 +231,20 @@ public:
 		int envmapContrastVar, int envmapSaturationVar,
 		int bumpTransformVar,  int fresnelReflectionVar,
 		bool bBlend );
-	void DrawBaseTextureBlend( int baseTextureVar, int baseTextureTransformVar, 
+	void DrawBaseTextureBlend( int baseTextureVar, int baseTextureTransformVar,
 		int baseTextureFrameVar,
-		int baseTexture2Var, int baseTextureTransform2Var, 
+		int baseTexture2Var, int baseTextureTransform2Var,
 		int baseTextureFrame2Var, int colorVar, int alphaVar );
 	void DrawWorldBumpedDiffuseLighting_Base_ps14( int bumpmapVar, int bumpFrameVar,
 		int bumpTransformVar, int baseTextureVar, int baseTextureTransformVar, int frameVar );
-	void DrawWorldBumpedDiffuseLighting_Blend_ps14( int bumpmapVar, int bumpFrameVar, int bumpTransformVar, 
-		int baseTextureVar, int baseTextureTransformVar, int baseTextureFrameVar, 
+	void DrawWorldBumpedDiffuseLighting_Blend_ps14( int bumpmapVar, int bumpFrameVar, int bumpTransformVar,
+		int baseTextureVar, int baseTextureTransformVar, int baseTextureFrameVar,
 		int baseTexture2Var, int baseTextureTransform2Var, int baseTextureFrame2Var);
 	void DrawWorldBumpedUsingVertexShader( int baseTextureVar, int baseTextureTransformVar,
-										   int bumpmapVar, int bumpFrameVar, 
+										   int bumpmapVar, int bumpFrameVar,
 										   int bumpTransformVar,
 										   int envmapMaskVar, int envmapMaskFrame,
-										   int envmapVar, 
+										   int envmapVar,
 										   int envmapFrameVar,
 										   int envmapTintVar, int colorVar, int alphaVar,
 										   int envmapContrastVar, int envmapSaturationVar, int frameVar, int fresnelReflectionVar,
@@ -254,30 +254,34 @@ public:
 										   int baseTextureFrame2Var,
 										   bool bSSBump
 		);
-	
+
+#endif
 	// Sets up hw morphing state for the vertex shader
 	void SetHWMorphVertexShaderState( int nDimConst, int nSubrectConst, VertexTextureSampler_t morphSampler );
 
+#ifndef GAME_SHADER_DLL
 	// Computes the shader index for vertex lit materials
 	int ComputeVertexLitShaderIndex( bool bVertexLitGeneric, bool hasBump, bool hasEnvmap, bool hasVertexColor, bool bHasNormal ) const;
+#endif
 
 	// Helper for setting up flashlight constants
 	void SetFlashlightVertexShaderConstants( bool bBump, int bumpTransformVar, bool bDetail, int detailScaleVar, bool bSetTextureTransforms );
 
+#ifndef GAME_SHADER_DLL
 #if SUPPORT_DX8
-	void DrawFlashlight_dx80( IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, 
-		bool bBump, int bumpmapVar, int bumpmapFrame, int bumpTransform, int flashlightTextureVar, 
-		int flashlightTextureFrameVar, bool bLightmappedGeneric, bool bWorldVertexTransition, 
+	void DrawFlashlight_dx80( IMaterialVar** params, IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow,
+		bool bBump, int bumpmapVar, int bumpmapFrame, int bumpTransform, int flashlightTextureVar,
+		int flashlightTextureFrameVar, bool bLightmappedGeneric, bool bWorldVertexTransition,
 		int nWorldVertexTransitionPassID, int baseTexture2Var, int baseTexture2FrameVar,
 		bool bTeeth=false, int nTeethForwardVar=0, int nTeethIllumFactorVar=0 );
 #endif
-
+#endif
 	struct DrawFlashlight_dx90_Vars_t
 	{
-		DrawFlashlight_dx90_Vars_t() 
-		{ 
+		DrawFlashlight_dx90_Vars_t()
+		{
 			// set all ints to -1
-			memset( this, 0xFF, sizeof(DrawFlashlight_dx90_Vars_t) ); 
+			memset( this, 0xFF, sizeof(DrawFlashlight_dx90_Vars_t) );
 			// set all bools to a default value.
 			m_bBump = false;
 			m_bLightmappedGeneric = false;
@@ -311,7 +315,8 @@ public:
 		bool m_bSSBump;
 		float m_fSeamlessScale;								// 0.0 = not seamless
 	};
-	void DrawFlashlight_dx90( IMaterialVar** params, 
+#ifndef GAME_SHADER_DLL
+	void DrawFlashlight_dx90( IMaterialVar** params,
 		IShaderDynamicAPI *pShaderAPI, IShaderShadow* pShaderShadow, DrawFlashlight_dx90_Vars_t &vars );
 #endif // GAME_SHADER_DLL
 
@@ -319,16 +324,16 @@ public:
 
 	void HashShadow2DJitter( const float fJitterSeed, float *fU, float* fV );
 
-	//Alpha tested materials can end up leaving garbage in the dest alpha buffer if they write depth. 
-	//This pass fills in the areas that passed the alpha test with depth in dest alpha 
+	//Alpha tested materials can end up leaving garbage in the dest alpha buffer if they write depth.
+	//This pass fills in the areas that passed the alpha test with depth in dest alpha
 	//by writing only equal depth pixels and only if we should be writing depth to dest alpha
 	void DrawEqualDepthToDestAlpha( void );
-	
+
 private:
 	// Helper methods for VertexLitGenericPass
 //	void UnlitGenericShadowState( int baseTextureVar, int detailVar, int envmapVar, int envmapMaskVar, bool doSkin );
 	void UnlitGenericDynamicState( int baseTextureVar, int frameVar, int baseTextureTransformVar,
-		int detailVar, int detailTransform, bool bDetailTransformIsScale, int envmapVar, 
+		int detailVar, int detailTransform, bool bDetailTransformIsScale, int envmapVar,
 		int envMapFrameVar, int envmapMaskVar, int envmapMaskFrameVar,
 		int envmapMaskScaleVar, int envmapTintVar );
 

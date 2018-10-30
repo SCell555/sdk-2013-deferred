@@ -37,14 +37,16 @@ enum StereoEye_t
 	STEREO_EYE_MAX = 3,
 };
 
+class CViewSetup;
 
 //-----------------------------------------------------------------------------
 // Purpose: Renderer setup data.  
 //-----------------------------------------------------------------------------
-class CViewSetup
+class CViewSetupEngine
 {
 public:
-	CViewSetup()
+
+	CViewSetupEngine()
 	{
 		m_flAspectRatio = 0.0f;
 		m_bRenderToSubrectOfLargerScreen = false;
@@ -55,6 +57,17 @@ public:
 //		m_bUseExplicitViewVector = false;
         m_bViewToProjectionOverride = false;
 		m_eStereoEye = STEREO_EYE_MONO;
+	}
+
+	explicit CViewSetupEngine( const CViewSetup& other )
+	{
+		memcpy( this, &other, sizeof( CViewSetupEngine ) );
+	}
+
+	CViewSetupEngine& operator=( const CViewSetup& other )
+	{
+		memcpy( this, &other, sizeof( CViewSetupEngine ) );
+		return *this;
 	}
 
 // shared by 2D & 3D views
@@ -131,6 +144,23 @@ public:
     VMatrix     m_ViewToProjection;
 };
 
+class CViewSetup : public CViewSetupEngine
+{
+public:
+	CViewSetup()
+	{
+		m_bDrawWorldNormal = false;
+	}
+
+	explicit CViewSetup(const CViewSetupEngine& other)
+	{
+		memcpy(static_cast<CViewSetupEngine*>(this), &other, sizeof(CViewSetupEngine));
+
+		m_bDrawWorldNormal = false;
+	}
+
+	bool m_bDrawWorldNormal;
+};
 
 
 #endif // VIEW_SHARED_H

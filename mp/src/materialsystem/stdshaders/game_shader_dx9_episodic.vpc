@@ -1,0 +1,51 @@
+//-----------------------------------------------------------------------------
+//	game_shader_dx9.vpc
+//
+//	Project Script for mods to use an an example of how to override shaders
+//-----------------------------------------------------------------------------
+
+$Macro SRCDIR		"..\.."
+$Macro GAMENAME "mod_episodic"
+$Include "$SRCDIR\materialsystem\stdshaders\game_shader_dx9_base.vpc"
+
+$Project "Shaders (EPISODIC)"
+{
+	$Folder	"Source Files"
+	{
+		$File	"lightmappedgeneric_dx9_helper.cpp"
+		$File	"lightmappedgeneric_dx9_helper.h"
+		$File	"lightmappedgeneric_dx9.cpp"
+		$File	"skin_dx9_helper.cpp"
+		$File	"skin_dx9_helper.h"
+		$File	"vertexlitgeneric_dx9_helper.cpp"
+		$File	"vertexlitgeneric_dx9_helper.h"
+		$File	"vertexlitgeneric_dx9.cpp"
+		$File	"worldvertextransition.cpp"
+		$File	"cloak_blended_pass_helper.cpp"
+		$File	"emissive_scroll_blended_pass_helper.cpp"
+		$File	"flesh_interior_blended_pass_helper.cpp"
+		
+		$Folder	"Deferred"
+		{
+			$File	"blur.cpp"
+			$File	"debug_lightingctrl.cpp"
+			$File	"debug_radiosity_grid.cpp"
+			$File	"debug_shadow.cpp"
+			$File	"deferred_utility.cpp"
+			$File	"defpass_composite.cpp"
+			$File	"defpass_gbuffer.cpp"
+			$File	"defpass_shadow.cpp"
+			$File	"IDeferredExt.cpp"
+			$File	"lighting_global.cpp"
+			$File	"lighting_pass_basic.cpp"
+			$File	"lighting_pass_volum.cpp"
+			$File	"lighting_volume.cpp"
+			$File	"lighting_world.cpp"
+			$File	"radiosity_blend.cpp"
+			$File	"radiosity_global.cpp"
+			$File	"radiosity_propagate.cpp"
+			$File	"volume_blend.cpp"
+			$File	"volume_prepass.cpp"
+		}
+	}
+}

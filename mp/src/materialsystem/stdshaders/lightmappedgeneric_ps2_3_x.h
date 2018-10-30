@@ -152,6 +152,13 @@ sampler ShadowDepthSampler		: register( s14 );
 sampler RandRotSampler			: register( s15 );
 #endif
 
+#if DEFERRED
+#include "common_deferred_fxc.h"
+sampler sLightAccum				: register( s13 );
+sampler sLightAccum2			: register( s14 );
+const float2 g_vecFullScreenTexel		: register( c32 );
+#endif
+
 struct PS_INPUT
 {
 #if SEAMLESS
@@ -179,6 +186,9 @@ struct PS_INPUT
 #if defined( _X360 ) && FLASHLIGHT
 	float4 flashlightSpacePos		: TEXCOORD8;
 	float4 vProjPos					: TEXCOORD9;
+#endif
+#ifdef SHADER_MODEL_PS_3_0
+	float2 vScreenPos				: VPOS;
 #endif
 };
 
@@ -479,7 +489,20 @@ HALF4 main( PS_INPUT i ) : COLOR
 	float3 worldSpaceNormal = mul( vNormal, i.tangentSpaceTranspose );
 #endif
 
+#if DEFERRED
+	float2 screenPos = ( i.vScreenPos + 0.5f ) * g_vecFullScreenTexel;
+	float4 flLighting = ReadLighting( tex2D( sLightAccum, screenPos ) );
+	float4 flLighting2 = ReadLighting( tex2D( sLightAccum2, screenPos ) );
+
+	float3 diffuseComponent;
+	float defint = length( flLighting );
+	if( defint > 0 )
+		diffuseComponent = albedo * (min( diffuseLighting, flLighting ) + flLighting2); // Darken 
+	else
+		diffuseComponent = albedo * (diffuseLighting + flLighting2);
+#else
 	float3 diffuseComponent = albedo.xyz * diffuseLighting;
+#endif
 
 #if defined( _X360 ) && FLASHLIGHT
 
